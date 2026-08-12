@@ -620,6 +620,7 @@
                                 <div class="info-label" style="color:#fff; font-size:1.05rem; font-weight:500; margin-bottom:4px;">รหัสผ่าน</div>
                                 <div class="info-value" style="color:#888; font-size:0.9rem; font-weight:400;">รักษาบัญชีของคุณให้ปลอดภัย</div>
                             </div>
+                            <button id="btnChangePassword" style="background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:6px; padding:6px 14px; cursor:pointer; font-family:inherit; font-size:0.9rem; font-weight:500; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">เปลี่ยนรหัสผ่าน</button>
                         </div>
                         <div class="info-row" style="flex-direction:row; justify-content:space-between; align-items:center;">
                             <div>
@@ -630,16 +631,16 @@
                         <div class="info-row" style="flex-direction:row; justify-content:space-between; align-items:center;">
                             <div>
                                 <div class="info-label" style="color:#fff; font-size:1.05rem; font-weight:500; margin-bottom:4px;">Discord</div>
-                                <div class="info-value" style="color:#888; font-size:0.9rem; font-weight:400;">k2nta</div>
+                                <div class="info-value" id="secDiscord" style="color:#888; font-size:0.9rem; font-weight:400;">ไม่ได้เชื่อมต่อ</div>
                             </div>
-                            <button style="background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:6px; padding:6px 14px; cursor:pointer; font-family:inherit; font-size:0.9rem; font-weight:500; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">ยกเลิกการเชื่อมโยง Discord</button>
+                            <button id="btnUnlinkDiscord" style="background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:6px; padding:6px 14px; cursor:pointer; font-family:inherit; font-size:0.9rem; font-weight:500; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">ยกเลิกการเชื่อมโยง Discord</button>
                         </div>
                         <div class="info-row" style="flex-direction:row; justify-content:space-between; align-items:center;">
                             <div>
                                 <div class="info-label" style="color:#f66; font-size:1.05rem; font-weight:500; margin-bottom:4px;">Delete account</div>
                                 <div class="info-value" style="color:#888; font-size:0.9rem; font-weight:400;">Request deletion by password and email confirmation.</div>
                             </div>
-                            <button style="background:transparent; border:1px solid #f66; color:#f66; border-radius:6px; padding:6px 14px; cursor:pointer; font-weight:500; font-family:inherit; font-size:0.9rem; transition: all 0.2s;" onmouseover="this.style.background='#f66'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#f66';">Delete</button>
+                            <button id="btnDeleteAccount" style="background:transparent; border:1px solid #f66; color:#f66; border-radius:6px; padding:6px 14px; cursor:pointer; font-weight:500; font-family:inherit; font-size:0.9rem; transition: all 0.2s;" onmouseover="this.style.background='#f66'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#f66';">Delete</button>
                         </div>
                     </div>
                 </div>
@@ -653,7 +654,7 @@
                     <p>คีย์ลิขสิทธิ์ทั้งหมดที่คุณแลก</p>
                 </div>
                 
-                <div class="info-list" style="padding: 0;">
+                <div class="info-list" style="padding: 0;" id="keyHistoryList">
                     <!-- Table Header -->
                     <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); color: #888; font-size: 0.85rem; font-weight: 500;">
                         <div>แลกคีย์ไลเซนส์แล้ว</div>
@@ -664,31 +665,7 @@
                         <div>สร้างเมื่อ</div>
                     </div>
                     
-                    <!-- Row 1 -->
-                    <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); align-items: center; color: #fff; font-size: 0.9rem;">
-                        <div>
-                            <div style="font-weight: 600; margin-bottom: 4px;">REAL-5gW...</div>
-                            <div style="color: #888; font-size: 0.8rem;">คีย์ฟรี - 1 วัน</div>
-                        </div>
-                        <div style="font-weight: 600;">Free</div>
-                        <div style="color: #888;">ถูกเพิกถอน</div>
-                        <div style="color: #888;">12 ส.ค. 2569</div>
-                        <div style="color: #888;">13 ส.ค. 2569</div>
-                        <div style="color: #888;">12 ส.ค. 2569</div>
-                    </div>
-
-                    <!-- Row 2 -->
-                    <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; padding: 20px 24px; align-items: center; color: #fff; font-size: 0.9rem;">
-                        <div>
-                            <div style="font-weight: 600; margin-bottom: 4px;">REAL-VBK...</div>
-                            <div style="color: #888; font-size: 0.8rem;">คีย์ฟรี - 1 วัน</div>
-                        </div>
-                        <div style="font-weight: 600;">Free</div>
-                        <div style="color: #888;">ถูกเพิกถอน</div>
-                        <div style="color: #888;">9 ส.ค. 2569</div>
-                        <div style="color: #888;">10 ส.ค. 2569</div>
-                        <div style="color: #888;">9 ส.ค. 2569</div>
-                    </div>
+                    <!-- Dynamic rows will be inserted here -->
                 </div>
             </div>
         </div>
@@ -806,9 +783,93 @@
                 
                 // Init notifications
                 initNotifications(supabase, currentUser.uid);
+                
+                // Fetch user identities for Discord
+                const { data: authData } = await supabase.auth.getUser();
+                if (authData?.user?.identities) {
+                    const discordIdentity = authData.user.identities.find(id => id.provider === 'discord');
+                    if (discordIdentity && discordIdentity.identity_data) {
+                        const dName = discordIdentity.identity_data.custom_claims?.global_name || discordIdentity.identity_data.full_name || discordIdentity.identity_data.name || discordIdentity.identity_data.username;
+                        const secDiscord = document.getElementById("secDiscord");
+                        if(secDiscord) secDiscord.textContent = dName || "เชื่อมต่อแล้ว";
+                        currentUser.discordIdentityId = discordIdentity.identity_id;
+                    }
+                }
+                
+                // Fetch Key History
+                await loadKeyHistory();
 
-            } catch (_) { }
+            } catch (err) { console.error(err); }
         })();
+        
+        async function loadKeyHistory() {
+            const list = document.getElementById("keyHistoryList");
+            if(!list || !currentUser) return;
+            
+            const { data: keys, error } = await supabase
+                .from('script_keys')
+                .select('*')
+                .eq('user_id', currentUser.uid)
+                .order('created_at', { ascending: false });
+                
+            if (error) {
+                console.error("Error fetching keys:", error);
+                return;
+            }
+            
+            // Keep the header
+            const headerHtml = `
+                <!-- Table Header -->
+                <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); color: #888; font-size: 0.85rem; font-weight: 500;">
+                    <div>แลกคีย์ไลเซนส์แล้ว</div>
+                    <div>แพ็กเกจปัจจุบัน</div>
+                    <div>สถานะ</div>
+                    <div>รับแล้ว</div>
+                    <div>หมดอายุ</div>
+                    <div>สร้างเมื่อ</div>
+                </div>
+            `;
+            
+            if (!keys || keys.length === 0) {
+                list.innerHTML = headerHtml + `
+                    <div style="padding: 20px 24px; color: #888; font-size: 0.9rem; text-align: center;">
+                        ไม่มีประวัติการแลกคีย์
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = headerHtml;
+            keys.forEach(k => {
+                const isExpired = k.expires_at && new Date(k.expires_at) < new Date();
+                let statusText = "ใช้งานอยู่";
+                let statusColor = "#4ade80"; // green
+                
+                if (!k.is_active) {
+                    statusText = "ถูกเพิกถอน";
+                    statusColor = "#f87171"; // red
+                } else if (isExpired) {
+                    statusText = "หมดอายุ";
+                    statusColor = "#9ca3af"; // gray
+                }
+                
+                html += `
+                    <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); align-items: center; color: #fff; font-size: 0.9rem;">
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: 4px;">${k.key_value.substring(0, 8)}...</div>
+                            <div style="color: #888; font-size: 0.8rem;">คีย์ส่วนตัว</div>
+                        </div>
+                        <div style="font-weight: 600;">Standard</div>
+                        <div style="color: ${statusColor};">${statusText}</div>
+                        <div style="color: #888;">${formatDateThai(k.created_at)}</div>
+                        <div style="color: #888;">${formatDateThai(k.expires_at) || 'ไม่มีวันหมดอายุ'}</div>
+                        <div style="color: #888;">${formatDateThai(k.created_at)}</div>
+                    </div>
+                `;
+            });
+            
+            list.innerHTML = html;
+        }
 
         // ── Avatar Upload ─────────────────────────────────────
         document.getElementById("avatarUpload").addEventListener("change", async (e) => {
@@ -830,6 +891,48 @@
             if(navAvatar) navAvatar.src = finalUrl;
             currentUser.avatar_url = finalUrl;
             showToast("อัปเดตรูปโปรไฟล์สำเร็จ!");
+        });
+
+        // ── Buttons ───────────────────────────────────────────
+        document.getElementById("btnChangePassword")?.addEventListener("click", async () => {
+            if(!currentUser) return;
+            const btn = document.getElementById("btnChangePassword");
+            btn.textContent = "กำลังส่งอีเมล...";
+            btn.disabled = true;
+            try {
+                const { error } = await supabase.auth.resetPasswordForEmail(currentUser.email, {
+                    redirectTo: window.location.origin + '/reset-password.html',
+                });
+                if(error) throw error;
+                showToast("ส่งอีเมลสำหรับเปลี่ยนรหัสผ่านแล้ว!");
+            } catch(e) {
+                showToast("เกิดข้อผิดพลาด: " + e.message, "error");
+            } finally {
+                btn.textContent = "เปลี่ยนรหัสผ่าน";
+                btn.disabled = false;
+            }
+        });
+
+        document.getElementById("btnUnlinkDiscord")?.addEventListener("click", async () => {
+            if(!currentUser?.discordIdentityId) {
+                showToast("บัญชีนี้ไม่ได้เชื่อมโยงกับ Discord", "error");
+                return;
+            }
+            if(confirm("คุณต้องการยกเลิกการเชื่อมโยง Discord ใช่หรือไม่? (หากคุณเข้าสู่ระบบด้วย Discord อาจทำให้เข้าใช้งานไม่ได้อีก)")) {
+                try {
+                    const { error } = await supabase.auth.unlinkIdentity(currentUser.discordIdentityId);
+                    if(error) throw error;
+                    showToast("ยกเลิกการเชื่อมโยง Discord แล้ว!");
+                    document.getElementById("secDiscord").textContent = "ไม่ได้เชื่อมต่อ";
+                    currentUser.discordIdentityId = null;
+                } catch (e) {
+                    showToast("เกิดข้อผิดพลาด: " + e.message, "error");
+                }
+            }
+        });
+
+        document.getElementById("btnDeleteAccount")?.addEventListener("click", () => {
+            showToast("ไม่สามารถลบบัญชีได้ด้วยตนเอง กรุณาติดต่อผู้ดูแลระบบ", "error");
         });
 
         // ── Logout ───────────────────────────────────────────
