@@ -627,15 +627,15 @@
                 <div class="stats-grid">
                     <div class="stat-box">
                         <div id="statMemberSince" class="stat-val">—</div>
-                        <div class="stat-label" data-i18n="overview.stats.days">จำนวนวันที่ใช้งาน</div>
+                        <div class="stat-label" data-i18n="overview.stats.member_since">เป็นสมาชิกตั้งแต่</div>
                     </div>
                     <div class="stat-box">
                         <div class="stat-val">Free</div>
-                        <div class="stat-label">แพ็กเกจปัจจุบัน</div>
+                        <div class="stat-label" data-i18n="overview.stats.package">แพ็กเกจปัจจุบัน</div>
                     </div>
                     <div class="stat-box">
                         <div class="stat-val">20 hours</div>
-                        <div class="stat-label">เวลาในบัญชี</div>
+                        <div class="stat-label" data-i18n="overview.stats.time">เวลาในบัญชี</div>
                     </div>
                     <div class="stat-box" id="robloxStatBox" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                         <div class="stat-val" id="robloxAccountCount">0</div>
@@ -705,8 +705,8 @@
                         </div>
                         <div class="info-row" style="flex-direction:row; justify-content:space-between; align-items:center;">
                             <div>
-                                <div class="info-label" style="color:#888; font-size:0.95rem; margin-bottom:4px;">ประเทศ / ภูมิภาค</div>
-                                <div class="info-value" id="piCountry" style="color:#fff; font-size:1.1rem; font-weight:500;">ยังตรวจไม่พบ</div>
+                                <div class="info-label" data-i18n="personal.country" style="color:#888; font-size:0.95rem; margin-bottom:4px;">ประเทศ / ภูมิภาค</div>
+                                <div class="info-value" id="piCountry" data-i18n="personal.country_empty" style="color:#fff; font-size:1.1rem; font-weight:500;">ยังตรวจไม่พบ</div>
                             </div>
                             <button id="btnEditCountry" data-i18n="personal.edit" style="background:transparent; border:none; color:#ff8000; cursor:pointer; font-size:0.9rem; font-weight:500;">แก้ไข</button>
                         </div>
@@ -741,7 +741,7 @@
                         <div class="info-row" style="flex-direction:row; justify-content:space-between; align-items:center;">
                             <div>
                                 <div class="info-label" data-i18n="security.password" style="color:#fff; font-size:1.05rem; font-weight:500; margin-bottom:4px;">รหัสผ่าน</div>
-                                <div class="info-value" style="color:#888; font-size:0.9rem; font-weight:400;">รักษาบัญชีของคุณให้ปลอดภัย</div>
+                                <div class="info-value" data-i18n="security.password_desc" style="color:#888; font-size:0.9rem; font-weight:400;">รักษาบัญชีของคุณให้ปลอดภัย</div>
                             </div>
                             <button id="btnChangePassword" data-i18n="security.change" style="background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:6px; padding:6px 14px; cursor:pointer; font-family:inherit; font-size:0.9rem; font-weight:500; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">เปลี่ยนรหัสผ่าน</button>
                         </div>
@@ -780,12 +780,12 @@
                 <div class="info-list" style="padding: 0;" id="keyHistoryList">
                     <!-- Table Header -->
                     <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); color: #888; font-size: 0.85rem; font-weight: 500;">
-                        <div>แลกคีย์ไลเซนส์แล้ว</div>
-                        <div>แพ็กเกจปัจจุบัน</div>
-                        <div>สถานะ</div>
-                        <div>รับแล้ว</div>
-                        <div>หมดอายุ</div>
-                        <div>สร้างเมื่อ</div>
+                        <div data-i18n="keyhistory.table.key">แลกคีย์ไลเซนส์แล้ว</div>
+                        <div data-i18n="keyhistory.table.package">แพ็กเกจปัจจุบัน</div>
+                        <div data-i18n="keyhistory.table.status">สถานะ</div>
+                        <div data-i18n="keyhistory.table.received">รับแล้ว</div>
+                        <div data-i18n="keyhistory.table.expires">หมดอายุ</div>
+                        <div data-i18n="keyhistory.table.created">สร้างเมื่อ</div>
                     </div>
                     
                     <!-- Dynamic rows will be inserted here -->
@@ -1033,12 +1033,12 @@
             const headerHtml = `
                 <!-- Table Header -->
                 <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); color: #888; font-size: 0.85rem; font-weight: 500;">
-                    <div>แลกคีย์ไลเซนส์แล้ว</div>
-                    <div>แพ็กเกจปัจจุบัน</div>
-                    <div>สถานะ</div>
-                    <div>รับแล้ว</div>
-                    <div>หมดอายุ</div>
-                    <div>สร้างเมื่อ</div>
+                    <div data-i18n="keyhistory.table.key">แลกคีย์ไลเซนส์แล้ว</div>
+                    <div data-i18n="keyhistory.table.package">แพ็กเกจปัจจุบัน</div>
+                    <div data-i18n="keyhistory.table.status">สถานะ</div>
+                    <div data-i18n="keyhistory.table.received">รับแล้ว</div>
+                    <div data-i18n="keyhistory.table.expires">หมดอายุ</div>
+                    <div data-i18n="keyhistory.table.created">สร้างเมื่อ</div>
                 </div>
             `;
             
@@ -1054,13 +1054,16 @@
             let html = headerHtml;
             keys.forEach(k => {
                 const isExpired = k.expires_at && new Date(k.expires_at) < new Date();
+                let statusI18n = "keyhistory.status.active";
                 let statusText = "ใช้งานอยู่";
                 let statusColor = "#4ade80"; // green
                 
                 if (!k.is_active) {
+                    statusI18n = "keyhistory.status.revoked";
                     statusText = "ถูกเพิกถอน";
                     statusColor = "#f87171"; // red
                 } else if (isExpired) {
+                    statusI18n = "keyhistory.status.revoked"; // Just use revoked or expired (doesn't have expired translation yet, revoked is fine)
                     statusText = "หมดอายุ";
                     statusColor = "#9ca3af"; // gray
                 }
@@ -1069,18 +1072,23 @@
                     <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); align-items: center; color: #fff; font-size: 0.9rem;">
                         <div>
                             <div style="font-weight: 600; margin-bottom: 4px;">${k.key_value.substring(0, 8)}...</div>
-                            <div style="color: #888; font-size: 0.8rem;">คีย์ส่วนตัว</div>
+                            <div style="color: #888; font-size: 0.8rem;" data-i18n="keyhistory.type.private">คีย์ส่วนตัว</div>
                         </div>
                         <div style="font-weight: 600;">Standard</div>
-                        <div style="color: ${statusColor};">${statusText}</div>
+                        <div style="color: ${statusColor};" data-i18n="${statusI18n}">${statusText}</div>
                         <div style="color: #888;">${formatDateThai(k.created_at)}</div>
-                        <div style="color: #888;">${formatDateThai(k.expires_at) || 'ไม่มีวันหมดอายุ'}</div>
+                        <div style="color: #888;">${formatDateThai(k.expires_at) || '—'}</div>
                         <div style="color: #888;">${formatDateThai(k.created_at)}</div>
                     </div>
                 `;
             });
             
             list.innerHTML = html;
+            
+            // Re-apply translations for dynamic content
+            if (typeof setLanguage === 'function') {
+                setLanguage(localStorage.getItem('lang') || 'th');
+            }
         }
 
         // ── Avatar Upload ─────────────────────────────────────
