@@ -18,6 +18,67 @@ export default {
     }
 
     // ═══════════════════════════════════════════════════════
+    // Route: POST /verify-key — ตรวจสอบ Key จาก Roblox Script
+    // ═══════════════════════════════════════════════════════
+    if (url.pathname === '/verify-key' && request.method === 'POST') {
+      try {
+        const body = await request.json();
+        const keyValue = (body.key || '').trim();
+
+        if (!keyValue) {
+          return jsonResponse({ valid: false, message: 'Key cannot be empty.' }, 400);
+        }
+
+        // ── ดึง Supabase credentials จาก env secrets ──────────
+        // ตั้งค่าใน Cloudflare Dashboard → Worker → Settings → Variables
+        // SUPABASE_URL = https://jqtxjbuiplmqjodqozre.supabase.co
+        // SUPABASE_SERVICE_KEY = (service_role key ของคุณ)
+        const SUPABASE_URL = env.SUPABASE_URL || 'https://jqtxjbuiplmqjodqozre.supabase.co';
+        const SUPABASE_SERVICE_KEY = env.SUPABASE_SERVICE_KEY || '';
+
+        if (!SUPABASE_SERVICE_KEY) {
+          return jsonResponse({ valid: false, message: 'Server misconfiguration.' }, 500);
+        }
+
+        // ── Query ตาราง script_keys ───────────────────────────
+        const now = new Date().toISOString();
+        const queryUrl = `${SUPABASE_URL}/rest/v1/script_keys?key_value=eq.${encodeURIComponent(keyValue)}&is_active=eq.true&select=id,user_id,expires_at`;
+
+        const supaRes = await fetch(queryUrl, {
+          method: 'GET',
+          headers: {
+            'apikey': SUPABASE_SERVICE_KEY,
+            'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+            'Content-Type': 'application/json',
+          }
+        });
+
+        if (!supaRes.ok) {
+          return jsonResponse({ valid: false, message: 'Database error.' }, 500);
+        }
+
+        const rows = await supaRes.json();
+
+        if (!rows || rows.length === 0) {
+          return jsonResponse({ valid: false, message: 'Invalid key. Get your key at https://singularity-web.pages.dev/key.html' });
+        }
+
+        const row = rows[0];
+
+        // ── ตรวจสอบวันหมดอายุ (ถ้ามี) ────────────────────────
+        if (row.expires_at && new Date(row.expires_at) < new Date(now)) {
+          return jsonResponse({ valid: false, message: 'Your key has expired. Please generate a new one.' });
+        }
+
+        // ── Key ถูกต้อง ───────────────────────────────────────
+        return jsonResponse({ valid: true, message: 'Key verified successfully!' });
+
+      } catch (err) {
+        return jsonResponse({ valid: false, message: 'Server error: ' + err.message }, 500);
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════
     // Route: POST /obfuscate — Proxy ไปยัง hide.lat API
     // (แก้ปัญหา CORS ที่ Browser เรียก API ตรงๆ ไม่ได้)
     // ═══════════════════════════════════════════════════════
@@ -115,3 +176,13 @@ export default {
   },
 };
 
+// ── Helper ─────────────────────────────────────────────────
+function jsonResponse(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+    }
+  });
+}

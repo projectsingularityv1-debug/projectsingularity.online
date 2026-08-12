@@ -173,3 +173,37 @@ create policy "Admins can manage games"
       where id = auth.uid() and is_admin = true
     )
   );
+
+
+-- ============================================================
+-- 7. Script Keys (ระบบ Key สำหรับใช้งาน Loader.lua)
+-- ============================================================
+create table if not exists public.script_keys (
+  id          uuid default gen_random_uuid() primary key,
+  user_id     uuid references auth.users on delete cascade not null,
+  key_value   text unique not null,
+  is_active   boolean default true,
+  expires_at  timestamptz default null, -- null = ไม่มีวันหมดอายุ
+  created_at  timestamptz default now()
+);
+
+alter table public.script_keys enable row level security;
+
+-- Users เห็นแค่ key ของตัวเอง
+create policy "Users can view own keys"
+  on public.script_keys for select using (auth.uid() = user_id);
+
+-- Users สร้าง key ของตัวเองได้
+create policy "Users can insert own keys"
+  on public.script_keys for insert with check (auth.uid() = user_id);
+
+-- Users อัปเดต key ของตัวเองได้ (เช่น ปิดใช้งาน)
+create policy "Users can update own keys"
+  on public.script_keys for update using (auth.uid() = user_id);
+
+-- Users ลบ key ของตัวเองได้
+create policy "Users can delete own keys"
+  on public.script_keys for delete using (auth.uid() = user_id);
+
+-- Service role (Cloudflare Worker) ตรวจสอบ key ได้ทุกตัว
+-- (ไม่ต้องมี policy เพราะ service_role bypass RLS อยู่แล้ว)
