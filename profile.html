@@ -618,6 +618,7 @@
     <script type="module">
         import { requireAuth, logout, getCurrentUserProfile } from "./auth.js";
         import { supabase } from "./supabase-config.js";
+        import { initNotifications } from "./notifications.js";
 
         let currentUser = null;
         
@@ -714,6 +715,9 @@
                 document.getElementById("piMemberSince").textContent = memberSinceStr;
                 
                 document.title = `${currentUser.username} — Real Account`;
+                
+                // Init notifications
+                initNotifications(supabase, currentUser.uid);
 
             } catch (_) { }
         })();
