@@ -683,7 +683,7 @@
                 <div class="personal-info-container">
                     <div class="info-header">
                         <h2>ข้อมูลส่วนตัว</h2>
-                        <p>จัดการรายละเอียดที่เชื่อมกับบัญชี Real ของคุณ</p>
+                        <p>จัดการรายละเอียดที่เชื่อมกับบัญชีของคุณ</p>
                     </div>
                     
                     <div class="info-list">
@@ -952,7 +952,7 @@
                 document.getElementById("statMemberSince").textContent = memberSinceStr;
                 document.getElementById("piMemberSince").textContent = memberSinceStr;
                 
-                document.title = `${currentUser.username} — Real Account`;
+                document.title = `${currentUser.username} — Account`;
                 
                 // Init notifications
                 initNotifications(supabase, currentUser.uid);
