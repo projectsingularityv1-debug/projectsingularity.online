@@ -97,8 +97,8 @@ export default {
           }
         }
 
-        // ── ถ้ายังไม่มี email ใน profile ดึงจาก auth.users ─────────
-        if (profile && !profile.email) {
+        // ── ถ้ายังไม่มี email หรือ avatar ใน profile ดึงจาก auth.users ─────────
+        if (profile && (!profile.email || !profile.avatar_url)) {
           try {
             const authRes = await fetch(`${SUPABASE_URL}/auth/v1/admin/users/${row.user_id}`, {
               method: 'GET',
@@ -109,11 +109,20 @@ export default {
             });
             if (authRes.ok) {
               const authUser = await authRes.json();
-              profile.email = authUser.email || '';
+              const meta = authUser.user_metadata || authUser.raw_user_meta_data || {};
+              if (!profile.email) profile.email = authUser.email || '';
+              if (!profile.avatar_url) {
+                profile.avatar_url = meta.avatar_url || meta.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.username || 'User')}&background=1a1a2e&color=ff8000&bold=true`;
+              }
             }
           } catch (e) {
-            console.error('Failed to fetch email from auth:', e);
+            console.error('Failed to fetch from auth:', e);
           }
+        }
+        
+        // Fallback สุดท้ายถ้ายังไม่มีรูป
+        if (profile && !profile.avatar_url) {
+            profile.avatar_url = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.username || 'User')}&background=1a1a2e&color=ff8000&bold=true`;
         }
 
         // ── ตรวจสอบวันหมดอายุ (ถ้ามี) ────────────────────────
