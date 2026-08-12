@@ -93,11 +93,40 @@
                 errorBanner.classList.remove("hidden");
                 return;
             }
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                errorBanner.textContent = "Please enter a valid email format.";
+                errorBanner.classList.remove("hidden");
+                return;
+            }
 
             errorBanner.classList.add("hidden");
             registerBtn.disabled = true;
-            btnText.textContent  = "Creating account...";
+            btnText.textContent  = "Verifying email...";
             spinner.classList.remove("hidden");
+            
+            try {
+                // Check if email domain actually exists (MX record check)
+                const domain = email.split('@')[1];
+                const dnsRes = await fetch(`https://cloudflare-dns.com/dns-query?name=${domain}&type=MX`, {
+                    headers: { 'Accept': 'application/dns-json' }
+                });
+                const dnsData = await dnsRes.json();
+                
+                if (dnsData.Status !== 0 || !dnsData.Answer || dnsData.Answer.length === 0) {
+                    errorBanner.textContent = "This email domain does not exist or cannot receive emails. Please use a real email.";
+                    errorBanner.classList.remove("hidden");
+                    registerBtn.disabled = false;
+                    btnText.textContent  = "Create account";
+                    spinner.classList.add("hidden");
+                    return;
+                }
+            } catch (err) {
+                console.warn("DNS check failed, proceeding anyway", err);
+            }
+
+            btnText.textContent  = "Creating account...";
 
             try {
                 const data = await register(email, password, username);
