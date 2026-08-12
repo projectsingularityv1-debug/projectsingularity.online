@@ -146,11 +146,6 @@ export default {
         }
 
         // ── Key ถูกต้อง ───────────────────────────────────────
-        // ถ้ามี rbxId ให้ใส่ avatar_url ใน profile เป็น Roblox Thumbnail URL
-        if (profile && rbxId && parseInt(rbxId) > 0) {
-          profile.avatar_url = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${parseInt(rbxId)}&size=150x150&format=Png&isCircular=true`;
-        }
-
         return jsonResponse({ valid: true, message: 'Key verified successfully!', profile: profile });
 
       } catch (err) {
