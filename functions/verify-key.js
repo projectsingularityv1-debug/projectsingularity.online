@@ -69,6 +69,25 @@ export async function onRequestPost(context) {
     const row = rows[0];
     const now = new Date();
 
+    // ดึงข้อมูล Profile
+    let profile = null;
+    const profileQuery = `${SUPABASE_URL}/rest/v1/profiles?id=eq.${row.user_id}&select=username,email,avatar_url`;
+    const profileRes = await fetch(profileQuery, {
+      method: 'GET',
+      headers: {
+        'apikey': SUPABASE_SERVICE_KEY,
+        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+        'Content-Type': 'application/json',
+      }
+    });
+
+    if (profileRes.ok) {
+      const profileRows = await profileRes.json();
+      if (profileRows && profileRows.length > 0) {
+        profile = profileRows[0];
+      }
+    }
+
     // ตรวจสอบวันหมดอายุ
     if (row.expires_at && new Date(row.expires_at) < now) {
       return new Response(
@@ -79,7 +98,7 @@ export async function onRequestPost(context) {
 
     // Key ถูกต้อง
     return new Response(
-      JSON.stringify({ valid: true, message: 'Key verified successfully!' }),
+      JSON.stringify({ valid: true, message: 'Key verified successfully!', profile: profile }),
       { status: 200, headers: corsHeaders }
     );
 

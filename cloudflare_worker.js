@@ -72,13 +72,32 @@ export default {
 
         const row = rows[0];
 
+        // ── ดึงข้อมูล Profile ──────────────────────────────────
+        let profile = null;
+        const profileQuery = `${SUPABASE_URL}/rest/v1/profiles?id=eq.${row.user_id}&select=username,email,avatar_url`;
+        const profileRes = await fetch(profileQuery, {
+          method: 'GET',
+          headers: {
+            'apikey': SUPABASE_SERVICE_KEY,
+            'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+            'Content-Type': 'application/json',
+          }
+        });
+        
+        if (profileRes.ok) {
+          const profileRows = await profileRes.json();
+          if (profileRows && profileRows.length > 0) {
+            profile = profileRows[0];
+          }
+        }
+
         // ── ตรวจสอบวันหมดอายุ (ถ้ามี) ────────────────────────
         if (row.expires_at && new Date(row.expires_at) < new Date(now)) {
           return jsonResponse({ valid: false, message: 'Your key has expired. Please generate a new one.' });
         }
 
         // ── Key ถูกต้อง ───────────────────────────────────────
-        return jsonResponse({ valid: true, message: 'Key verified successfully!' });
+        return jsonResponse({ valid: true, message: 'Key verified successfully!', profile: profile });
 
       } catch (err) {
         return jsonResponse({ valid: false, message: 'Server error: ' + err.message }, 500);
