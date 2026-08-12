@@ -20,6 +20,8 @@ export async function onRequestPost(context) {
   try {
     const body = await request.json();
     const keyValue = (body.key || '').trim();
+    const rbxUser = (body.rbx_user || '').trim();
+    const rbxId = body.rbx_id || '';
 
     if (!keyValue) {
       return new Response(
@@ -94,6 +96,30 @@ export async function onRequestPost(context) {
         JSON.stringify({ valid: false, message: 'Your key has expired. Please reset it at projectsingularity.online/key.html' }),
         { status: 200, headers: corsHeaders }
       );
+    }
+
+    // บันทึกข้อมูลบัญชี Roblox (Upsert)
+    if (rbxUser && rbxUser !== 'Unknown' && rbxId) {
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/roblox_accounts`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_SERVICE_KEY,
+            'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates'
+          },
+          body: JSON.stringify({
+            user_id: row.user_id,
+            roblox_username: rbxUser,
+            roblox_userid: parseInt(rbxId) || 0,
+            key_used: keyValue,
+            last_used_at: now.toISOString()
+          })
+        });
+      } catch (e) {
+        console.error("Failed to insert roblox account:", e);
+      }
     }
 
     // Key ถูกต้อง

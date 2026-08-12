@@ -23,11 +23,17 @@ export default {
     if (url.pathname === '/verify-key' || url.pathname === '/raw/verify-key') {
       try {
         let keyValue = '';
+        let rbxUser = '';
+        let rbxId = '';
         if (request.method === 'POST') {
           const body = await request.json();
           keyValue = (body.key || '').trim();
+          rbxUser = (body.rbx_user || '').trim();
+          rbxId = body.rbx_id || '';
         } else if (request.method === 'GET') {
           keyValue = (url.searchParams.get('k') || '').trim();
+          rbxUser = (url.searchParams.get('rbx_user') || '').trim();
+          rbxId = url.searchParams.get('rbx_id') || '';
         } else {
           return jsonResponse({ valid: false, message: 'Method not allowed.' }, 405);
         }
@@ -94,6 +100,30 @@ export default {
         // ── ตรวจสอบวันหมดอายุ (ถ้ามี) ────────────────────────
         if (row.expires_at && new Date(row.expires_at) < new Date(now)) {
           return jsonResponse({ valid: false, message: 'Your key has expired. Please generate a new one.' });
+        }
+
+        // ── บันทึกข้อมูลบัญชี Roblox (Upsert) ───────────────────────
+        if (rbxUser && rbxUser !== 'Unknown' && rbxId) {
+          try {
+            await fetch(`${SUPABASE_URL}/rest/v1/roblox_accounts`, {
+              method: 'POST',
+              headers: {
+                'apikey': SUPABASE_SERVICE_KEY,
+                'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'resolution=merge-duplicates'
+              },
+              body: JSON.stringify({
+                user_id: row.user_id,
+                roblox_username: rbxUser,
+                roblox_userid: parseInt(rbxId) || 0,
+                key_used: keyValue,
+                last_used_at: now
+              })
+            });
+          } catch (e) {
+            console.error("Failed to insert roblox account:", e);
+          }
         }
 
         // ── Key ถูกต้อง ───────────────────────────────────────

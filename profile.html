@@ -635,9 +635,9 @@
                         <div class="stat-val">20 hours</div>
                         <div class="stat-label">เวลาในบัญชี</div>
                     </div>
-                    <div class="stat-box">
-                        <div class="stat-val">0</div>
-                        <div class="stat-label">บัญชี Roblox ที่สร้างแล้ว</div>
+                    <div class="stat-box" id="robloxStatBox" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                        <div class="stat-val" id="robloxAccountCount">0</div>
+                        <div class="stat-label">บัญชี Roblox ที่ใช้กับระบบ</div>
                     </div>
                 </div>
 
@@ -807,6 +807,25 @@
         </div>
     </div>
 
+    <!-- Roblox Accounts Modal -->
+    <div id="robloxAccountsModal" class="modal-overlay hidden">
+        <div class="modal glass-panel">
+            <div class="modal-header">
+                <h2><i class="ph ph-users"></i> บัญชี Roblox ที่ใช้กับระบบ</h2>
+                <button class="icon-btn" id="closeRobloxModalBtn"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="file-list" id="robloxAccountsList" style="max-height: 400px; overflow-y: auto;">
+                <div class="file-row" style="color:#666;justify-content:center;padding:32px">
+                    <span>Loading...</span>
+                </div>
+            </div>
+            <div class="modal-footer" style="margin-top:20px;">
+                <button class="btn-secondary" id="cancelRobloxModalBtn">ปิด</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="script.js"></script>
     <script type="module">
         import { requireAuth, logout, getCurrentUserProfile } from "./auth.js";
@@ -1128,6 +1147,64 @@
         window.closeEditModal = function() {
             document.getElementById("editModal").classList.remove("show");
         }
+
+        // ── Fetch Roblox Accounts ───────────────────────────────────
+        async function fetchRobloxAccounts() {
+            try {
+                const { data: accounts, error } = await supabase
+                    .from('roblox_accounts')
+                    .select('*')
+                    .eq('user_id', currentUser.uid)
+                    .order('last_used_at', { ascending: false });
+
+                if (error) throw error;
+                
+                const countElem = document.getElementById('robloxAccountCount');
+                if (countElem) countElem.textContent = accounts ? accounts.length : 0;
+
+                const listElem = document.getElementById('robloxAccountsList');
+                if (listElem) {
+                    if (!accounts || accounts.length === 0) {
+                        listElem.innerHTML = `<div class="file-row" style="color:#666;justify-content:center;padding:32px">ยังไม่มีบัญชี Roblox ที่เคยใช้งาน</div>`;
+                    } else {
+                        let html = '';
+                        accounts.forEach(acc => {
+                            const avatarUrl = \`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=\${acc.roblox_userid}&size=150x150&format=Png&isCircular=true\`;
+                            const date = new Date(acc.last_used_at).toLocaleString('th-TH');
+                            
+                            html += \`
+                            <div class="file-row" style="display:flex; align-items:center; gap: 15px; padding: 15px;">
+                                <img src="\${avatarUrl}" alt="Avatar" style="width: 50px; height: 50px; border-radius: 50%; background: #222;" onerror="this.src='https://ui-avatars.com/api/?name=\${acc.roblox_username}&background=random'">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; color: #fff; font-size: 1.1rem;">\${acc.roblox_username}</div>
+                                    <div style="font-size: 0.85rem; color: #888;">ID: \${acc.roblox_userid}</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 0.85rem; color: #aaa;">ใช้งานล่าสุด</div>
+                                    <div style="font-size: 0.9rem; color: #fff;">\${date}</div>
+                                </div>
+                            </div>
+                            \`;
+                        });
+                        listElem.innerHTML = html;
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to load roblox accounts:", err);
+            }
+        }
+
+        // Trigger fetch after loading profile
+        fetchRobloxAccounts();
+
+        // ── Roblox Accounts Modal Logic ──────────────────────────────
+        const robloxModal = document.getElementById('robloxAccountsModal');
+        document.getElementById('robloxStatBox')?.addEventListener('click', () => {
+            robloxModal.classList.remove('hidden');
+            fetchRobloxAccounts(); // Refresh when opened
+        });
+        document.getElementById('closeRobloxModalBtn')?.addEventListener('click', () => robloxModal.classList.add('hidden'));
+        document.getElementById('cancelRobloxModalBtn')?.addEventListener('click', () => robloxModal.classList.add('hidden'));
 
         // ── Profile Edits ───────────────────────────────────────────
         document.getElementById("btnEditUsername")?.addEventListener("click", () => {
