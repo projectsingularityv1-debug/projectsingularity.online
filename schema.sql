@@ -8,6 +8,8 @@ create table if not exists public.profiles (
   id         uuid references auth.users on delete cascade not null primary key,
   username   text unique not null,
   avatar_url text,
+  country    text default 'ยังตรวจไม่พบ',
+  language   text default 'ไทย',
   created_at timestamptz default now()
 );
 

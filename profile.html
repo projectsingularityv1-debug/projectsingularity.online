@@ -582,25 +582,39 @@
                     </div>
                     
                     <div class="info-list">
-                        <div class="info-row">
-                            <div class="info-label">ชื่อผู้ใช้</div>
-                            <div class="info-value" id="piUsername">—</div>
+                        <div class="info-row" style="flex-direction:row; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div class="info-label" style="color:#888; font-size:0.95rem; margin-bottom:4px;">ชื่อผู้ใช้</div>
+                                <div class="info-value" id="piUsername" style="color:#fff; font-size:1.1rem; font-weight:500;">—</div>
+                            </div>
+                            <button id="btnEditUsername" style="background:transparent; border:none; color:#ff8000; cursor:pointer; font-size:0.9rem; font-weight:500;">แก้ไข</button>
                         </div>
-                        <div class="info-row">
-                            <div class="info-label">อีเมล</div>
-                            <div class="info-value" id="piEmail">—</div>
+                        <div class="info-row" style="flex-direction:row; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div class="info-label" style="color:#888; font-size:0.95rem; margin-bottom:4px;">อีเมล</div>
+                                <div class="info-value" id="piEmail" style="color:#fff; font-size:1.1rem; font-weight:500;">—</div>
+                            </div>
+                            <button id="btnEditEmail" style="background:transparent; border:none; color:#ff8000; cursor:pointer; font-size:0.9rem; font-weight:500;">แก้ไข</button>
                         </div>
-                        <div class="info-row">
-                            <div class="info-label">ประเทศ / ภูมิภาค</div>
-                            <div class="info-value">ยังตรวจไม่พบ</div>
+                        <div class="info-row" style="flex-direction:row; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div class="info-label" style="color:#888; font-size:0.95rem; margin-bottom:4px;">ประเทศ / ภูมิภาค</div>
+                                <div class="info-value" id="piCountry" style="color:#fff; font-size:1.1rem; font-weight:500;">ยังตรวจไม่พบ</div>
+                            </div>
+                            <button id="btnEditCountry" style="background:transparent; border:none; color:#ff8000; cursor:pointer; font-size:0.9rem; font-weight:500;">แก้ไข</button>
                         </div>
-                        <div class="info-row">
-                            <div class="info-label">ภาษา</div>
-                            <div class="info-value">ไทย</div>
+                        <div class="info-row" style="flex-direction:row; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div class="info-label" style="color:#888; font-size:0.95rem; margin-bottom:4px;">ภาษา</div>
+                                <div class="info-value" id="piLanguage" style="color:#fff; font-size:1.1rem; font-weight:500;">ไทย</div>
+                            </div>
+                            <button id="btnEditLanguage" style="background:transparent; border:none; color:#ff8000; cursor:pointer; font-size:0.9rem; font-weight:500;">แก้ไข</button>
                         </div>
-                        <div class="info-row">
-                            <div class="info-label">เป็นสมาชิกตั้งแต่</div>
-                            <div class="info-value" id="piMemberSince">—</div>
+                        <div class="info-row" style="flex-direction:row; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div class="info-label" style="color:#888; font-size:0.95rem; margin-bottom:4px;">เป็นสมาชิกตั้งแต่</div>
+                                <div class="info-value" id="piMemberSince" style="color:#fff; font-size:1.1rem; font-weight:500;">—</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -763,6 +777,8 @@
                 // Fill Personal Info Tab
                 document.getElementById("piUsername").textContent = currentUser.username;
                 document.getElementById("piEmail").textContent = currentUser.email;
+                document.getElementById("piCountry").textContent = currentUser.country || "ยังตรวจไม่พบ";
+                document.getElementById("piLanguage").textContent = currentUser.language || "ไทย";
                 
                 // Fill Security Tab
                 const secEmail = document.getElementById("secEmail");
@@ -933,6 +949,67 @@
 
         document.getElementById("btnDeleteAccount")?.addEventListener("click", () => {
             showToast("ไม่สามารถลบบัญชีได้ด้วยตนเอง กรุณาติดต่อผู้ดูแลระบบ", "error");
+        });
+
+        // ── Profile Edits ───────────────────────────────────────────
+        document.getElementById("btnEditUsername")?.addEventListener("click", async () => {
+            const newUsername = prompt("ระบุชื่อผู้ใช้ใหม่:", currentUser.username);
+            if (!newUsername || newUsername.trim() === currentUser.username) return;
+            
+            try {
+                const { error } = await supabase.from('profiles').update({ username: newUsername.trim() }).eq('id', currentUser.uid);
+                if (error) throw error;
+                currentUser.username = newUsername.trim();
+                document.getElementById("piUsername").textContent = currentUser.username;
+                document.getElementById("sidebarUsername").textContent = currentUser.username;
+                document.getElementById("mainUsername").textContent = currentUser.username;
+                showToast("อัปเดตชื่อผู้ใช้สำเร็จ!");
+            } catch (err) {
+                showToast("ไม่สามารถอัปเดตชื่อผู้ใช้ได้: " + err.message, "error");
+            }
+        });
+
+        document.getElementById("btnEditEmail")?.addEventListener("click", async () => {
+            const newEmail = prompt("ระบุอีเมลใหม่:\n(คุณอาจจะต้องยืนยันอีเมลใหม่ก่อนจึงจะเปลี่ยนสำเร็จ)", currentUser.email);
+            if (!newEmail || newEmail.trim() === currentUser.email) return;
+            
+            try {
+                const { error } = await supabase.auth.updateUser({ email: newEmail.trim() });
+                if (error) throw error;
+                showToast("ส่งคำขอเปลี่ยนอีเมลแล้ว กรุณาเช็คกล่องจดหมายของคุณ!");
+            } catch (err) {
+                showToast("ไม่สามารถเปลี่ยนอีเมลได้: " + err.message, "error");
+            }
+        });
+
+        document.getElementById("btnEditCountry")?.addEventListener("click", async () => {
+            const newCountry = prompt("ระบุประเทศ/ภูมิภาค:", currentUser.country || "");
+            if (newCountry === null || newCountry.trim() === (currentUser.country || "")) return;
+            
+            try {
+                const { error } = await supabase.from('profiles').update({ country: newCountry.trim() }).eq('id', currentUser.uid);
+                if (error) throw error;
+                currentUser.country = newCountry.trim();
+                document.getElementById("piCountry").textContent = currentUser.country || "ยังตรวจไม่พบ";
+                showToast("อัปเดตประเทศ/ภูมิภาคสำเร็จ!");
+            } catch (err) {
+                showToast("ไม่สามารถอัปเดตได้: " + err.message, "error");
+            }
+        });
+
+        document.getElementById("btnEditLanguage")?.addEventListener("click", async () => {
+            const newLanguage = prompt("ระบุภาษา:", currentUser.language || "ไทย");
+            if (newLanguage === null || newLanguage.trim() === (currentUser.language || "ไทย")) return;
+            
+            try {
+                const { error } = await supabase.from('profiles').update({ language: newLanguage.trim() }).eq('id', currentUser.uid);
+                if (error) throw error;
+                currentUser.language = newLanguage.trim();
+                document.getElementById("piLanguage").textContent = currentUser.language || "ไทย";
+                showToast("อัปเดตภาษาสำเร็จ!");
+            } catch (err) {
+                showToast("ไม่สามารถอัปเดตได้: " + err.message, "error");
+            }
         });
 
         // ── Logout ───────────────────────────────────────────
