@@ -207,3 +207,14 @@ create policy "Users can delete own keys"
 
 -- Service role (Cloudflare Worker) ตรวจสอบ key ได้ทุกตัว
 -- (ไม่ต้องมี policy เพราะ service_role bypass RLS อยู่แล้ว)
+
+-- Admin policy: admin ดูและจัดการ key ของทุกคนได้
+create policy "Admins can manage all keys"
+  on public.script_keys for all
+  using (
+    exists (
+      select 1 from public.profiles
+      where id = auth.uid() and is_admin = true
+    )
+  );
+

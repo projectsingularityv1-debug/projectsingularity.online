@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — Key Management | Singularity</title>
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/kentatvv1-tech/UI-BYKENTA/main/logo%20w.png">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body { background: #0a0a0a; }
+
+        /* ── Nav ── */
+        .admin-nav {
+            position: fixed; top: 0; left: 0; right: 0; height: 60px;
+            background: rgba(10,10,10,0.9);
+            border-bottom: 1px solid rgba(255,128,0,0.15);
+            backdrop-filter: blur(20px);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 28px; z-index: 100;
+        }
+        .admin-nav-logo { display: flex; align-items: center; gap: 10px; color: #fff; font-weight: 700; font-size: 1rem; text-decoration: none; }
+        .admin-nav-logo img { width: 28px; height: 28px; border-radius: 6px; }
+        .admin-badge {
+            background: rgba(255,128,0,0.15); border: 1px solid rgba(255,128,0,0.4);
+            color: #ff8000; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+            text-transform: uppercase; padding: 3px 10px; border-radius: 100px;
+        }
+        .admin-nav-right { display: flex; align-items: center; gap: 12px; }
+        .nav-back { font-size: 0.85rem; color: rgba(255,255,255,0.45); text-decoration: none; transition: color 0.2s; }
+        .nav-back:hover { color: #ff8000; }
+
+        /* ── Page ── */
+        .admin-page { padding: 80px 24px 60px; max-width: 1100px; margin: 0 auto; }
+
+        /* ── Header ── */
+        .admin-header { margin-bottom: 32px; }
+        .admin-header h1 {
+            font-size: 2rem; font-weight: 700;
+            background: linear-gradient(135deg, #ff8000, #ffb347, #fff);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            margin-bottom: 6px;
+        }
+        .admin-header p { color: rgba(255,255,255,0.45); font-size: 0.9rem; }
+
+        /* ── Stats Row ── */
+        .stats-row { display: flex; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+        .stat-card {
+            flex: 1; min-width: 150px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px; padding: 18px 20px;
+        }
+        .stat-card.orange { border-color: rgba(255,128,0,0.25); background: rgba(255,128,0,0.05); }
+        .stat-label { font-size: 0.75rem; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+        .stat-value { font-size: 1.8rem; font-weight: 700; color: #fff; }
+        .stat-card.orange .stat-value { color: #ff8000; }
+
+        /* ── Toolbar ── */
+        .toolbar {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 20px; flex-wrap: wrap;
+        }
+        .search-wrap {
+            flex: 1; min-width: 200px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px; display: flex; align-items: center;
+            padding: 0 14px; gap: 10px;
+            transition: border-color 0.2s;
+        }
+        .search-wrap:focus-within { border-color: rgba(255,128,0,0.4); }
+        .search-wrap svg { width: 16px; height: 16px; fill: rgba(255,255,255,0.3); flex-shrink: 0; }
+        .search-input {
+            background: transparent; border: none; outline: none;
+            color: #fff; font-family: 'Outfit', sans-serif; font-size: 0.88rem;
+            width: 100%; padding: 10px 0;
+        }
+        .search-input::placeholder { color: rgba(255,255,255,0.25); }
+
+        .filter-select {
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px; color: #fff; font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem; padding: 10px 14px; cursor: pointer;
+            outline: none; transition: border-color 0.2s;
+        }
+        .filter-select:focus { border-color: rgba(255,128,0,0.4); }
+        .filter-select option { background: #1a1a1a; }
+
+        .btn-create {
+            padding: 10px 20px; border-radius: 10px; border: none;
+            background: linear-gradient(135deg, #ff8000, #ff5500);
+            color: #fff; font-family: 'Outfit', sans-serif; font-size: 0.88rem;
+            font-weight: 600; cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; gap: 8px; white-space: nowrap;
+            box-shadow: 0 4px 16px rgba(255,128,0,0.25);
+        }
+        .btn-create:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(255,128,0,0.4); }
+
+        /* ── Table ── */
+        .table-wrap {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 16px; overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.07); }
+        th {
+            padding: 13px 18px; text-align: left;
+            font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+            text-transform: uppercase; color: rgba(255,255,255,0.35);
+        }
+        td { padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+        tbody tr { transition: background 0.15s; }
+        tbody tr:hover { background: rgba(255,255,255,0.03); }
+        tbody tr:last-child td { border-bottom: none; }
+
+        .key-mono {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+            color: #ff9a35; background: rgba(255,128,0,0.08);
+            border: 1px solid rgba(255,128,0,0.15);
+            padding: 4px 10px; border-radius: 6px;
+            max-width: 260px; overflow: hidden; text-overflow: ellipsis;
+            white-space: nowrap; display: inline-block; cursor: pointer;
+            transition: background 0.2s;
+        }
+        .key-mono:hover { background: rgba(255,128,0,0.15); }
+
+        .user-cell { display: flex; align-items: center; gap: 10px; }
+        .user-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #333; }
+        .user-name { font-size: 0.88rem; font-weight: 500; color: rgba(255,255,255,0.85); }
+        .user-email { font-size: 0.75rem; color: rgba(255,255,255,0.35); }
+
+        .badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 3px 10px; border-radius: 100px; font-size: 0.75rem; font-weight: 600;
+        }
+        .badge-active { background: rgba(0,220,130,0.12); border: 1px solid rgba(0,220,130,0.3); color: #00dc82; }
+        .badge-inactive { background: rgba(255,80,80,0.1); border: 1px solid rgba(255,80,80,0.25); color: #ff5555; }
+        .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+        .date-text { font-size: 0.82rem; color: rgba(255,255,255,0.45); }
+
+        /* ── Action Buttons ── */
+        .action-btns { display: flex; gap: 8px; align-items: center; }
+        .btn-icon {
+            width: 32px; height: 32px; border-radius: 8px; border: none;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.18s;
+        }
+        .btn-copy { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.6); }
+        .btn-copy:hover { background: rgba(255,255,255,0.12); color: #fff; }
+        .btn-revoke { background: rgba(255,80,80,0.08); color: #ff5555; }
+        .btn-revoke:hover { background: rgba(255,80,80,0.2); }
+        .btn-restore { background: rgba(0,200,120,0.08); color: #00dc82; }
+        .btn-restore:hover { background: rgba(0,200,120,0.2); }
+        .btn-delete { background: rgba(180,0,0,0.08); color: #ff3333; }
+        .btn-delete:hover { background: rgba(180,0,0,0.2); }
+        .btn-reset-key { background: rgba(255,128,0,0.08); color: #ff8000; }
+        .btn-reset-key:hover { background: rgba(255,128,0,0.2); }
+        .btn-icon svg { width: 15px; height: 15px; fill: currentColor; }
+
+        /* ── Empty State ── */
+        .empty-state { text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.3); font-size: 0.9rem; }
+        .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+
+        /* ── Loading ── */
+        .loading-row td { text-align: center; padding: 40px; color: rgba(255,255,255,0.3); }
+        .spin {
+            display: inline-block; width: 20px; height: 20px;
+            border: 2px solid rgba(255,255,255,0.1); border-top-color: #ff8000;
+            border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 10px;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Create Key Modal ── */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.75); backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9000; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: all; }
+        .modal-box {
+            background: #141414; border: 1px solid rgba(255,128,0,0.2);
+            border-radius: 18px; padding: 32px; max-width: 440px; width: 90%;
+            transform: scale(0.92); transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-overlay.open .modal-box { transform: scale(1); }
+        .modal-box h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; }
+        .modal-box p { font-size: 0.85rem; color: rgba(255,255,255,0.45); margin-bottom: 22px; line-height: 1.5; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 0.78rem; font-weight: 600; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+        .form-input {
+            width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px; padding: 11px 14px; color: #fff;
+            font-family: 'Outfit', sans-serif; font-size: 0.88rem; outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-input:focus { border-color: rgba(255,128,0,0.5); }
+        .form-input::placeholder { color: rgba(255,255,255,0.2); }
+
+        .modal-actions { display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end; }
+        .btn-cancel {
+            padding: 10px 20px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);
+            background: transparent; color: rgba(255,255,255,0.6);
+            font-family: 'Outfit', sans-serif; font-size: 0.88rem; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-cancel:hover { background: rgba(255,255,255,0.06); color: #fff; }
+        .btn-confirm {
+            padding: 10px 22px; border-radius: 10px; border: none;
+            background: linear-gradient(135deg, #ff8000, #ff5500);
+            color: #fff; font-family: 'Outfit', sans-serif; font-size: 0.88rem;
+            font-weight: 600; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-confirm:hover { box-shadow: 0 4px 16px rgba(255,128,0,0.4); }
+        .btn-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed; bottom: 24px; left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(20,20,20,0.95); border: 1px solid rgba(255,128,0,0.4);
+            border-radius: 12px; padding: 11px 22px; font-size: 0.87rem; font-weight: 500;
+            color: #fff; z-index: 9999; opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none; white-space: nowrap;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.success { border-color: rgba(0,220,130,0.5); }
+        .toast.error { border-color: rgba(255,80,80,0.5); }
+
+        /* ── Pagination ── */
+        .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+        .page-btn {
+            padding: 7px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.6);
+            font-family: 'Outfit', sans-serif; font-size: 0.82rem; cursor: pointer; transition: all 0.2s;
+        }
+        .page-btn:hover, .page-btn.active { background: rgba(255,128,0,0.15); border-color: rgba(255,128,0,0.4); color: #ff8000; }
+        .page-info { font-size: 0.82rem; color: rgba(255,255,255,0.35); margin-top: 10px; text-align: center; }
+    </style>
+</head>
+<body>
+    <canvas id="starfield"></canvas>
+
+    <!-- Nav -->
+    <nav class="admin-nav">
+        <a href="index.html" class="admin-nav-logo">
+            <img src="https://raw.githubusercontent.com/kentatvv1-tech/UI-BYKENTA/main/logo%20w.png" alt="Singularity">
+            Singularity
+            <span class="admin-badge">Admin</span>
+        </a>
+        <div class="admin-nav-right">
+            <a href="key.html" class="nav-back">My Key</a>
+            <a href="index.html" class="nav-back">← Dashboard</a>
+        </div>
+    </nav>
+
+    <!-- Main -->
+    <div class="admin-page">
+        <!-- Header -->
+        <div class="admin-header">
+            <h1>🔑 Key Management</h1>
+            <p>จัดการ script key ของผู้ใช้ทุกคน — สร้าง, เพิกถอน, หรือลบ key</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card orange">
+                <div class="stat-label">Total Keys</div>
+                <div class="stat-value" id="statTotal">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Active</div>
+                <div class="stat-value" id="statActive" style="color:#00dc82">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Revoked</div>
+                <div class="stat-value" id="statRevoked" style="color:#ff5555">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Users with Key</div>
+                <div class="stat-value" id="statUsers">—</div>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="search-wrap">
+                <svg viewBox="0 0 24 24"><path d="M21 21l-4.35-4.35M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                <input type="text" class="search-input" id="searchInput" placeholder="ค้นหา username, email หรือ key...">
+            </div>
+            <select class="filter-select" id="filterStatus">
+                <option value="all">ทุกสถานะ</option>
+                <option value="active">Active เท่านั้น</option>
+                <option value="inactive">Revoked เท่านั้น</option>
+            </select>
+            <button class="btn-create" id="btnCreateKey" onclick="openCreateModal()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                สร้าง Key ให้ User
+            </button>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Key</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Expires</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="keysTableBody">
+                    <tr class="loading-row">
+                        <td colspan="6">
+                            <span class="spin"></span> กำลังโหลด...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+        <div class="page-info" id="pageInfo"></div>
+    </div>
+
+    <!-- Create Key Modal -->
+    <div class="modal-overlay" id="createModal">
+        <div class="modal-box">
+            <h3>➕ สร้าง Key ให้ User</h3>
+            <p>ค้นหา user แล้วสร้าง key ให้ (ถ้า user มี key อยู่แล้วจะถูกแทนที่)</p>
+
+            <div class="form-group">
+                <label>Username หรือ Email</label>
+                <input type="text" class="form-input" id="createUserInput" placeholder="kenta หรือ user@example.com">
+            </div>
+            <div class="form-group">
+                <label>User ID (UUID) — ถ้าทราบ</label>
+                <input type="text" class="form-input" id="createUserIdInput" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+                <div style="font-size:0.75rem;color:rgba(255,255,255,0.3);margin-top:5px">ค้นพบ User ID จากตาราง profiles หรือค้นหาด้วย username ด้านบน</div>
+            </div>
+            <div class="form-group">
+                <label>Custom Key (ไม่บังคับ)</label>
+                <input type="text" class="form-input" id="createKeyInput" placeholder="เว้นว่างเพื่อ generate อัตโนมัติ" style="font-family:'JetBrains Mono',monospace;font-size:0.82rem">
+            </div>
+
+            <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center">
+                <button onclick="searchUser()" style="padding:8px 16px;border-radius:8px;border:1px solid rgba(255,128,0,0.3);background:rgba(255,128,0,0.1);color:#ff8000;font-family:'Outfit',sans-serif;font-size:0.82rem;cursor:pointer">
+                    🔍 ค้นหา User
+                </button>
+                <span id="searchUserResult" style="font-size:0.8rem;color:rgba(255,255,255,0.45)"></span>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeCreateModal()">Cancel</button>
+                <button class="btn-confirm" id="createConfirmBtn" onclick="doCreateKey()">
+                    สร้าง Key
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+        import { requireAuth } from './auth.js';
+
+        // ── Auth Guard: Admin only ────────────────────────────
+        let adminUser = null;
+        try {
+            const user = await requireAuth('login.html');
+            const { data: profile } = await supabase
+                .from('profiles').select('is_admin').eq('id', user.id).single();
+            if (!profile?.is_admin) {
+                alert('⛔ Access Denied — Admins only');
+                window.location.href = 'index.html';
+            }
+            adminUser = user;
+        } catch(e) { /* redirected */ }
+
+        // ── State ────────────────────────────────────────────
+        let allKeys = [];
+        let filteredKeys = [];
+        let currentPage = 1;
+        const PAGE_SIZE = 15;
+
+        // ── Expose to global ─────────────────────────────────
+        window._supabase = supabase;
+
+        // ── Toast ─────────────────────────────────────────────
+        window.showToast = function(msg, type = 'success') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = `toast ${type} show`;
+            setTimeout(() => t.className = 'toast', 3000);
+        };
+
+        // ── Format Date ───────────────────────────────────────
+        window.fmtDate = function(iso) {
+            if (!iso) return '—';
+            return new Date(iso).toLocaleDateString('th-TH', { year:'numeric', month:'short', day:'numeric' });
+        };
+
+        // ── Load all keys (with user profiles join) ───────────
+        async function loadKeys() {
+            document.getElementById('keysTableBody').innerHTML =
+                '<tr class="loading-row"><td colspan="6"><span class="spin"></span> กำลังโหลด...</td></tr>';
+
+            const { data, error } = await supabase
+                .from('script_keys')
+                .select(`
+                    id, key_value, is_active, expires_at, created_at, user_id,
+                    profiles:user_id (username, avatar_url)
+                `)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                showToast('Error: ' + error.message, 'error');
+                return;
+            }
+
+            // Also get auth emails via profiles only (we don't have direct auth access)
+            allKeys = data || [];
+            updateStats();
+            applyFilter();
+        }
+
+        // ── Stats ─────────────────────────────────────────────
+        function updateStats() {
+            const active = allKeys.filter(k => k.is_active && (!k.expires_at || new Date(k.expires_at) > new Date())).length;
+            const revoked = allKeys.length - active;
+            const uniqueUsers = new Set(allKeys.map(k => k.user_id)).size;
+            document.getElementById('statTotal').textContent = allKeys.length;
+            document.getElementById('statActive').textContent = active;
+            document.getElementById('statRevoked').textContent = revoked;
+            document.getElementById('statUsers').textContent = uniqueUsers;
+        }
+
+        // ── Filter + Search ───────────────────────────────────
+        window.applyFilter = function() {
+            const q = document.getElementById('searchInput').value.toLowerCase().trim();
+            const status = document.getElementById('filterStatus').value;
+
+            filteredKeys = allKeys.filter(k => {
+                const username = (k.profiles?.username || '').toLowerCase();
+                const keyVal = (k.key_value || '').toLowerCase();
+                const matchQ = !q || username.includes(q) || keyVal.includes(q);
+
+                const isActive = k.is_active && (!k.expires_at || new Date(k.expires_at) > new Date());
+                const matchStatus =
+                    status === 'all' ||
+                    (status === 'active' && isActive) ||
+                    (status === 'inactive' && !isActive);
+
+                return matchQ && matchStatus;
+            });
+
+            currentPage = 1;
+            renderTable();
+            renderPagination();
+        };
+
+        document.getElementById('searchInput').addEventListener('input', applyFilter);
+        document.getElementById('filterStatus').addEventListener('change', applyFilter);
+
+        // ── Render Table ──────────────────────────────────────
+        function renderTable() {
+            const tbody = document.getElementById('keysTableBody');
+            const start = (currentPage - 1) * PAGE_SIZE;
+            const slice = filteredKeys.slice(start, start + PAGE_SIZE);
+
+            if (slice.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">🔍</div>ไม่พบ key ที่ตรงเงื่อนไข</div></td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = slice.map(k => {
+                const isActive = k.is_active && (!k.expires_at || new Date(k.expires_at) > new Date());
+                const avatar = k.profiles?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(k.profiles?.username || 'U')}&background=1a1a1a&color=ff8000`;
+                const username = k.profiles?.username || 'Unknown';
+
+                return `
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <img class="user-avatar" src="${avatar}" alt="${username}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=1a1a1a&color=ff8000'">
+                            <div>
+                                <div class="user-name">${username}</div>
+                                <div class="user-email">${k.user_id.substring(0,16)}...</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="key-mono" title="คลิกเพื่อ copy" onclick="copyKey('${k.key_value}')">
+                            ${k.key_value}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge ${isActive ? 'badge-active' : 'badge-inactive'}">
+                            <span class="badge-dot"></span>
+                            ${isActive ? 'Active' : 'Revoked'}
+                        </span>
+                    </td>
+                    <td><span class="date-text">${fmtDate(k.created_at)}</span></td>
+                    <td><span class="date-text">${fmtDate(k.expires_at)}</span></td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-icon btn-copy" title="Copy Key" onclick="copyKey('${k.key_value}')">
+                                <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                            </button>
+                            <button class="btn-icon btn-reset-key" title="Reset Key ใหม่" onclick="resetKeyAdmin('${k.id}', '${k.user_id}')">
+                                <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.96 7.96 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                            </button>
+                            ${isActive
+                                ? `<button class="btn-icon btn-revoke" title="Revoke Key" onclick="revokeKey('${k.id}')">
+                                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11H7v-2h10v2z"/></svg>
+                                   </button>`
+                                : `<button class="btn-icon btn-restore" title="Restore Key" onclick="restoreKey('${k.id}')">
+                                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                                   </button>`
+                            }
+                            <button class="btn-icon btn-delete" title="ลบ Key" onclick="deleteKey('${k.id}', '${username}')">
+                                <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        // ── Pagination ────────────────────────────────────────
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredKeys.length / PAGE_SIZE);
+            const pag = document.getElementById('pagination');
+            const info = document.getElementById('pageInfo');
+            info.textContent = `แสดง ${filteredKeys.length} รายการ`;
+
+            if (totalPages <= 1) { pag.innerHTML = ''; return; }
+
+            pag.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.className = `page-btn${i === currentPage ? ' active' : ''}`;
+                btn.textContent = i;
+                btn.onclick = () => { currentPage = i; renderTable(); renderPagination(); };
+                pag.appendChild(btn);
+            }
+        }
+
+        // ── Actions ───────────────────────────────────────────
+        window.copyKey = async function(key) {
+            await navigator.clipboard.writeText(key);
+            showToast('✅ Copied!', 'success');
+        };
+
+        window.revokeKey = async function(id) {
+            if (!confirm('Revoke key นี้? ผู้ใช้จะใช้สคริปต์ไม่ได้จนกว่าจะ restore')) return;
+            const { error } = await window._supabase.from('script_keys').update({ is_active: false }).eq('id', id);
+            if (error) { showToast('Error: ' + error.message, 'error'); return; }
+            showToast('🚫 Key ถูก Revoke แล้ว', 'success');
+            loadKeys();
+        };
+
+        window.restoreKey = async function(id) {
+            const { error } = await window._supabase.from('script_keys').update({ is_active: true }).eq('id', id);
+            if (error) { showToast('Error: ' + error.message, 'error'); return; }
+            showToast('✅ Key ถูก Restore แล้ว', 'success');
+            loadKeys();
+        };
+
+        window.deleteKey = async function(id, username) {
+            if (!confirm(`ลบ key ของ ${username}? การกระทำนี้ไม่สามารถย้อนกลับได้`)) return;
+            const { error } = await window._supabase.from('script_keys').delete().eq('id', id);
+            if (error) { showToast('Error: ' + error.message, 'error'); return; }
+            showToast('🗑 Key ถูกลบแล้ว', 'success');
+            loadKeys();
+        };
+
+        window.resetKeyAdmin = async function(id, userId) {
+            if (!confirm('Reset key ใหม่ให้ user นี้? Key เดิมจะถูกแทนที่')) return;
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            const newKey = [8,4,4,4,12].map(len =>
+                Array.from({length: len}, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+            ).join('-');
+            const { error } = await window._supabase
+                .from('script_keys').update({ key_value: newKey, is_active: true, created_at: new Date().toISOString() }).eq('id', id);
+            if (error) { showToast('Error: ' + error.message, 'error'); return; }
+            showToast('🔄 Key ถูก Reset แล้ว', 'success');
+            loadKeys();
+        };
+
+        // ── Create Key Modal ──────────────────────────────────
+        window.openCreateModal = function() {
+            document.getElementById('createModal').classList.add('open');
+            document.getElementById('createUserInput').value = '';
+            document.getElementById('createUserIdInput').value = '';
+            document.getElementById('createKeyInput').value = '';
+            document.getElementById('searchUserResult').textContent = '';
+        };
+        window.closeCreateModal = function() {
+            document.getElementById('createModal').classList.remove('open');
+        };
+        document.getElementById('createModal').addEventListener('click', e => {
+            if (e.target === document.getElementById('createModal')) closeCreateModal();
+        });
+
+        window.searchUser = async function() {
+            const q = document.getElementById('createUserInput').value.trim();
+            if (!q) return;
+            const { data } = await window._supabase
+                .from('profiles').select('id, username, avatar_url')
+                .ilike('username', `%${q}%`).limit(5);
+            if (!data || data.length === 0) {
+                document.getElementById('searchUserResult').textContent = '❌ ไม่พบ user';
+                return;
+            }
+            const u = data[0];
+            document.getElementById('createUserIdInput').value = u.id;
+            document.getElementById('searchUserResult').textContent = `✅ พบ: ${u.username}`;
+        };
+
+        window.doCreateKey = async function() {
+            const userId = document.getElementById('createUserIdInput').value.trim();
+            if (!userId) { showToast('กรุณาระบุ User ID', 'error'); return; }
+
+            const btn = document.getElementById('createConfirmBtn');
+            btn.disabled = true; btn.textContent = 'กำลังสร้าง...';
+
+            // ลบ key เดิมถ้ามี
+            await window._supabase.from('script_keys').delete().eq('user_id', userId);
+
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            const customKey = document.getElementById('createKeyInput').value.trim();
+            const newKey = customKey || [8,4,4,4,12].map(len =>
+                Array.from({length: len}, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+            ).join('-');
+
+            const { error } = await window._supabase.from('script_keys').insert({
+                user_id: userId, key_value: newKey, is_active: true
+            });
+
+            btn.disabled = false; btn.textContent = 'สร้าง Key';
+
+            if (error) { showToast('Error: ' + error.message, 'error'); return; }
+
+            showToast('✅ สร้าง Key สำเร็จ!', 'success');
+            closeCreateModal();
+            loadKeys();
+        };
+
+        // ── RLS Bypass: Admin needs service role for full access ──
+        // Since we use anon key, add admin policy for script_keys
+        // Run this SQL in Supabase:
+        // CREATE POLICY "Admins can manage all keys"
+        //   ON public.script_keys FOR ALL
+        //   USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
+
+        // ── Init ──────────────────────────────────────────────
+        loadKeys();
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

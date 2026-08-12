@@ -560,7 +560,10 @@
             <img src="https://raw.githubusercontent.com/kentatvv1-tech/UI-BYKENTA/main/logo%20w.png" alt="Singularity">
             Singularity
         </a>
-        <a href="index.html" class="key-nav-back">← Back to Dashboard</a>
+        <div style="display:flex; gap:16px; align-items:center;">
+            <a href="admin-keys.html" class="key-nav-back" id="adminLink" style="display:none; color:#ff8000; font-weight:600;">👑 Manage All Keys</a>
+            <a href="index.html" class="key-nav-back">← Back to Dashboard</a>
+        </div>
     </nav>
 
     <!-- Main -->
@@ -678,6 +681,13 @@
         let currentUser = null;
         try {
             currentUser = await requireAuth('login.html');
+            
+            // ตรวจสอบว่าเป็น Admin หรือไม่
+            const { data: profile } = await supabase
+                .from('profiles').select('is_admin').eq('id', currentUser.id).single();
+            if (profile?.is_admin) {
+                document.getElementById('adminLink').style.display = 'block';
+            }
         } catch (e) {
             // redirected
         }
