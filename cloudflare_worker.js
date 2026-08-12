@@ -78,9 +78,9 @@ export default {
 
         const row = rows[0];
 
-        // ── ดึงข้อมูล Profile ──────────────────────────────────
+        // ── ดึงข้อมูล Profile + Email ─────────────────────────
         let profile = null;
-        const profileQuery = `${SUPABASE_URL}/rest/v1/profiles?id=eq.${row.user_id}&select=username,avatar_url`;
+        const profileQuery = `${SUPABASE_URL}/rest/v1/profiles?id=eq.${row.user_id}&select=username,avatar_url,email`;
         const profileRes = await fetch(profileQuery, {
           method: 'GET',
           headers: {
@@ -94,6 +94,25 @@ export default {
           const profileRows = await profileRes.json();
           if (profileRows && profileRows.length > 0) {
             profile = profileRows[0];
+          }
+        }
+
+        // ── ถ้ายังไม่มี email ใน profile ดึงจาก auth.users ─────────
+        if (profile && !profile.email) {
+          try {
+            const authRes = await fetch(`${SUPABASE_URL}/auth/v1/admin/users/${row.user_id}`, {
+              method: 'GET',
+              headers: {
+                'apikey': SUPABASE_SERVICE_KEY,
+                'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+              }
+            });
+            if (authRes.ok) {
+              const authUser = await authRes.json();
+              profile.email = authUser.email || '';
+            }
+          } catch (e) {
+            console.error('Failed to fetch email from auth:', e);
           }
         }
 
@@ -127,6 +146,11 @@ export default {
         }
 
         // ── Key ถูกต้อง ───────────────────────────────────────
+        // ถ้ามี rbxId ให้ใส่ avatar_url ใน profile เป็น Roblox Thumbnail URL
+        if (profile && rbxId && parseInt(rbxId) > 0) {
+          profile.avatar_url = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${parseInt(rbxId)}&size=150x150&format=Png&isCircular=true`;
+        }
+
         return jsonResponse({ valid: true, message: 'Key verified successfully!', profile: profile });
 
       } catch (err) {
