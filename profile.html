@@ -828,7 +828,7 @@
     <!-- Scripts -->
     <script src="script.js"></script>
     <script type="module">
-        import { requireAuth, logout, getCurrentUserProfile } from "./auth.js";
+        import { requireAuth, logout, getCurrentUserProfile } from "./auth.js?v=2";
         import { supabase } from "./supabase-config.js";
         import { initNotifications } from "./notifications.js";
 
@@ -879,7 +879,7 @@
                 // Tooltip added for clarity
                 html += `<div class="${className}" title="${count} keys on ${dateStr}"></div>`;
             }
-            graph.innerHTML = html;
+            if (graph) graph.innerHTML = html;
         }
 
         function formatDateThai(isoString) {
@@ -910,44 +910,79 @@
                 // Show target tab
                 const targetId = link.getAttribute('data-target');
                 if (targetId) {
-                    document.getElementById(targetId).classList.add('active');
+                    const targetEl = document.getElementById(targetId);
+                    if (targetEl) targetEl.classList.add('active');
                 }
             });
         });
 
-        // ── Init ─────────────────────────────────────────────
+        // ── Init ────────────────────────────────────────
         (async () => {
             try {
-                await requireAuth();
-                currentUser = await getCurrentUserProfile();
-                if (!currentUser) return;
+                // Step 1: Check auth session
+                const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+                console.log('[Profile] Session:', sessionData?.session ? 'OK' : 'NONE', sessionError || '');
                 
-                // Generate activity graph using real user data
+                if (!sessionData?.session) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Step 2: Get user
+                const { data: { user }, error: userError } = await supabase.auth.getUser();
+                console.log('[Profile] User:', user?.email, userError || '');
+                if (!user) { window.location.href = 'login.html'; return; }
+
+                // Step 3: Get profile from DB
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+                console.log('[Profile] Profile DB:', profile, profileError || '');
+
+                // Build currentUser object (always fallback to auth data)
+                const authEmail = user.email || '';
+                const authUsername = user.user_metadata?.username
+                    || user.user_metadata?.full_name
+                    || user.user_metadata?.name
+                    || authEmail.split('@')[0]
+                    || 'User';
+                const authAvatar = user.user_metadata?.avatar_url
+                    || user.user_metadata?.picture
+                    || `https://ui-avatars.com/api/?name=${encodeURIComponent(authUsername)}&background=1a1a2e&color=ff8000&bold=true`;
+
+                currentUser = profile
+                    ? { ...profile, email: authEmail, username: profile.username || authUsername, avatar_url: profile.avatar_url || authAvatar, uid: user.id }
+                    : { uid: user.id, email: authEmail, username: authUsername, avatar_url: authAvatar, country: 'ยังตรวจไม่พบ', language: 'ไทย', created_at: user.created_at };
+
+                console.log('[Profile] currentUser:', currentUser.username, currentUser.email);
+
+                // Generate activity graph
                 generateGraph(currentUser);
 
                 // Fill profile
-                document.getElementById("sidebarUsername").textContent = currentUser.username;
-                document.getElementById("sidebarEmail").textContent = currentUser.email;
-                document.getElementById("mainUsername").textContent = currentUser.username;
-                document.getElementById("mainEmail").textContent = currentUser.email;
-                
-                // Fill Personal Info Tab
-                document.getElementById("piUsername").textContent = currentUser.username;
-                document.getElementById("piEmail").textContent = currentUser.email;
-                document.getElementById("piCountry").textContent = currentUser.country || "ยังตรวจไม่พบ";
-                document.getElementById("piLanguage").textContent = currentUser.language || "ไทย";
-                
-                // Fill Security Tab
-                const secEmail = document.getElementById("secEmail");
-                if(secEmail) secEmail.textContent = currentUser.email;
-                
-                if (currentUser.avatar_url) {
-                    document.getElementById("sidebarAvatar").src = currentUser.avatar_url;
-                    document.getElementById("mainAvatar").src = currentUser.avatar_url;
-                    const navAvatar = document.getElementById("navAvatar");
-                    if(navAvatar) navAvatar.src = currentUser.avatar_url;
+                const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || ''; };
+                setEl('sidebarUsername', currentUser.username);
+                setEl('sidebarEmail', currentUser.email);
+                setEl('mainUsername', currentUser.username);
+                setEl('mainEmail', currentUser.email);
+                setEl('piUsername', currentUser.username);
+                setEl('piEmail', currentUser.email);
+                setEl('piCountry', currentUser.country || 'ยังตรวจไม่พบ');
+                setEl('piLanguage', currentUser.language || 'ไทย');
+                const secEmail = document.getElementById('secEmail');
+                if (secEmail) secEmail.textContent = currentUser.email;
+
+                // Set avatars
+                const av = currentUser.avatar_url;
+                if (av) {
+                    ['sidebarAvatar', 'mainAvatar', 'navAvatar'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.src = av;
+                    });
                 }
-                
+
                 const memberSinceStr = formatDateThai(currentUser.created_at);
                 document.getElementById("statMemberSince").textContent = memberSinceStr;
                 document.getElementById("piMemberSince").textContent = memberSinceStr;
