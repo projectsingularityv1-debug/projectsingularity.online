@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Executors Status — Singularity</title>
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/kentatvv1-tech/UI-BYKENTA/main/logo%20w.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .executors-hero {
+            text-align: center;
+            padding: 60px 20px 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .executors-hero h1 {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            background: linear-gradient(to right, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .executors-hero p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 32px;
+        }
+        
+        .executors-section {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px 20px 80px;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #ccc;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: var(--font-main);
+            font-weight: 500;
+        }
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border-color: rgba(255,255,255,0.3);
+        }
+        
+        .executors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .executor-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .executor-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border-color: rgba(255,255,255,0.2);
+        }
+        
+        .executor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .executor-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .executor-platform {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        /* Status Colors */
+        .status-working { background: rgba(52,211,153,0.15); color: #34d399; border: 1px solid rgba(52,211,153,0.2); }
+        .status-patching { background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+        .status-detected { background: rgba(248,113,113,0.15); color: #f87171; border: 1px solid rgba(248,113,113,0.2); }
+        .status-unknown { background: rgba(156,163,175,0.15); color: #9ca3af; border: 1px solid rgba(156,163,175,0.2); }
+        
+        .executor-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .detail-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .detail-value {
+            font-size: 0.9rem;
+            color: #ddd;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .loading-state, .error-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            border: 1px dashed var(--border-color);
+        }
+        
+        .error-state {
+            color: #f87171;
+            border-color: rgba(248,113,113,0.3);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="starfield"></canvas>
+    
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="home.html" class="logo">
+                <img src="https://raw.githubusercontent.com/kentatvv1-tech/UI-BYKENTA/main/logo%20w.png" alt="Singularity Logo" class="custom-logo">
+                <span>Singularity</span>
+            </a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="issues.html">Issues</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li><a href="scripts.html">Scripts Hub</a></li>
+            <li><a href="executors.html" class="active">Executors</a></li>
+        </ul>
+        <div class="nav-right">
+        </div>
+    </nav>
+
+    <main class="executors-hero">
+        <h1>Executors Status</h1>
+        <p>Live status tracker for Roblox exploits. Inspired by WEAO.</p>
+    </main>
+
+    <section class="executors-section">
+        <div class="filters-container" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+            <div class="filters" id="platformFilters" style="margin-bottom: 0;">
+                <button class="filter-btn active" data-platform="all">All</button>
+                <button class="filter-btn" data-platform="windows">Windows</button>
+                <button class="filter-btn" data-platform="mac">Mac</button>
+                <button class="filter-btn" data-platform="android">Android</button>
+                <button class="filter-btn" data-platform="ios">iOS</button>
+            </div>
+            
+            <div class="status-filters">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #ccc; font-size: 0.9rem;">
+                    <input type="checkbox" id="workingOnlyToggle" style="accent-color: #34d399; width: 16px; height: 16px;">
+                    <i class="ph ph-check-circle" style="color: #34d399;"></i> Show Working Only
+                </label>
+            </div>
+        </div>
+        
+        <div class="executors-grid" id="executorsGrid">
+            <div class="loading-state">
+                <i class="ph ph-spinner ph-spin" style="font-size: 2rem; margin-bottom: 12px;"></i>
+                <p>Fetching latest statuses...</p>
+            </div>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+    <script>
+        // Placeholder for WEAO API Data or your own backend API
+        // const API_URL = "https://api.weao.xyz/api/status/exploits"; 
+        
+        // Mock data to ensure the UI works beautifully until you hook it up to a working API proxy
+        const mockData = [
+            // Windows Script Executor Exploits
+            { name: "Volt", platform: "windows", status: "Working", isFree: false, version: "1.3.6.3", updated: "08/08/2026" },
+            { name: "Potassium", platform: "windows", status: "Working", isFree: false, version: "24.0", updated: "08/07/2026" },
+            { name: "Wave", platform: "windows", status: "Working", isFree: false, version: "NEW-1.4.5", updated: "08/06/2026" },
+            { name: "Synapse Z", platform: "windows", status: "Patching", isFree: false, version: "1.0.3.4", updated: "08/11/2026" },
+            { name: "Madium", platform: "windows", status: "Working", isFree: true, version: "2.0.5", updated: "08/08/2026" },
+            { name: "Cosmic", platform: "windows", status: "Working", isFree: false, version: "1.733", updated: "08/08/2026" },
+            { name: "Real", platform: "windows", status: "Working", isFree: true, version: "1.9.0", updated: "08/07/2026" },
+            { name: "Velocity", platform: "windows", status: "Patching", isFree: true, version: "1.3.6", updated: "07/30/2026" },
+            { name: "SirHurt", platform: "windows", status: "Working", isFree: false, version: "V5.458", updated: "08/10/2026" },
+            { name: "Solara", platform: "windows", status: "Working", isFree: true, version: "0.1.6", updated: "08/10/2026" },
+            { name: "Xeno", platform: "windows", status: "Working", isFree: true, version: "1.3.60", updated: "08/06/2026" },
+            
+            // Mac Script Executor Exploits
+            { name: "MacSploit", platform: "mac", status: "Patching", isFree: false, version: "733.1", updated: "08/10/2026" },
+            { name: "Opiumware", platform: "mac", status: "Patching", isFree: true, version: "v2.4.8", updated: "08/04/2026" },
+            
+            // Android Script Executor Exploits
+            { name: "Delta", platform: "android", status: "Working", isFree: true, version: "2.729.840", updated: "06/08/2026" },
+            { name: "Vega X", platform: "android", status: "Working", isFree: true, version: "2.732.1043", updated: "08/05/2026" },
+            { name: "Codex", platform: "android", status: "Patching", isFree: true, version: "2.731.944", updated: "08/10/2026" },
+            
+            // iOS Script Executor Exploits
+            { name: "Delta", platform: "ios", status: "Working", isFree: true, version: "2.729.838", updated: "06/17/2026" },
+            
+            // Windows External Exploits
+            { name: "Serotonin", platform: "windows", status: "Working", isFree: false, version: "v2", updated: "08/05/2026" },
+            { name: "Severe", platform: "windows", status: "Working", isFree: false, version: "v2", updated: "08/07/2026" },
+            { name: "Lumen", platform: "windows", status: "Working", isFree: false, version: "1.0.8", updated: "08/06/2026" },
+            { name: "Ronin", platform: "windows", status: "Patching", isFree: false, version: "Version-4.1.7", updated: "07/28/2026" },
+            { name: "Matcha", platform: "windows", status: "Working", isFree: false, version: "v2", updated: "08/05/2026" },
+            { name: "Matrix Hub", platform: "windows", status: "Working", isFree: false, version: "v2", updated: "08/05/2026" },
+            { name: "Photon", platform: "windows", status: "Working", isFree: false, version: "6.8", updated: "08/06/2026" },
+            { name: "DX9WARE V2", platform: "windows", status: "Working", isFree: false, version: "1.1.212", updated: "08/06/2026" }
+        ];
+
+        let executorsData = [];
+
+        async function fetchExecutors() {
+            const grid = document.getElementById('executorsGrid');
+            try {
+                // To fetch from WEAO you will need to bypass CORS using a proxy
+                // Example:
+                // const res = await fetch("https://your-cors-proxy.com/https://api.whatexpsare.online/v1/exploits", {
+                //     headers: { "User-Agent": "WEAO-3PService" }
+                // });
+                // const data = await res.json();
+                
+                // Simulating network delay for effect
+                await new Promise(r => setTimeout(r, 800));
+                
+                // Fallback to mock data
+                executorsData = mockData;
+                renderExecutors('all');
+                
+            } catch (error) {
+                grid.innerHTML = `
+                    <div class="error-state">
+                        <i class="ph ph-warning-circle" style="font-size: 2rem; margin-bottom: 12px;"></i>
+                        <p>Failed to load data from WEAO API.</p>
+                        <p style="font-size: 0.85rem; margin-top: 8px;">Check your connection or API proxy settings.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function getStatusStyle(status) {
+            const s = status.toLowerCase();
+            if (s.includes('working') || s.includes('updated') || s.includes('undetected')) return 'status-working';
+            if (s.includes('patching') || s.includes('updating') || s.includes('testing')) return 'status-patching';
+            if (s.includes('detected') || s.includes('offline')) return 'status-detected';
+            return 'status-unknown';
+        }
+        
+        function getStatusIcon(status) {
+            const s = status.toLowerCase();
+            if (s.includes('working') || s.includes('undetected')) return 'ph-check-circle';
+            if (s.includes('patching') || s.includes('testing')) return 'ph-wrench';
+            if (s.includes('detected') || s.includes('offline')) return 'ph-warning';
+            return 'ph-question';
+        }
+
+        function getPlatformIcon(platform) {
+            const p = platform.toLowerCase();
+            if (p.includes('windows')) return 'ph-windows-logo';
+            if (p.includes('mac') || p.includes('macos')) return 'ph-apple-logo';
+            if (p.includes('android')) return 'ph-android-logo';
+            if (p.includes('ios')) return 'ph-device-mobile';
+            return 'ph-desktop';
+        }
+
+        function renderExecutors(filterPlatform) {
+            const grid = document.getElementById('executorsGrid');
+            grid.innerHTML = '';
+            
+            const showWorkingOnly = document.getElementById('workingOnlyToggle').checked;
+            
+            const filtered = executorsData.filter(ex => {
+                const platformMatch = filterPlatform === 'all' || ex.platform.toLowerCase() === filterPlatform;
+                
+                let statusMatch = true;
+                if (showWorkingOnly) {
+                    const statusStr = ex.status.toLowerCase();
+                    statusMatch = statusStr.includes('working') || statusStr.includes('updated') || statusStr.includes('undetected');
+                }
+                
+                return platformMatch && statusMatch;
+            });
+            
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="loading-state" style="background:transparent; border:none;">No executors found matching the current filters.</div>`;
+                return;
+            }
+
+            filtered.forEach(ex => {
+                const card = document.createElement('div');
+                card.className = 'executor-card';
+                
+                card.innerHTML = `
+                    <div class="executor-header">
+                        <div class="executor-title">
+                            ${ex.name}
+                            ${ex.isFree ? '<span style="font-size: 0.7rem; background: rgba(52,211,153,0.15); border: 1px solid rgba(52,211,153,0.2); padding: 2px 6px; border-radius: 4px; color: #34d399;">FREE</span>' : '<span style="font-size: 0.7rem; background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.2); color: #fbbf24; padding: 2px 6px; border-radius: 4px;">PAID</span>'}
+                        </div>
+                        <div class="status-badge ${getStatusStyle(ex.status)}">
+                            <i class="ph ${getStatusIcon(ex.status)}"></i> ${ex.status}
+                        </div>
+                    </div>
+                    
+                    <div class="executor-platform">
+                        <i class="ph ${getPlatformIcon(ex.platform)}"></i> ${ex.platform.charAt(0).toUpperCase() + ex.platform.slice(1)}
+                    </div>
+                    
+                    <div class="executor-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Version</span>
+                            <span class="detail-value"><i class="ph ph-tag"></i> ${ex.version || 'Unknown'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Last Updated</span>
+                            <span class="detail-value"><i class="ph ph-clock"></i> ${ex.updated || 'Unknown'}</span>
+                        </div>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        // Filter logic
+        let currentPlatformFilter = 'all';
+        
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                currentPlatformFilter = e.target.dataset.platform;
+                renderExecutors(currentPlatformFilter);
+            });
+        });
+
+        document.getElementById('workingOnlyToggle').addEventListener('change', () => {
+            renderExecutors(currentPlatformFilter);
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', fetchExecutors);
+    </script>
+</body>
+</html>

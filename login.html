@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — Singularity</title>
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/kentatvv1-tech/UI-BYKENTA/main/logo%20w.png">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="auth.css">
+</head>
+<body>
+    <canvas id="starfield"></canvas>
+
+    <div class="auth-wrapper">
+        <div class="auth-card glass-panel">
+            <!-- Logo -->
+            <div class="auth-logo">
+                <img src="https://raw.githubusercontent.com/kentatvv1-tech/UI-BYKENTA/main/logo%20w.png" alt="Singularity Logo" class="auth-logo-img">
+                <span>Singularity</span>
+            </div>
+            <h2 class="auth-title">Sign in to your account</h2>
+
+            <!-- Error Banner -->
+            <div id="errorBanner" class="error-banner hidden"></div>
+
+            <!-- Form -->
+            <form id="loginForm" class="auth-form" novalidate>
+                <div class="form-group">
+                    <label for="email">Email address</label>
+                    <input type="email" id="email" placeholder="you@example.com" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <label for="password" style="margin-bottom: 0;">Password</label>
+                        <a href="forgot-password.html" style="font-size: 0.85rem; color: var(--accent); text-decoration: none;">Forgot password?</a>
+                    </div>
+                    <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+                </div>
+                <button type="submit" id="loginBtn" class="btn-auth">
+                    <span id="loginBtnText">Sign in</span>
+                    <span id="loginSpinner" class="spinner hidden"></span>
+                </button>
+
+                <div style="display: flex; align-items: center; text-align: center; margin: 20px 0;">
+                    <div style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></div>
+                    <span style="padding: 0 10px; color: #666; font-size: 0.85rem;">OR</span>
+                    <div style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></div>
+                </div>
+
+                <button type="button" id="discordLoginBtn" class="btn-auth" style="background: #5865F2; color: white;">
+                    <i class="ph-fill ph-discord-logo" style="font-size: 1.2rem; margin-right: 8px;"></i>
+                    Continue with Discord
+                </button>
+            </form>
+
+            <p class="auth-footer">
+                Don't have an account? <a href="register.html">Register</a>
+            </p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { login, loginWithDiscord } from "./auth.js";
+        import { supabase } from "./supabase-config.js";
+
+        // If already logged in, redirect
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (session) window.location.href = "index.html";
+        });
+
+        const form       = document.getElementById("loginForm");
+        const discordBtn = document.getElementById("discordLoginBtn");
+        const errorBanner = document.getElementById("errorBanner");
+        const loginBtn   = document.getElementById("loginBtn");
+        const btnText    = document.getElementById("loginBtnText");
+        const spinner    = document.getElementById("loginSpinner");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const email    = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+
+            errorBanner.classList.add("hidden");
+            loginBtn.disabled = true;
+            btnText.textContent = "Signing in...";
+            spinner.classList.remove("hidden");
+
+            try {
+                await login(email, password);
+                window.location.href = "index.html";
+            } catch (err) {
+                console.error("Login error:", err);
+                let msg = err.message || "Login failed. Please check your credentials.";
+                errorBanner.textContent = msg;
+                errorBanner.classList.remove("hidden");
+            } finally {
+                loginBtn.disabled = false;
+                btnText.textContent = "Sign in";
+                spinner.classList.add("hidden");
+            }
+        });
+
+        discordBtn.addEventListener("click", async () => {
+            try {
+                discordBtn.disabled = true;
+                discordBtn.innerHTML = '<span class="spinner"></span>';
+                await loginWithDiscord();
+            } catch (err) {
+                console.error("Discord login error:", err);
+                discordBtn.disabled = false;
+                discordBtn.innerHTML = '<i class="ph-fill ph-discord-logo" style="font-size: 1.2rem; margin-right: 8px;"></i> Continue with Discord';
+                errorBanner.textContent = "Failed to login with Discord.";
+                errorBanner.classList.remove("hidden");
+            }
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

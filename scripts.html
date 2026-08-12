@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scripts & Hub — Singularity</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Specific styles for scripts.html */
+        .hub-hero {
+            text-align: center;
+            padding: 60px 20px 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hub-hero h1 {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            background: linear-gradient(to right, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hub-hero p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 32px;
+        }
+
+        .code-snippet {
+            background: #0a0a0a;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .code-snippet::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        }
+
+        .code-text {
+            font-family: var(--font-mono);
+            color: #fff;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            white-space: pre;
+            flex: 1;
+        }
+
+        .code-text::-webkit-scrollbar {
+            height: 0px;
+        }
+
+        .copy-btn {
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-family: var(--font-main);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .copy-btn:hover {
+            background: #ddd;
+            transform: translateY(-1px);
+        }
+
+        .copy-btn.copied {
+            background: #4caf50;
+            color: #fff;
+        }
+
+        .maps-section {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px 80px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+
+        .maps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .map-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .map-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .map-img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .map-info {
+            padding: 16px;
+        }
+
+        .map-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .map-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .map-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 8px;
+            background: rgba(76, 175, 80, 0.15);
+            color: #4caf50;
+            border-radius: 100px;
+        }
+
+        @media (max-width: 600px) {
+            .code-snippet {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .hub-hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .copy-btn {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="starfield"></div>
+
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="home.html" class="logo">
+                <img src="https://raw.githubusercontent.com/kentatvv1-tech/UI-BYKENTA/main/logo%20w.png"
+                    alt="Singularity Logo" class="custom-logo">
+                <span>Singularity</span>
+            </a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="issues.html">Issues</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li><a href="scripts.html">Scripts Hub</a></li>
+            <li><a href="executors.html" class="active">Executors</a></li>
+        </ul>
+        <div class="nav-right">
+            <!-- Spacer for balance -->
+        </div>
+    </nav>
+
+    <main class="hub-hero">
+        <h1>Singularity Hub</h1>
+        <p>The ultimate all-in-one script hub for Roblox. Copy the loadstring below, execute it in your favorite
+            exploit, and dominate the game.</p>
+
+        <div class="code-snippet">
+            <div class="code-text" id="loadstringCode">
+                loadstring(game:HttpGet('https://projectsingularity.online/raw/repos/80337d33-0a39-4c6d-acf6-55cef02b6c69/Loader.lua'))()
+            </div>
+            <button class="copy-btn" id="copyBtn">
+                <i class="ph ph-copy"></i> Copy
+            </button>
+        </div>
+    </main>
+
+    <section class="maps-section">
+        <div class="section-title-row">
+            <h2 class="section-title"><i class="ph ph-game-controller"></i> Supported Maps / Games</h2>
+            <button class="btn-add-game hidden" id="addGameBtn">
+                <i class="ph ph-plus-circle"></i> Add Game
+            </button>
+        </div>
+        <div class="maps-grid" id="mapsGrid">
+            <!-- Loaded dynamically from Supabase -->
+            <div class="map-skeleton"></div>
+            <div class="map-skeleton"></div>
+            <div class="map-skeleton"></div>
+        </div>
+    </section>
+
+    <!-- Add / Edit Game Modal -->
+    <div class="modal-overlay hidden" id="gameModal">
+        <div class="game-modal-card glass-panel">
+            <div class="modal-header">
+                <h3 id="gameModalTitle"><i class="ph ph-game-controller"></i> Add Game</h3>
+                <button class="icon-btn" id="closeGameModal"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="form-group">
+                <label>Game Title <span style="color:#f66">*</span></label>
+                <input type="text" id="gameTitle" placeholder="e.g. Blox Fruits">
+            </div>
+            <div class="form-group" style="margin-top:14px">
+                <label>Description</label>
+                <input type="text" id="gameDesc" placeholder="e.g. Auto Farm, ESP, Teleports...">
+            </div>
+            <div class="form-group" style="margin-top:14px">
+                <label>Image URL (Thumbnail)</label>
+                <input type="text" id="gameImg" placeholder="https://tr.rbxcdn.com/...">
+                <div id="imgPreview" style="margin-top:8px; display:none;">
+                    <img id="imgPreviewEl" src="" alt="Preview"
+                        style="width:100%; height:100px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,0.1);">
+                </div>
+            </div>
+            <div class="form-group" style="margin-top:14px">
+                <label>Status</label>
+                <select id="gameStatus">
+                    <option value="Supported">✅ Supported</option>
+                    <option value="Coming Soon">🕐 Coming Soon</option>
+                    <option value="Discontinued">❌ Discontinued</option>
+                </select>
+            </div>
+            <div id="gameModalError" style="display:none; color:#f87171; font-size:0.85rem; margin-top:12px;"></div>
+            <div class="modal-footer" style="margin-top:20px">
+                <button class="btn-secondary" id="cancelGameModal">Cancel</button>
+                <button class="btn-primary" id="saveGameBtn"><i class="ph ph-floppy-disk"></i> Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirm Modal -->
+    <div class="modal-overlay hidden" id="deleteGameModal">
+        <div class="game-modal-card glass-panel" style="max-width:380px">
+            <div class="modal-header">
+                <h3 style="color:#f87171"><i class="ph ph-warning"></i> Delete Game</h3>
+                <button class="icon-btn" id="closeDeleteGameModal"><i class="ph ph-x"></i></button>
+            </div>
+            <p style="color:#aaa; margin: 16px 0;">Are you sure you want to remove <strong id="deleteGameName"
+                    style="color:#fff"></strong> from the list?</p>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelDeleteGame">Cancel</button>
+                <button class="btn-primary" id="confirmDeleteGame"
+                    style="background:#e53e3e; color:#fff;">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+
+        let isAdmin = false;
+        let editingGameId = null;
+        let deletingGameId = null;
+
+        // ── Status style map ─────────────────────────────────
+        const statusStyles = {
+            'Supported': { bg: 'rgba(52,211,153,0.15)', color: '#34d399', icon: 'ph-check-circle' },
+            'Coming Soon': { bg: 'rgba(251,191,36,0.15)', color: '#fbbf24', icon: 'ph-clock' },
+            'Discontinued': { bg: 'rgba(248,113,113,0.15)', color: '#f87171', icon: 'ph-x-circle' }
+        };
+
+        // ── Copy Button ───────────────────────────────────────
+        const copyBtn = document.getElementById('copyBtn');
+        const codeText = document.getElementById('loadstringCode').textContent;
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(codeText).then(() => {
+                copyBtn.innerHTML = '<i class="ph ph-check"></i> Copied!';
+                copyBtn.classList.add('copied');
+                setTimeout(() => {
+                    copyBtn.innerHTML = '<i class="ph ph-copy"></i> Copy';
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            });
+        });
+
+        // ── Check if logged-in user is admin ─────────────────
+        async function checkAdmin() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) return;
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('is_admin')
+                .eq('id', session.user.id)
+                .single();
+            if (profile?.is_admin) {
+                isAdmin = true;
+                document.getElementById('addGameBtn').classList.remove('hidden');
+            }
+        }
+
+        // ── Load & Render Games ───────────────────────────────
+        async function loadGames() {
+            const grid = document.getElementById('mapsGrid');
+            const { data: games, error } = await supabase
+                .from('games')
+                .select('*')
+                .order('sort_order', { ascending: true })
+                .order('created_at', { ascending: true });
+
+            if (error || !games || games.length === 0) {
+                grid.innerHTML = `<div style="color:#555; grid-column:1/-1; text-align:center; padding:40px 0">
+                    <i class="ph ph-game-controller" style="font-size:2rem"></i><br>No games added yet.
+                </div>`;
+                return;
+            }
+
+            grid.innerHTML = games.map(g => renderGameCard(g)).join('');
+
+            if (isAdmin) {
+                grid.querySelectorAll('.admin-edit-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openEditModal(games.find(g => g.id === btn.dataset.id));
+                    });
+                });
+                grid.querySelectorAll('.admin-delete-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openDeleteModal(btn.dataset.id, btn.dataset.title);
+                    });
+                });
+            }
+        }
+
+        function renderGameCard(g) {
+            const st = statusStyles[g.status] || statusStyles['Supported'];
+            const adminBtns = isAdmin ? `
+                <div class="admin-card-actions">
+                    <button class="admin-edit-btn" data-id="${g.id}" title="Edit"><i class="ph ph-pencil"></i></button>
+                    <button class="admin-delete-btn" data-id="${g.id}" data-title="${escHtml(g.title)}" title="Delete"><i class="ph ph-trash"></i></button>
+                </div>` : '';
+
+            return `<div class="map-card">
+                ${adminBtns}
+                <img src="${escHtml(g.image_url || '')}" alt="${escHtml(g.title)}" class="map-img"
+                     onerror="this.style.display='none'">
+                <div class="map-info">
+                    <div class="map-title">${escHtml(g.title)}</div>
+                    <div class="map-desc">${escHtml(g.description || '')}</div>
+                    <div class="map-status" style="background:${st.bg}; color:${st.color}">
+                        <i class="ph ${st.icon}"></i> ${escHtml(g.status)}
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        // ── Add Game Modal ────────────────────────────────────
+        document.getElementById('addGameBtn').addEventListener('click', () => {
+            editingGameId = null;
+            document.getElementById('gameModalTitle').innerHTML = '<i class="ph ph-game-controller"></i> Add Game';
+            document.getElementById('gameTitle').value = '';
+            document.getElementById('gameDesc').value = '';
+            document.getElementById('gameImg').value = '';
+            document.getElementById('gameStatus').value = 'Supported';
+            document.getElementById('imgPreview').style.display = 'none';
+            document.getElementById('gameModalError').style.display = 'none';
+            document.getElementById('gameModal').classList.remove('hidden');
+        });
+
+        // Image preview
+        document.getElementById('gameImg').addEventListener('input', (e) => {
+            const val = e.target.value;
+            if (val) {
+                document.getElementById('imgPreviewEl').src = val;
+                document.getElementById('imgPreview').style.display = 'block';
+            } else {
+                document.getElementById('imgPreview').style.display = 'none';
+            }
+        });
+
+        function openEditModal(game) {
+            editingGameId = game.id;
+            document.getElementById('gameModalTitle').innerHTML = '<i class="ph ph-pencil"></i> Edit Game';
+            document.getElementById('gameTitle').value = game.title;
+            document.getElementById('gameDesc').value = game.description || '';
+            document.getElementById('gameImg').value = game.image_url || '';
+            document.getElementById('gameStatus').value = game.status;
+            if (game.image_url) {
+                document.getElementById('imgPreviewEl').src = game.image_url;
+                document.getElementById('imgPreview').style.display = 'block';
+            }
+            document.getElementById('gameModalError').style.display = 'none';
+            document.getElementById('gameModal').classList.remove('hidden');
+        }
+
+        function openDeleteModal(id, title) {
+            deletingGameId = id;
+            document.getElementById('deleteGameName').textContent = title;
+            document.getElementById('deleteGameModal').classList.remove('hidden');
+        }
+
+        // Close modals
+        ['closeGameModal', 'cancelGameModal'].forEach(id => {
+            document.getElementById(id).addEventListener('click', () => {
+                document.getElementById('gameModal').classList.add('hidden');
+            });
+        });
+        ['closeDeleteGameModal', 'cancelDeleteGame'].forEach(id => {
+            document.getElementById(id).addEventListener('click', () => {
+                document.getElementById('deleteGameModal').classList.add('hidden');
+            });
+        });
+
+        // ── Save (Add / Edit) ─────────────────────────────────
+        document.getElementById('saveGameBtn').addEventListener('click', async () => {
+            const title = document.getElementById('gameTitle').value.trim();
+            const errEl = document.getElementById('gameModalError');
+            if (!title) { errEl.textContent = 'Title is required.'; errEl.style.display = 'block'; return; }
+
+            const payload = {
+                title,
+                description: document.getElementById('gameDesc').value.trim(),
+                image_url: document.getElementById('gameImg').value.trim(),
+                status: document.getElementById('gameStatus').value
+            };
+
+            let error;
+            if (editingGameId) {
+                ({ error } = await supabase.from('games').update(payload).eq('id', editingGameId));
+            } else {
+                ({ error } = await supabase.from('games').insert(payload));
+            }
+
+            if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
+            document.getElementById('gameModal').classList.add('hidden');
+            await loadGames();
+        });
+
+        // ── Delete ────────────────────────────────────────────
+        document.getElementById('confirmDeleteGame').addEventListener('click', async () => {
+            if (!deletingGameId) return;
+            const { error } = await supabase.from('games').delete().eq('id', deletingGameId);
+            if (!error) {
+                document.getElementById('deleteGameModal').classList.add('hidden');
+                await loadGames();
+            }
+        });
+
+        // ── Helpers ───────────────────────────────────────────
+        function escHtml(s) {
+            return String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        // ── Init ──────────────────────────────────────────────
+        await checkAdmin();
+        await loadGames();
+    </script>
+
+    <style>
+        /* Additional styles for admin games feature */
+        .section-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+
+        .btn-add-game {
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-add-game:hover {
+            background: #ddd;
+            transform: translateY(-1px);
+        }
+
+        .btn-add-game.hidden {
+            display: none;
+        }
+
+        .map-card {
+            position: relative;
+        }
+
+        .admin-card-actions {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            gap: 6px;
+            z-index: 5;
+        }
+
+        .admin-edit-btn,
+        .admin-delete-btn {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .admin-edit-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .admin-delete-btn:hover {
+            background: rgba(229, 62, 62, 0.6);
+        }
+
+        .game-modal-card {
+            width: 90%;
+            max-width: 480px;
+            padding: 28px;
+            border-radius: 16px;
+            background: rgba(8, 8, 8, 0.97);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 9998;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.hidden {
+            display: none;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: #ccc;
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            background: #111;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: #fff;
+            font-size: 0.9rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .form-group select option {
+            background: #111;
+        }
+
+        .map-skeleton {
+            height: 260px;
+            background: linear-gradient(90deg, #111 25%, #1a1a1a 50%, #111 75%);
+            background-size: 200% 100%;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            to {
+                background-position: -200% 0;
+            }
+        }
+    </style>
+</body>
+// Copy Button Logic (handled by module script above)
+</script>
+</body>
+
+</html>

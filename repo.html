@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repository — Singularity</title>
+    <link rel="icon" type="image/png"
+        href="https://raw.githubusercontent.com/kentatvv1-tech/UI-BYKENTA/main/logo%20w.png">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+
+<body>
+    <canvas id="starfield"></canvas>
+
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="logo">
+                <img src="https://raw.githubusercontent.com/kentatvv1-tech/UI-BYKENTA/main/logo%20w.png"
+                    alt="Singularity Logo" class="custom-logo">
+                <span>Singularity</span>
+            </div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="issues.html">Issues</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li><a href="scripts.html">Scripts Hub</a></li>
+            <li><a href="executors.html" class="active">Executors</a></li>
+        </ul>
+        <div class="nav-right">
+            <div class="profile-avatar">
+                <img id="navAvatar" src="https://ui-avatars.com/api/?name=U&background=000&color=fff" alt="User">
+            </div>
+            <button class="icon-btn" id="logoutBtn" title="Sign out"><i class="ph ph-sign-out"></i></button>
+        </div>
+    </nav>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="modal-overlay hidden">
+        <div class="modal glass-panel">
+            <div class="modal-header">
+                <h2><i class="ph ph-upload-simple"></i> Upload Files</h2>
+                <button class="icon-btn" id="closeUploadBtn"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="form-group" style="margin-top:12px">
+                <div class="file-upload-zone" id="dropZone">
+                    <input type="file" id="fileInput" multiple>
+                    <div class="upload-icon"><i class="ph ph-upload-simple"></i></div>
+                    <div class="upload-text">Click to browse or drag files here</div>
+                    <div class="upload-subtext">Supports .lua, .txt, .json</div>
+                </div>
+                <div id="uploadFileList" class="file-list hidden"></div>
+            </div>
+            <div class="form-group" style="margin-top:16px;">
+                <label class="toggle-row" for="autoObfuscateCheck">
+                    <span class="toggle-label">
+                        <i class="ph ph-shield-check" style="color:#60a5fa"></i>
+                        Auto-Obfuscate .lua files
+                        <span class="toggle-badge">API</span>
+                    </span>
+                    <span class="toggle-switch">
+                        <input type="checkbox" id="autoObfuscateCheck" class="toggle-input" checked>
+                        <span class="toggle-thumb"></span>
+                    </span>
+                </label>
+            </div>
+            <div id="uploadProgress" class="upload-progress hidden"></div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelUploadBtn">Cancel</button>
+                <button class="btn-primary" id="confirmUploadBtn">
+                    <i class="ph ph-upload-simple"></i> Upload
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirm Modal -->
+    <div id="deleteModal" class="modal-overlay hidden">
+        <div class="modal glass-panel">
+            <div class="modal-header">
+                <h2 style="color:#f66"><i class="ph ph-warning"></i> Delete File</h2>
+                <button class="icon-btn" id="closeDeleteBtn"><i class="ph ph-x"></i></button>
+            </div>
+            <p style="color:#aaa;margin:16px 0">Are you sure you want to delete <strong id="deleteFileName"
+                    style="color:#fff"></strong>?<br>This cannot be undone.</p>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelDeleteBtn">Cancel</button>
+                <button class="btn-primary" id="confirmDeleteBtn" style="background:#c0392b;color:#fff">
+                    <i class="ph ph-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Repo Settings Modal -->
+    <div id="settingsModal" class="modal-overlay hidden">
+        <div class="modal glass-panel">
+            <div class="modal-header">
+                <h2><i class="ph ph-gear"></i> Repository Settings</h2>
+                <button class="icon-btn" id="closeSettingsBtn"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="form-group" style="margin-top:8px">
+                <label>Repository name</label>
+                <input type="text" id="settingsRepoName">
+            </div>
+            <div class="form-group" style="margin-top:16px">
+                <label>Description</label>
+                <input type="text" id="settingsRepoDesc">
+            </div>
+            <div class="form-group" style="margin-top:16px">
+                <label>Visibility</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="settingsVisibility" value="private">
+                        <i class="ph ph-lock"></i> Private
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="settingsVisibility" value="public">
+                        <i class="ph ph-globe"></i> Public
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer"
+                style="margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 24px;">
+                <button class="btn-primary" id="saveSettingsBtn">Save Changes</button>
+            </div>
+            <div class="form-group">
+                <h3 style="color:#f66; font-size: 1rem; margin-bottom: 8px;">Danger Zone</h3>
+                <p style="color:#aaa; font-size: 0.85rem; margin-bottom: 12px;">Once you delete a repository, there is
+                    no going back. Please be certain.</p>
+                <button class="btn-secondary" id="deleteRepoBtn"
+                    style="color:#f66; border-color: rgba(255,102,102,0.4);">
+                    <i class="ph ph-trash"></i> Delete this repository
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Repo Confirm Modal -->
+    <div id="deleteRepoConfirmModal" class="modal-overlay hidden" style="z-index: 1000;">
+        <div class="modal glass-panel">
+            <div class="modal-header">
+                <h2 style="color:#f66"><i class="ph ph-warning"></i> Confirm Deletion</h2>
+                <button class="icon-btn" id="closeDeleteRepoConfirmBtn"><i class="ph ph-x"></i></button>
+            </div>
+            <p style="color:#aaa;margin:16px 0">To confirm deletion, please type the repository name: <strong
+                    id="deleteRepoNameLabel" style="color:#fff;user-select:all;"></strong></p>
+            <div class="form-group">
+                <input type="text" id="deleteRepoNameInput" placeholder="Repository name">
+            </div>
+            <div class="modal-footer" style="margin-top:20px">
+                <button class="btn-secondary" id="cancelDeleteRepoConfirmBtn">Cancel</button>
+                <button class="btn-primary" id="confirmFinalDeleteRepoBtn" style="background:#c0392b;color:#fff"
+                    disabled>
+                    <i class="ph ph-trash"></i> I understand, delete this repository
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <main class="container">
+        <section class="content-area" style="max-width:960px;margin:0 auto">
+
+            <!-- Repo Header -->
+            <div class="repo-header">
+                <div class="repo-title">
+                    <i class="ph ph-book-bookmark"></i>
+                    <a href="index.html" id="ownerLink" class="author">owner</a>
+                    <span class="separator">/</span>
+                    <span id="repoNameDisplay" class="repo-name-large">repository</span>
+                    <span id="repoBadge" class="badge private">Private</span>
+                </div>
+                <div class="repo-actions">
+                    <button class="btn-primary btn-sm" id="uploadBtn">
+                        <i class="ph ph-upload-simple"></i> Upload
+                    </button>
+                    <a id="issuesLink" href="#" class="btn-secondary btn-sm">
+                        <i class="ph ph-record"></i> Issues
+                    </a>
+                    <button id="settingsBtn" class="btn-secondary btn-sm" style="display: none;">
+                        <i class="ph ph-gear"></i> Settings
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="repo-tabs">
+                <a href="#" class="tab active"><i class="ph ph-code"></i> Code</a>
+                <a id="issuesTabLink" href="#" class="tab"><i class="ph ph-record"></i> Issues</a>
+            </div>
+
+            <!-- File Explorer -->
+            <div class="file-explorer glass-panel">
+                <div class="explorer-header">
+                    <div class="commit-info">
+                        <i class="ph ph-folder-open"></i>
+                        <span id="fileCount" style="color:#aaa">Loading files...</span>
+                    </div>
+                    <div class="commit-meta">
+                        <span id="repoDesc" style="color:#666;font-size:0.8rem;font-style:italic"></span>
+                    </div>
+                </div>
+                <div class="file-list" id="fileList">
+                    <div class="file-row" style="color:#666;justify-content:center;padding:32px">
+                        <span>Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- README Preview (if exists) -->
+            <div id="readmePanel" class="readme-panel glass-panel mt-20 hidden">
+                <div class="readme-header"><i class="ph ph-list"></i> README.md</div>
+                <div class="readme-content" id="readmeContent"></div>
+            </div>
+
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+    <script type="module">
+        import { requireAuth, logout, getCurrentUserProfile } from "./auth.js";
+        import { supabase } from "./supabase-config.js";
+
+        const params = new URLSearchParams(location.search);
+        const repoId = params.get("id");
+        let currentUser = null;
+        let repoData = null;
+        let fileToDelete = null;
+
+        if (!repoId) { window.location.href = "index.html"; }
+
+        // ── Init ─────────────────────────────────────────────
+        (async () => {
+            try {
+                currentUser = await getCurrentUserProfile();
+                if (currentUser && currentUser.avatar_url) document.getElementById("navAvatar").src = currentUser.avatar_url;
+                if (!currentUser) document.getElementById("logoutBtn").style.display = "none";
+
+                // Load repo data
+                const { data: snap, error } = await supabase
+                    .from('repositories')
+                    .select('*')
+                    .eq('id', repoId)
+                    .single();
+
+                if (error || !snap) { window.location.href = "index.html"; return; }
+                repoData = snap;
+
+                // Update header
+                document.getElementById("ownerLink").textContent = repoData.owner_username || "owner";
+                document.getElementById("repoNameDisplay").textContent = repoData.name;
+                document.getElementById("repoBadge").textContent = repoData.is_private ? "Private" : "Public";
+                document.getElementById("repoBadge").className = `badge ${repoData.is_private ? "private" : "public"}`;
+                document.getElementById("repoDesc").textContent = repoData.description || "";
+                document.title = `${repoData.name} — Singularity`;
+
+                const isOwner = currentUser && currentUser.uid === repoData.owner_id;
+                if (!isOwner) {
+                    const uploadBtn = document.getElementById("uploadBtn");
+                    if (uploadBtn) uploadBtn.style.display = "none";
+                } else {
+                    document.getElementById("settingsBtn").style.display = "inline-flex";
+                }
+
+                const issuesUrl = `issues.html?repoId=${repoId}&repoName=${encodeURIComponent(repoData.name)}`;
+                document.getElementById("issuesLink").href = issuesUrl;
+                document.getElementById("issuesTabLink").href = issuesUrl;
+
+                await loadFiles();
+            } catch (_) { }
+        })();
+
+        // ── Load Files from Storage ──────────────────────────
+        async function loadFiles() {
+            const fileList = document.getElementById("fileList");
+            try {
+                const { data: files, error } = await supabase.storage.from('repos').list(repoId);
+                if (error) throw error;
+
+                // Filter out empty folder placeholders and raw files from the UI
+                const validFiles = files.filter(f => f.name !== '.emptyFolderPlaceholder' && f.name !== '' && !f.name.endsWith('.raw.lua'));
+
+                document.getElementById("fileCount").textContent = `${validFiles.length} file${validFiles.length !== 1 ? 's' : ''}`;
+
+                if (validFiles.length === 0) {
+                    fileList.innerHTML = `
+                        <div class="file-row" style="justify-content:center;padding:40px;color:#555">
+                            <div style="text-align:center">
+                                <i class="ph ph-file-x" style="font-size:2rem;margin-bottom:8px;display:block"></i>
+                                <p>This repository is empty.</p>
+                                <p style="font-size:0.85rem;margin-top:4px">Upload your first file to get started.</p>
+                            </div>
+                        </div>`;
+                    return;
+                }
+
+                fileList.innerHTML = "";
+                for (const file of validFiles) {
+                    const name = file.name;
+                    const { data: { publicUrl } } = supabase.storage.from('repos').getPublicUrl(`${repoId}/${name}`);
+
+                    // แปลงลิงก์ให้ผ่าน Cloudflare Worker เพื่อป้องกันเบราว์เซอร์
+                    const fileUrl = publicUrl.replace(
+                        'https://jqtxjbuiplmqjodqozre.supabase.co/storage/v1/object/public',
+                        'https://projectsingularity.online/raw'
+                    );
+
+                    const isReadme = name.toLowerCase() === "readme.md";
+                    const isLua = name.endsWith(".lua") || name.endsWith(".txt");
+
+                    const row = document.createElement("div");
+                    row.className = "file-row file-item";
+                    row.innerHTML = `
+                        <div class="file-name">
+                            <i class="ph ${getFileIcon(name)}"></i>
+                            <a href="editor.html?repoId=${repoId}&file=${encodeURIComponent(name)}">${escapeHtml(name)}</a>
+                        </div>
+                        <div class="file-msg" style="display:flex;gap:12px;justify-content:flex-end">
+                            ${isLua ? `
+                            <button class="copy-btn" data-url="${fileUrl}" title="Copy loadstring" style="background:none;border:none;color:#666;cursor:pointer;font-size:0.8rem">
+                                <i class="ph ph-copy"></i> Copy Script
+                            </button>
+                            ` : ''}
+                            <a href="${fileUrl}" target="_blank" title="View raw" style="color:#666;font-size:0.8rem">
+                                <i class="ph ph-arrow-square-out"></i> Raw
+                            </a>
+                            ${(currentUser && currentUser.uid === repoData.owner_id) ? `
+                            <button class="del-btn" data-name="${escapeHtml(name)}" title="Delete file" style="background:none;border:none;color:#666;cursor:pointer;font-size:0.85rem">
+                                <i class="ph ph-trash"></i>
+                            </button>
+                            ` : ''}
+                        </div>
+                        <div class="file-time"></div>
+                    `;
+                    fileList.appendChild(row);
+
+                    if (isReadme) {
+                        try {
+                            const { data: fileData, error: downloadError } = await supabase.storage.from('repos').download(`${repoId}/${name}`);
+                            if (!downloadError) {
+                                const text = await fileData.text();
+                                document.getElementById("readmeContent").innerHTML = simpleMarkdown(text);
+                                document.getElementById("readmePanel").classList.remove("hidden");
+                            }
+                        } catch (_) { }
+                    }
+                }
+
+                // Delete buttons
+                document.querySelectorAll(".del-btn").forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        fileToDelete = btn.dataset.name;
+                        document.getElementById("deleteFileName").textContent = fileToDelete;
+                        document.getElementById("deleteModal").classList.remove("hidden");
+                    });
+                });
+
+                // Copy buttons logic
+                document.querySelectorAll(".copy-btn").forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        const url = btn.dataset.url;
+                        const loadstringCode = `loadstring(game:HttpGet('${url}'))()`;
+                        navigator.clipboard.writeText(loadstringCode).then(() => {
+                            const originalHtml = btn.innerHTML;
+                            btn.innerHTML = `<i class="ph ph-check" style="color:#4caf50"></i> Copied!`;
+                            btn.style.color = "#4caf50";
+                            setTimeout(() => {
+                                btn.innerHTML = originalHtml;
+                                btn.style.color = "#666";
+                            }, 2000);
+                        });
+                    });
+                });
+
+            } catch (err) {
+                fileList.innerHTML = `<div class="file-row" style="color:#f66;padding:24px">Failed to load files.</div>`;
+            }
+        }
+
+        // ── Upload Modal ─────────────────────────────────────
+        const uploadModal = document.getElementById("uploadModal");
+        document.getElementById("uploadBtn").addEventListener("click", () => uploadModal.classList.remove("hidden"));
+        document.getElementById("closeUploadBtn").addEventListener("click", () => uploadModal.classList.add("hidden"));
+        document.getElementById("cancelUploadBtn").addEventListener("click", () => uploadModal.classList.add("hidden"));
+
+        async function obfuscateLuaCode(code) {
+            // เรียกผ่าน Cloudflare Worker โดยตรง (ไม่ผ่าน Domain ที่อาจ Route ผิด)
+            const response = await fetch('https://singularity-raw.projectsingularity-v1.workers.dev/obfuscate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    source: code,
+                    tier: "lite",
+                    banner: false
+                })
+            });
+
+            if (!response.ok) {
+                const errText = await response.text().catch(() => response.status);
+                throw new Error(`Obfuscator Error ${response.status}: ${errText}`);
+            }
+
+            const result = await response.json();
+            console.log("[Obfuscator] Response:", result);
+
+            const obfCode = result.source || result.output || result.code || result.result || result.script;
+            if (!obfCode) throw new Error('ไม่พบโค้ดใน response: ' + JSON.stringify(Object.keys(result)));
+            return obfCode;
+        }
+
+        // ── Obfuscator Upload Logic ──────────────────────────
+        const obfCheck = document.getElementById("autoObfuscateCheck");
+        if (obfCheck) {
+            // Load saved preference
+            const savedPref = localStorage.getItem("sg_autoObfuscate");
+            if (savedPref !== null) {
+                obfCheck.checked = savedPref === "true";
+            }
+            // Save preference on change
+            obfCheck.addEventListener("change", (e) => {
+                localStorage.setItem("sg_autoObfuscate", e.target.checked);
+            });
+        }
+
+        // ── Upload Drop Zone Logic ───────────────────────────
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const uploadFileList = document.getElementById('uploadFileList');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+        });
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            let dt = e.dataTransfer;
+            fileInput.files = dt.files;
+            updateFileList();
+        });
+        fileInput.addEventListener('change', updateFileList);
+
+        function updateFileList() {
+            const files = fileInput.files;
+            if (files.length > 0) {
+                uploadFileList.classList.remove('hidden');
+                let listHtml = '';
+                for (let i = 0; i < files.length; i++) {
+                    const f = files[i];
+                    listHtml += `<div class="file-list-item">
+                                    <i class="ph ${getFileIcon(f.name)}" style="font-size:1.1rem"></i>
+                                    ${escapeHtml(f.name)} <span style="color:#666; font-size:0.75rem;">(${(f.size / 1024).toFixed(1)} KB)</span>
+                                 </div>`;
+                }
+                uploadFileList.innerHTML = listHtml;
+            } else {
+                uploadFileList.classList.add('hidden');
+                uploadFileList.innerHTML = '';
+            }
+        }
+
+        // Reset modal on open
+        document.getElementById("uploadBtn").addEventListener("click", () => {
+            fileInput.value = '';
+            updateFileList();
+            document.getElementById("uploadProgress").classList.add("hidden");
+            uploadModal.classList.remove("hidden");
+        });
+
+        document.getElementById("confirmUploadBtn").addEventListener("click", async () => {
+            const files = document.getElementById("fileInput").files;
+            const autoObf = obfCheck?.checked;
+            const progress = document.getElementById("uploadProgress");
+            if (!files.length) return;
+
+            progress.classList.remove("hidden");
+            progress.textContent = "Uploading...";
+
+            try {
+                for (const file of files) {
+                    // Force text/plain for code files so the browser displays them instead of downloading
+                    let contentType = file.type || "text/plain;charset=utf-8";
+                    if (file.name.endsWith(".lua") || file.name.endsWith(".txt") || file.name.endsWith(".js") || file.name.endsWith(".html") || file.name.endsWith(".css")) {
+                        contentType = "text/plain;charset=utf-8";
+                    }
+
+                    if (file.name.endsWith(".lua") && autoObf) {
+                        progress.textContent = `Obfuscating: ${file.name}...`;
+                        const code = await file.text();
+                        const obfuscatedCode = await obfuscateLuaCode(code);
+
+                        // Upload RAW file (hidden from UI)
+                        progress.textContent = `Uploading raw: ${file.name}...`;
+                        const rawFile = new Blob([code], { type: contentType });
+                        let rawName = file.name.replace('.lua', '.raw.lua');
+                        await supabase.storage.from('repos').upload(`${repoId}/${rawName}`, rawFile, { upsert: true, contentType });
+
+                        // Upload OBFUSCATED file
+                        progress.textContent = `Uploading obfuscated: ${file.name}...`;
+                        const obfFile = new Blob([obfuscatedCode], { type: contentType });
+                        const { error } = await supabase.storage.from('repos').upload(`${repoId}/${file.name}`, obfFile, { upsert: true, contentType });
+                        if (error) throw error;
+
+                    } else {
+                        const { error } = await supabase.storage.from('repos').upload(`${repoId}/${file.name}`, file, {
+                            upsert: true,
+                            contentType: contentType
+                        });
+                        if (error) throw error;
+                    }
+                    progress.textContent = `Finished: ${file.name}`;
+                }
+                uploadModal.classList.add("hidden");
+                document.getElementById("fileInput").value = "";
+                progress.classList.add("hidden");
+                await loadFiles();
+            } catch (err) {
+                progress.textContent = "Upload failed: " + err.message;
+                progress.style.color = "#f66";
+            }
+        });
+
+        // ── Delete File Modal ────────────────────────────────
+        const deleteModal = document.getElementById("deleteModal");
+        document.getElementById("closeDeleteBtn").addEventListener("click", () => deleteModal.classList.add("hidden"));
+        document.getElementById("cancelDeleteBtn").addEventListener("click", () => deleteModal.classList.add("hidden"));
+        document.getElementById("confirmDeleteBtn").addEventListener("click", async () => {
+            if (!fileToDelete) return;
+            try {
+                let filesToRemove = [`${repoId}/${fileToDelete}`];
+                if (fileToDelete.endsWith(".lua") && !fileToDelete.endsWith(".raw.lua")) {
+                    filesToRemove.push(`${repoId}/${fileToDelete.replace('.lua', '.raw.lua')}`);
+                }
+
+                const { error } = await supabase.storage.from('repos').remove(filesToRemove);
+                if (error) throw error;
+                deleteModal.classList.add("hidden");
+                await loadFiles();
+                window.showToast("File deleted successfully", "success");
+            } catch (err) {
+                window.showToast("Failed to delete: " + err.message, "error");
+            }
+        });
+
+        // ── Settings Modal ───────────────────────────────────
+        const settingsModal = document.getElementById("settingsModal");
+        const settingsBtn = document.getElementById("settingsBtn");
+
+        if (settingsBtn) {
+            settingsBtn.addEventListener("click", () => {
+                document.getElementById("settingsRepoName").value = repoData.name;
+                document.getElementById("settingsRepoDesc").value = repoData.description || "";
+                document.querySelector(`input[name="settingsVisibility"][value="${repoData.is_private ? 'private' : 'public'}"]`).checked = true;
+                settingsModal.classList.remove("hidden");
+            });
+        }
+
+        document.getElementById("closeSettingsBtn").addEventListener("click", () => settingsModal.classList.add("hidden"));
+
+        document.getElementById("saveSettingsBtn").addEventListener("click", async () => {
+            const newName = document.getElementById("settingsRepoName").value.trim();
+            const newDesc = document.getElementById("settingsRepoDesc").value.trim();
+            const isPrivate = document.querySelector('input[name="settingsVisibility"]:checked').value === "private";
+
+            if (!newName) { window.showToast("Repository name is required", "error"); return; }
+
+            try {
+                const { error } = await supabase
+                    .from('repositories')
+                    .update({ name: newName, description: newDesc, is_private: isPrivate })
+                    .eq('id', repoId);
+
+                if (error) throw error;
+                window.showToast("Settings saved successfully", "success");
+                setTimeout(() => location.reload(), 1000);
+            } catch (err) {
+                window.showToast("Failed to save settings: " + err.message, "error");
+            }
+        });
+
+        // ── Delete Repository Modal ──────────────────────────
+        const deleteRepoConfirmModal = document.getElementById("deleteRepoConfirmModal");
+        const deleteRepoNameInput = document.getElementById("deleteRepoNameInput");
+        const confirmFinalDeleteRepoBtn = document.getElementById("confirmFinalDeleteRepoBtn");
+
+        document.getElementById("deleteRepoBtn").addEventListener("click", () => {
+            document.getElementById("deleteRepoNameLabel").textContent = repoData.name;
+            deleteRepoNameInput.value = "";
+            confirmFinalDeleteRepoBtn.disabled = true;
+            settingsModal.classList.add("hidden");
+            deleteRepoConfirmModal.classList.remove("hidden");
+            deleteRepoNameInput.focus();
+        });
+
+        document.getElementById("closeDeleteRepoConfirmBtn").addEventListener("click", () => deleteRepoConfirmModal.classList.add("hidden"));
+        document.getElementById("cancelDeleteRepoConfirmBtn").addEventListener("click", () => deleteRepoConfirmModal.classList.add("hidden"));
+
+        deleteRepoNameInput.addEventListener("input", (e) => {
+            if (e.target.value === repoData.name) {
+                confirmFinalDeleteRepoBtn.disabled = false;
+            } else {
+                confirmFinalDeleteRepoBtn.disabled = true;
+            }
+        });
+
+        confirmFinalDeleteRepoBtn.addEventListener("click", async () => {
+            try {
+                // Delete all files from storage first
+                const { data: files } = await supabase.storage.from('repos').list(repoId);
+                if (files && files.length > 0) {
+                    const filesToRemove = files.map(f => `${repoId}/${f.name}`);
+                    await supabase.storage.from('repos').remove(filesToRemove);
+                }
+
+                // Delete repo from DB
+                const { error } = await supabase.from('repositories').delete().eq('id', repoId);
+                if (error) throw error;
+
+                window.showToast("Repository deleted", "success");
+                setTimeout(() => window.location.href = "index.html", 1000);
+            } catch (err) {
+                window.showToast("Failed to delete repository: " + err.message, "error");
+            }
+        });
+
+        // ── Logout ───────────────────────────────────────────
+        document.getElementById("logoutBtn").addEventListener("click", () => logout());
+
+        // ── Helpers ──────────────────────────────────────────
+        function getFileIcon(name) {
+            const ext = name.split(".").pop().toLowerCase();
+            const map = {
+                js: "ph-file-js", ts: "ph-file-ts", css: "ph-file-css",
+                html: "ph-file-html", md: "ph-file-text", json: "ph-file-code",
+                py: "ph-file-code", lua: "ph-file-code", txt: "ph-file-text",
+                png: "ph-file-image", jpg: "ph-file-image", jpeg: "ph-file-image",
+                gif: "ph-file-image", svg: "ph-file-image", pdf: "ph-file-pdf"
+            };
+            return map[ext] || "ph-file";
+        }
+
+        function escapeHtml(str) {
+            return String(str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function simpleMarkdown(text) {
+            return text
+                .replace(/^### (.+)$/gm, "<h3>$1</h3>")
+                .replace(/^## (.+)$/gm, "<h2>$1</h2>")
+                .replace(/^# (.+)$/gm, "<h1>$1</h1>")
+                .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+                .replace(/\*(.+?)\*/g, "<em>$1</em>")
+                .replace(/`(.+?)`/g, "<code>$1</code>")
+                .replace(/\n/g, "<br>");
+        }
+    </script>
+</body>
+
+</html>

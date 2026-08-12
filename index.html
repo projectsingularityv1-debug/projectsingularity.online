@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Singularity — Dashboard</title>
+    <link rel="icon" type="image/png"
+        href="https://raw.githubusercontent.com/kentatvv1-tech/UI-BYKENTA/main/logo%20w.png">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        .org-avatar-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            min-width: 18px;
+            font-size: 13px;
+            color: #888;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="starfield"></canvas>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="logo">
+                <img src="https://raw.githubusercontent.com/kentatvv1-tech/UI-BYKENTA/main/logo%20w.png"
+                    alt="Singularity Logo" class="custom-logo">
+                <span>Singularity</span>
+            </div>
+            <div class="search-bar">
+                <i class="ph ph-magnifying-glass"></i>
+                <input type="text" id="searchInput" placeholder="Search or jump to...">
+                <span class="shortcut">/</span>
+            </div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="issues.html">Issues</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li><a href="scripts.html">Scripts Hub</a></li>
+            <li><a href="executors.html" class="active">Executors</a></li>
+        </ul>
+        <div class="nav-right">
+            <!-- Notification Bell -->
+            <div id="notifBellWrap" style="position:relative;">
+                <button class="icon-btn" id="notifBell" title="Notifications">
+                    <i class="ph ph-bell"></i>
+                    <span id="notifBadge" style="display:none;"></span>
+                </button>
+                <div id="notifPanel">
+                    <div class="notif-header">
+                        <h4>Notifications</h4>
+                        <button id="notifMarkAll">Mark all read</button>
+                    </div>
+                    <div id="notifList"></div>
+                </div>
+            </div>
+            <button class="btn-primary btn-sm" id="newRepoBtn">
+                <i class="ph ph-plus"></i> New
+            </button>
+            <div class="profile-avatar">
+                <img id="navAvatar" src="https://ui-avatars.com/api/?name=U&background=000&color=fff"
+                    alt="User Profile">
+            </div>
+            <button class="icon-btn" id="logoutBtn" title="Sign out"><i class="ph ph-sign-out"></i></button>
+        </div>
+    </nav>
+
+    <!-- New Repo Modal -->
+    <div id="newRepoModal" class="modal-overlay hidden">
+        <div class="modal glass-panel">
+            <div class="modal-header">
+                <h2><i class="ph ph-book-bookmark"></i> Create a new repository</h2>
+                <button class="icon-btn" id="closeModalBtn"><i class="ph ph-x"></i></button>
+            </div>
+            <div id="modalError" class="error-banner hidden"></div>
+            <div class="form-group">
+                <label>Repository name <span style="color:#f66">*</span></label>
+                <input type="text" id="repoName" placeholder="my-awesome-project">
+            </div>
+            <div class="form-group" style="margin-top:16px">
+                <label>Description <span style="color:#666">(optional)</span></label>
+                <input type="text" id="repoDesc" placeholder="Short description of your repository">
+            </div>
+            <div class="form-group" style="margin-top:16px">
+                <label>Visibility</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="visibility" value="private" checked>
+                        <i class="ph ph-lock"></i> Private
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="visibility" value="public">
+                        <i class="ph ph-globe"></i> Public
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelModalBtn">Cancel</button>
+                <button class="btn-primary" id="createRepoBtn">
+                    <span id="createRepoBtnText">Create repository</span>
+                    <span id="createRepoSpinner" class="spinner hidden"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h3>Your Repositories</h3>
+                    <button class="btn-primary btn-sm" id="newRepoBtnSidebar"><i class="ph ph-book-bookmark"></i>
+                        New</button>
+                </div>
+                <div class="search-repo">
+                    <input type="text" id="repoFilter" placeholder="Find a repository...">
+                </div>
+                <ul class="repo-list" id="sidebarRepoList">
+                    <li class="skeleton-item"></li>
+                    <li class="skeleton-item"></li>
+                    <li class="skeleton-item"></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Feed -->
+        <section class="content-area">
+            <div class="dashboard-welcome">
+                <h1 id="welcomeTitle">Welcome back!</h1>
+                <p class="text-muted">Manage your private scripts</p>
+            </div>
+            <div id="repoGrid" class="repo-grid">
+                <!-- Repo cards injected by JS -->
+            </div>
+            <div id="emptyState" class="empty-state hidden">
+                <i class="ph ph-book-bookmark" style="font-size:3rem;color:#333"></i>
+                <p>You don't have any repositories yet.</p>
+                <button class="btn-primary" id="emptyNewRepoBtn"><i class="ph ph-plus"></i> Create your first
+                    repository</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+    <script type="module">
+        import { requireAuth, logout, getCurrentUserProfile } from "./auth.js";
+        import { supabase } from "./supabase-config.js";
+        import { initNotifications } from "./notifications.js";
+
+        let currentUser = null;
+        let allRepos = [];
+
+        // ── Init ─────────────────────────────────────────────
+        (async () => {
+            try {
+                const user = await requireAuth();
+                const profile = await getCurrentUserProfile();
+                currentUser = profile || { uid: user.id, username: user.email, avatarUrl: "" };
+
+                // Initialize notifications
+                initNotifications(supabase, user.id);
+
+                // Update UI with user info
+                document.getElementById("welcomeTitle").textContent = `Welcome back, ${currentUser.username}!`;
+                if (currentUser.avatar_url) document.getElementById("navAvatar").src = currentUser.avatar_url;
+
+                await loadRepos();
+            } catch (_) { }
+        })();
+
+        // ── Load Repositories ────────────────────────────────
+        async function loadRepos() {
+            const { data: repos, error } = await supabase
+                .from('repositories')
+                .select('*')
+                .eq('owner_id', currentUser.uid)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error("Error fetching repos:", error);
+                return;
+            }
+
+            allRepos = repos || [];
+            renderRepos(allRepos);
+            renderSidebarRepos(allRepos);
+        }
+
+        function renderRepos(repos) {
+            const grid = document.getElementById("repoGrid");
+            const empty = document.getElementById("emptyState");
+            grid.innerHTML = "";
+            if (repos.length === 0) {
+                empty.classList.remove("hidden");
+                return;
+            }
+            empty.classList.add("hidden");
+            repos.forEach(repo => {
+                const card = document.createElement("div");
+                card.className = "repo-card glass-panel";
+
+                // Supabase returns string for timestamptz
+                const createdDate = repo.created_at ? new Date(repo.created_at) : null;
+
+                card.innerHTML = `
+                    <div class="repo-card-header">
+                        <a href="repo.html?id=${repo.id}" class="repo-card-name">
+                            <i class="ph ph-book-bookmark"></i> ${escapeHtml(repo.name)}
+                        </a>
+                        <span class="badge ${repo.is_private ? 'private' : 'public'}">${repo.is_private ? 'Private' : 'Public'}</span>
+                    </div>
+                    <p class="repo-card-desc">${escapeHtml(repo.description || 'No description')}</p>
+                    <div class="repo-card-footer">
+                        <span class="text-muted" style="font-size:0.8rem">
+                            Created ${formatDate(createdDate)}
+                        </span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function renderSidebarRepos(repos) {
+            const list = document.getElementById("sidebarRepoList");
+            list.innerHTML = "";
+            repos.forEach(repo => {
+                const li = document.createElement("li");
+                li.innerHTML = `
+                    <a href="repo.html?id=${repo.id}">
+                        <span class="org-avatar-icon"><i class="ph ph-book-bookmark"></i></span>
+                        <span class="repo-name">${escapeHtml(currentUser.username)} / ${escapeHtml(repo.name)}</span>
+                        <span class="badge ${repo.is_private ? 'private' : 'public'}">${repo.is_private ? 'Private' : 'Public'}</span>
+                    </a>
+                `;
+                list.appendChild(li);
+            });
+            if (repos.length === 0) {
+                list.innerHTML = `<li style="color:#555;padding:8px;font-size:0.85rem">No repositories yet.</li>`;
+            }
+        }
+
+        // ── Search / Filter ──────────────────────────────────
+        document.getElementById("repoFilter").addEventListener("input", (e) => {
+            const q = e.target.value.toLowerCase();
+            const filtered = allRepos.filter(r => r.name.toLowerCase().includes(q));
+            renderSidebarRepos(filtered);
+        });
+
+        document.getElementById("searchInput").addEventListener("input", (e) => {
+            const q = e.target.value.toLowerCase();
+            const filtered = allRepos.filter(r => r.name.toLowerCase().includes(q) || (r.description && r.description.toLowerCase().includes(q)));
+            renderRepos(filtered);
+        });
+
+        // ── Modal Logic ──────────────────────────────────────
+        const modal = document.getElementById("newRepoModal");
+        const openModal = () => modal.classList.remove("hidden");
+        const closeModal = () => { modal.classList.add("hidden"); clearModal(); };
+
+        function clearModal() {
+            document.getElementById("repoName").value = "";
+            document.getElementById("repoDesc").value = "";
+            document.getElementById("modalError").classList.add("hidden");
+            document.querySelector('input[name="visibility"][value="private"]').checked = true;
+        }
+
+        document.getElementById("newRepoBtn").addEventListener("click", openModal);
+        document.getElementById("newRepoBtnSidebar").addEventListener("click", openModal);
+        document.getElementById("emptyNewRepoBtn")?.addEventListener("click", openModal);
+        document.getElementById("closeModalBtn").addEventListener("click", closeModal);
+        document.getElementById("cancelModalBtn").addEventListener("click", closeModal);
+        modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+
+        document.getElementById("createRepoBtn").addEventListener("click", async () => {
+            const name = document.getElementById("repoName").value.trim();
+            const desc = document.getElementById("repoDesc").value.trim();
+            const isPrivate = document.querySelector('input[name="visibility"]:checked').value === "private";
+            const errorEl = document.getElementById("modalError");
+            const spinner = document.getElementById("createRepoSpinner");
+            const btnText = document.getElementById("createRepoBtnText");
+            const createBtn = document.getElementById("createRepoBtn");
+
+            if (!name) {
+                errorEl.textContent = "Repository name is required.";
+                errorEl.classList.remove("hidden");
+                return;
+            }
+            if (!/^[a-zA-Z0-9_\-\.\s]+$/.test(name)) {
+                errorEl.textContent = "Name can only contain letters, numbers, spaces, hyphens, underscores, and dots.";
+                errorEl.classList.remove("hidden");
+                return;
+            }
+
+            errorEl.classList.add("hidden");
+            createBtn.disabled = true;
+            btnText.textContent = "Creating...";
+            spinner.classList.remove("hidden");
+
+            try {
+                if (allRepos.length >= 25) {
+                    throw new Error("You have reached the maximum limit of 25 repositories per account.");
+                }
+
+                const { data, error } = await supabase
+                    .from('repositories')
+                    .insert([{
+                        name: name,
+                        description: desc,
+                        is_private: isPrivate,
+                        owner_id: currentUser.uid,
+                        owner_username: currentUser.username
+                    }])
+                    .select()
+                    .single();
+
+                if (error) throw error;
+                closeModal();
+                window.location.href = `repo.html?id=${data.id}`;
+            } catch (err) {
+                errorEl.textContent = "Failed to create repository. " + err.message;
+                errorEl.classList.remove("hidden");
+                createBtn.disabled = false;
+                btnText.textContent = "Create repository";
+                spinner.classList.add("hidden");
+            }
+        });
+
+        // ── Logout ───────────────────────────────────────────
+        document.getElementById("logoutBtn").addEventListener("click", () => logout());
+
+        // ── Helpers ──────────────────────────────────────────
+        function escapeHtml(str) {
+            return String(str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+        function formatDate(d) {
+            if (!d) return "recently";
+            return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+        }
+    </script>
+</body>
+
+</html>

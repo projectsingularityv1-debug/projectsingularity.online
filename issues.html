@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issues — Singularity</title>
+    <link rel="icon" type="image/png"
+        href="https://raw.githubusercontent.com/kentatvv1-tech/UI-BYKENTA/main/logo%20w.png">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+
+<body>
+    <canvas id="starfield"></canvas>
+
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="logo">
+                <img src="https://raw.githubusercontent.com/kentatvv1-tech/UI-BYKENTA/main/logo%20w.png"
+                    alt="Singularity Logo" class="custom-logo">
+                <span>Singularity</span>
+            </div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="issues.html">Issues</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li><a href="scripts.html">Scripts Hub</a></li>
+            <li><a href="executors.html" class="active">Executors</a></li>
+        </ul>
+        <div class="nav-right">
+            <div class="profile-avatar">
+                <img id="navAvatar" src="https://ui-avatars.com/api/?name=U&background=000&color=fff" alt="User">
+            </div>
+            <button class="icon-btn" id="logoutBtn" title="Sign out"><i class="ph ph-sign-out"></i></button>
+        </div>
+    </nav>
+
+    <!-- New Issue Modal -->
+    <div id="newIssueModal" class="modal-overlay hidden">
+        <div class="modal glass-panel">
+            <div class="modal-header">
+                <h2><i class="ph ph-record"></i> New Issue</h2>
+                <button class="icon-btn" id="closeIssueModalBtn"><i class="ph ph-x"></i></button>
+            </div>
+            <div id="issueModalError" class="error-banner hidden"></div>
+            <div class="form-group" style="margin-top:8px">
+                <label>Title <span style="color:#f66">*</span></label>
+                <input type="text" id="issueTitle" placeholder="Short description of the issue">
+            </div>
+            <div class="form-group" style="margin-top:16px">
+                <label>Description <span style="color:#666">(optional)</span></label>
+                <textarea id="issueBody" rows="5" placeholder="Provide more details about the issue..."
+                    style="background:#0a0a0a;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:10px 14px;color:#fff;font-size:0.95rem;font-family:'Outfit',sans-serif;outline:none;resize:vertical;width:100%"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelIssueModalBtn">Cancel</button>
+                <button class="btn-primary" id="submitIssueBtn">
+                    <span id="issueSubmitText">Submit Issue</span>
+                    <span id="issueSpinner" class="spinner hidden"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <main class="container">
+        <section class="content-area" style="max-width:860px;margin:0 auto">
+
+            <div class="repo-header">
+                <div class="repo-title">
+                    <i class="ph ph-record"></i>
+                    <span id="repoNameTitle" style="color:#aaa">Repository</span>
+                    <span class="separator">/</span>
+                    <span style="color:#fff">Issues</span>
+                </div>
+                <button class="btn-primary" id="newIssueBtn">
+                    <i class="ph ph-plus"></i> New Issue
+                </button>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="issues-filter glass-panel"
+                style="display:flex;align-items:center;gap:16px;padding:12px 16px;margin-bottom:16px">
+                <button class="tab-filter active" data-filter="open">
+                    <i class="ph ph-record"></i> Open <span class="count" id="openCount">0</span>
+                </button>
+                <button class="tab-filter" data-filter="closed">
+                    <i class="ph ph-check-circle"></i> Closed <span class="count" id="closedCount">0</span>
+                </button>
+            </div>
+
+            <!-- Issue List -->
+            <div id="issueList" class="glass-panel" style="overflow:hidden">
+                <div style="padding:40px;text-align:center;color:#555">Loading issues...</div>
+            </div>
+
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+    <script type="module">
+        import { requireAuth, logout, getCurrentUserProfile } from "./auth.js";
+        import { supabase } from "./supabase-config.js";
+
+        const params = new URLSearchParams(location.search);
+        const repoId = params.get("repoId");
+        const repoName = params.get("repoName") || "Repository";
+        let currentUser = null;
+        let allIssues = [];
+        let filterState = "open";
+
+        document.getElementById("repoNameTitle").textContent = repoName;
+        document.title = `Issues — ${repoName} — Singularity`;
+
+        // ── Init ─────────────────────────────────────────────
+        (async () => {
+            try {
+                currentUser = await getCurrentUserProfile();
+                if (currentUser && currentUser.avatar_url) document.getElementById("navAvatar").src = currentUser.avatar_url;
+                if (!currentUser) {
+                    document.getElementById("logoutBtn").style.display = "none";
+                    document.getElementById("newIssueBtn").style.display = "none";
+                }
+                await loadIssues();
+            } catch (_) { }
+        })();
+
+        // ── Load Issues ──────────────────────────────────────
+        async function loadIssues() {
+            let query = supabase.from('issues').select('*').order('created_at', { ascending: false });
+            if (repoId && repoId !== "__ALL__") {
+                query = query.eq('repo_id', repoId);
+            }
+            const { data: issues, error } = await query;
+            if (error) {
+                console.error(error);
+                return;
+            }
+            allIssues = issues || [];
+            renderIssues();
+        }
+
+        function renderIssues() {
+            const list = document.getElementById("issueList");
+            const visible = allIssues.filter(i => i.status === filterState);
+            const open = allIssues.filter(i => i.status === "open").length;
+            const closed = allIssues.filter(i => i.status === "closed").length;
+            document.getElementById("openCount").textContent = open;
+            document.getElementById("closedCount").textContent = closed;
+
+            if (visible.length === 0) {
+                list.innerHTML = `
+                    <div style="padding:48px;text-align:center;color:#555">
+                        <i class="ph ph-smiley" style="font-size:2.5rem;display:block;margin-bottom:12px"></i>
+                        <p>No ${filterState} issues here!</p>
+                    </div>`;
+                return;
+            }
+
+            list.innerHTML = "";
+            visible.forEach((issue) => {
+                const row = document.createElement("div");
+                row.className = "issue-row";
+                row.style.cssText = "display:flex;align-items:flex-start;gap:12px;padding:16px;border-bottom:1px solid rgba(255,255,255,0.07)";
+                row.innerHTML = `
+                    <i class="ph ${issue.status === 'open' ? 'ph-record' : 'ph-check-circle'}"
+                       style="color:${issue.status === 'open' ? '#4ade80' : '#888'};font-size:1.1rem;margin-top:2px"></i>
+                    <div style="flex:1;min-width:0">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                            <span style="font-weight:600;color:#fff">${escapeHtml(issue.title)}</span>
+                            ${issue.status === 'open' && issue.author_id === currentUser?.uid
+                        ? `<button class="close-issue-btn btn-secondary btn-sm" data-id="${issue.id}" style="flex-shrink:0">
+                                       <i class="ph ph-check"></i> Close
+                                   </button>`
+                        : ""}
+                        </div>
+                        ${issue.body ? `<p style="color:#666;font-size:0.85rem;margin-top:4px">${escapeHtml(issue.body)}</p>` : ""}
+                        <p style="color:#444;font-size:0.78rem;margin-top:6px">
+                            Opened by <strong style="color:#777">${escapeHtml(issue.author_username || "unknown")}</strong>
+                            · ${formatDate(issue.created_at ? new Date(issue.created_at) : null)}
+                        </p>
+                    </div>
+                `;
+                list.appendChild(row);
+            });
+
+            // Close issue buttons
+            document.querySelectorAll(".close-issue-btn").forEach(btn => {
+                btn.addEventListener("click", async () => {
+                    await supabase.from('issues').update({ status: 'closed' }).eq('id', btn.dataset.id);
+                    const issue = allIssues.find(i => i.id === btn.dataset.id);
+                    if (issue) issue.status = "closed";
+                    renderIssues();
+                });
+            });
+        }
+
+        // ── Filter ───────────────────────────────────────────
+        document.querySelectorAll(".tab-filter").forEach(btn => {
+            btn.addEventListener("click", () => {
+                document.querySelectorAll(".tab-filter").forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                filterState = btn.dataset.filter;
+                renderIssues();
+            });
+        });
+
+        // ── New Issue Modal ──────────────────────────────────
+        const issueModal = document.getElementById("newIssueModal");
+        document.getElementById("newIssueBtn").addEventListener("click", () => issueModal.classList.remove("hidden"));
+        document.getElementById("closeIssueModalBtn").addEventListener("click", () => issueModal.classList.add("hidden"));
+        document.getElementById("cancelIssueModalBtn").addEventListener("click", () => issueModal.classList.add("hidden"));
+
+        document.getElementById("submitIssueBtn").addEventListener("click", async () => {
+            const title = document.getElementById("issueTitle").value.trim();
+            const body = document.getElementById("issueBody").value.trim();
+            const errEl = document.getElementById("issueModalError");
+            const spinner = document.getElementById("issueSpinner");
+            const btnText = document.getElementById("issueSubmitText");
+            const btn = document.getElementById("submitIssueBtn");
+
+            if (!title) {
+                errEl.textContent = "Please enter a title.";
+                errEl.classList.remove("hidden");
+                return;
+            }
+
+            errEl.classList.add("hidden");
+            btn.disabled = true;
+            btnText.textContent = "Submitting...";
+            spinner.classList.remove("hidden");
+
+            try {
+                // If repoId is null or "__ALL__", we can't create an issue unless we specify a repo_id
+                // Since this page handles a specific repo, repoId should exist.
+                if (!repoId || repoId === "__ALL__") throw new Error("Missing repository ID");
+
+                const { data: newIssue, error } = await supabase
+                    .from('issues')
+                    .insert([{
+                        repo_id: repoId,
+                        title: title,
+                        body: body,
+                        status: 'open',
+                        author_id: currentUser.uid,
+                        author_username: currentUser.username
+                    }])
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                allIssues.unshift(newIssue);
+                issueModal.classList.add("hidden");
+                document.getElementById("issueTitle").value = "";
+                document.getElementById("issueBody").value = "";
+                filterState = "open";
+                document.querySelectorAll(".tab-filter").forEach(b => b.classList.remove("active"));
+                document.querySelector('[data-filter="open"]').classList.add("active");
+                renderIssues();
+            } catch (err) {
+                console.error("Create issue error:", err);
+                errEl.textContent = "Failed to create issue: " + (err.message || err);
+                errEl.classList.remove("hidden");
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = "Submit Issue";
+                spinner.classList.add("hidden");
+            }
+        });
+
+        // ── Logout ───────────────────────────────────────────
+        document.getElementById("logoutBtn").addEventListener("click", () => logout());
+
+        // ── Helpers ──────────────────────────────────────────
+        function escapeHtml(str) {
+            return String(str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+        function formatDate(d) {
+            if (!d) return "just now";
+            return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+        }
+    </script>
+</body>
+
+</html>

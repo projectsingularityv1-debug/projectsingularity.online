@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Singularity — Roblox Script Hub</title>
+    <meta name="description" content="The all-in-one platform for Roblox scripting. Manage your scripts, track issues, and collaborate — all in one place.">
+
+    <!-- Open Graph / Discord Embed -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://projectsingularity.online/home.html">
+    <meta property="og:title" content="Singularity — Roblox Script Hub">
+    <meta property="og:description" content="The all-in-one platform for Roblox scripting. Manage your scripts, track issues, and collaborate — all in one place.">
+    <meta property="og:image" content="https://raw.githubusercontent.com/kentatvv1-tech/UI-BYKENTA/main/logo%20w.png">
+    <meta name="theme-color" content="#000000">
+
+    <link rel="icon" type="image/png"
+        href="https://raw.githubusercontent.com/kentatvv1-tech/UI-BYKENTA/main/logo%20w.png">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;900&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --font-main: 'Outfit', -apple-system, sans-serif;
+            --nav-h: 56px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: #000000;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* ── Video Background ── */
+        .hero-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            background: #000000;
+        }
+
+        .hero-bg video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        /* Dark overlay + blur for readability */
+        .hero-bg::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+            pointer-events: none;
+        }
+
+        /* ── Navbar ── */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--nav-h);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            transition: background 0.3s ease;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            z-index: 1;
+        }
+
+        .nav-logo img {
+            width: 26px;
+            height: 26px;
+            object-fit: contain;
+            filter: brightness(0) invert(1);
+        }
+
+        /* Center links absolutely so they are always perfectly centred */
+        .nav-links {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 0;
+            list-style: none;
+            white-space: nowrap;
+        }
+
+        .nav-links a {
+            font-size: 0.84rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.65);
+            padding: 5px 10px;
+            border-radius: 7px;
+            transition: color 0.2s, background 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+            z-index: 1;
+        }
+
+        .nav-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            object-fit: cover;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .nav-avatar:hover {
+            border-color: rgba(255, 255, 255, 0.7);
+            transform: scale(1.05);
+        }
+
+        .nav-username {
+            font-size: 0.87rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .nav-login-btn {
+            font-size: 0.87rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.85);
+            padding: 7px 16px;
+            border-radius: 100px;
+            border: 1.5px solid rgba(255, 255, 255, 0.3);
+            background: transparent;
+            transition: all 0.2s;
+            cursor: pointer;
+            font-family: var(--font-main);
+        }
+
+        .nav-login-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.6);
+            color: #ffffff;
+        }
+
+        /* ── Hero Section ── */
+        .hero {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: calc(var(--nav-h) + 60px) 24px 80px;
+        }
+
+        .hero-title {
+            font-size: clamp(5rem, 14vw, 10rem);
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            line-height: 0.95;
+            color: #ffffff;
+            text-shadow: 0 2px 40px rgba(0, 0, 0, 0.4);
+            margin-bottom: 24px;
+            animation: heroFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.75);
+            max-width: 460px;
+            line-height: 1.65;
+            margin-bottom: 32px;
+            animation: heroFadeUp 0.8s 0.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            animation: heroFadeUp 0.8s 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @keyframes heroFadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #0a0c18;
+            color: #fff;
+            font-family: var(--font-main);
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 12px 22px;
+            border-radius: 100px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-download:hover {
+            background: #1a1d35;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn-learn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.85);
+            font-family: var(--font-main);
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 12px 18px;
+            border-radius: 100px;
+            border: 1.5px solid rgba(255, 255, 255, 0.35);
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .btn-learn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.6);
+            color: #ffffff;
+        }
+
+        .hero-note {
+            margin-top: 18px;
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.45);
+            animation: heroFadeUp 0.8s 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .hero-note a {
+            color: rgba(255, 255, 255, 0.65);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .hero-note a:hover {
+            color: #ffffff;
+        }
+
+        /* ── Trusted By ── */
+        .trusted-section {
+            position: relative;
+            z-index: 1;
+            padding: 20px 24px 80px;
+            text-align: center;
+        }
+
+        .trusted-label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.45);
+            letter-spacing: 0.04em;
+            margin-bottom: 28px;
+        }
+
+        .trusted-logos {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 48px;
+            flex-wrap: wrap;
+        }
+
+        .trusted-logo {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.35);
+            letter-spacing: 0.03em;
+            transition: color 0.25s;
+            cursor: default;
+            font-family: 'Inter', var(--font-main);
+            user-select: none;
+        }
+
+        .trusted-logo:hover {
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        /* ── Cookie Banner ── */
+        .cookie-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 200;
+            background: rgba(10, 12, 24, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 18px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            animation: slideUpCookie 0.5s 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .cookie-banner.hidden {
+            display: none;
+        }
+
+        @keyframes slideUpCookie {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .cookie-content h4 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #fff;
+        }
+
+        .cookie-content p {
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.45);
+            line-height: 1.55;
+            max-width: 620px;
+        }
+
+        .cookie-actions {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .btn-cookie {
+            font-family: var(--font-main);
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.07);
+            color: rgba(255, 255, 255, 0.75);
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-cookie:hover {
+            background: rgba(255, 255, 255, 0.13);
+            border-color: rgba(255, 255, 255, 0.25);
+            color: #fff;
+        }
+
+        .btn-cookie-accept {
+            background: #fff;
+            color: #0a0c18;
+            border-color: transparent;
+        }
+
+        .btn-cookie-accept:hover {
+            background: #e0e0e0;
+            box-shadow: 0 0 14px rgba(255, 255, 255, 0.15);
+        }
+
+        /* ── Auth CTA Section ── */
+        .auth-cta {
+            margin-top: 32px;
+            padding: 32px 36px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 32px;
+        }
+
+        .auth-cta-text h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .auth-cta-text p {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+            max-width: 380px;
+            line-height: 1.5;
+        }
+
+        .auth-cta-btns {
+            display: flex;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .auth-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-main);
+            font-size: 0.9rem;
+            font-weight: 700;
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-decoration: none;
+        }
+
+        .auth-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.85);
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .auth-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.45);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+            text-shadow: none;
+        }
+
+        .auth-btn-primary {
+            background: #fff;
+            color: #0a0c18;
+        }
+
+        .auth-btn-primary:hover {
+            background: #e8e8e8;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(255, 255, 255, 0.2);
+            color: #0a0c18;
+            text-shadow: none;
+        }
+
+        @media (max-width: 768px) {
+            .auth-cta {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 24px 20px;
+            }
+
+            .auth-cta-btns {
+                width: 100%;
+            }
+
+            .auth-btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+
+        /* ── Nav Active ── */
+        .nav-active {
+            color: #ffffff !important;
+            background: rgba(255, 255, 255, 0.12) !important;
+        }
+
+        /* ── Navigation Cards Section ── */
+        .nav-cards-section {
+            position: relative;
+            z-index: 1;
+            padding: 0 40px 100px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-cards-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.35);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .nav-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .nav-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 22px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            text-decoration: none;
+            color: #fff;
+            transition: all 0.25s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+
+        .nav-card:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+            color: #fff;
+            text-shadow: none;
+        }
+
+        .nav-card:hover::before {
+            opacity: 1;
+        }
+
+        .nav-card:hover .nav-card-arrow {
+            transform: translateX(4px);
+            opacity: 1;
+        }
+
+        /* Highlight card (Register) */
+        .nav-card-highlight {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-card-highlight:hover {
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .nav-card-icon {
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.85);
+            transition: background 0.25s;
+        }
+
+        .nav-card:hover .nav-card-icon {
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .nav-card-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .nav-card-body h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 3px;
+        }
+
+        .nav-card-body p {
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.5);
+            line-height: 1.4;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .nav-card-arrow {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.35);
+            opacity: 0.6;
+            transition: transform 0.25s, opacity 0.25s;
+            flex-shrink: 0;
+        }
+
+        /* ── Page Transition Overlay ── */
+        #page-transition {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: #000000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.35s ease;
+        }
+
+        #page-transition.fade-in {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        #page-transition.fade-out {
+            opacity: 0;
+        }
+
+        /* Spinner inside transition */
+        #page-transition .pt-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 36px;
+            height: 36px;
+            border: 3px solid rgba(255, 255, 255, 0.15);
+            border-top-color: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            animation: ptSpin 0.7s linear infinite;
+        }
+
+        @keyframes ptSpin {
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        /* ── Nav Auth Dropdown ── */
+        .nav-auth-wrap {
+            position: relative;
+        }
+
+        .nav-auth-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-family: var(--font-main);
+            font-size: 0.87rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.85);
+            padding: 7px 14px;
+            border-radius: 100px;
+            border: 1.5px solid rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.07);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .nav-auth-btn:hover {
+            background: rgba(255, 255, 255, 0.14);
+            border-color: rgba(255, 255, 255, 0.5);
+            color: #fff;
+        }
+
+        .nav-auth-btn i {
+            font-size: 1rem;
+        }
+
+        .nav-auth-btn .caret {
+            font-size: 0.7rem;
+            margin-left: 2px;
+            transition: transform 0.2s;
+        }
+
+        .nav-auth-wrap.open .caret {
+            transform: rotate(180deg);
+        }
+
+        /* Profile avatar button */
+        .nav-profile-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 3px 8px 3px 3px;
+            border-radius: 100px;
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.2s;
+        }
+
+        .nav-profile-btn:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .nav-profile-btn img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #222;
+            border: 1.5px solid rgba(255,255,255,0.2);
+            flex-shrink: 0;
+        }
+
+        .nav-profile-btn span {
+            font-size: 0.87rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .nav-profile-btn .caret {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.5);
+            transition: transform 0.2s;
+        }
+
+        .nav-auth-wrap.open .nav-profile-btn .caret {
+            transform: rotate(180deg);
+        }
+
+        /* Dropdown menu */
+        .nav-dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            min-width: 180px;
+            background: rgba(0, 0, 0, 0.97);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 6px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-8px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 500;
+        }
+
+        .nav-auth-wrap.open .nav-dropdown {
+            opacity: 1;
+            pointer-events: all;
+            transform: translateY(0);
+        }
+
+        .nav-dropdown a,
+        .nav-dropdown button {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            width: 100%;
+            padding: 9px 12px;
+            border-radius: 9px;
+            font-family: var(--font-main);
+            font-size: 0.87rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.75);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.15s, color 0.15s;
+            text-align: left;
+        }
+
+        .nav-dropdown a:hover,
+        .nav-dropdown button:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            text-shadow: none;
+        }
+
+        .nav-dropdown .dropdown-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.08);
+            margin: 4px 6px;
+        }
+
+        .nav-dropdown .dropdown-danger {
+            color: rgba(255, 100, 100, 0.8);
+        }
+
+        .nav-dropdown .dropdown-danger:hover {
+            background: rgba(255, 80, 80, 0.12);
+            color: #ff6b6b;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            html {
+                font-size: 14px;
+            }
+            .nav-cards-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 0 16px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero-title {
+                font-size: clamp(3.5rem, 18vw, 6rem);
+            }
+
+            .trusted-logos {
+                gap: 20px;
+            }
+
+            .trusted-logo {
+                font-size: 0.82rem;
+            }
+
+            .nav-cards-section {
+                padding: 0 16px 80px;
+            }
+
+            .nav-cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-card-body p {
+                white-space: normal;
+            }
+
+            .cookie-banner {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 16px 20px;
+            }
+
+            .cookie-actions {
+                flex-wrap: wrap;
+            }
+        }
+
+        /* ── Security Section ── */
+        .security-section {
+            position: relative;
+            z-index: 1;
+            padding: 80px 40px 100px;
+        }
+
+        .security-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .security-header {
+            text-align: center;
+            margin-bottom: 52px;
+        }
+
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 5px 14px;
+            border-radius: 100px;
+            margin-bottom: 20px;
+        }
+
+        .security-title {
+            font-size: clamp(1.8rem, 4vw, 2.6rem);
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.02em;
+            margin-bottom: 14px;
+            line-height: 1.15;
+        }
+
+        .security-desc {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.45);
+            max-width: 520px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .security-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .security-card {
+            padding: 26px 24px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.25s ease;
+        }
+
+        .security-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.18);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .sec-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 13px;
+            background: rgba(255, 255, 255, 0.09);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 16px;
+            transition: background 0.25s;
+        }
+
+        .security-card:hover .sec-icon {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .security-card h3 {
+            font-size: 0.97rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .security-card p {
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.45);
+            line-height: 1.55;
+        }
+
+        @media (max-width: 900px) {
+            .security-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .security-section {
+                padding: 60px 16px 80px;
+            }
+
+            .security-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Page Transition Overlay -->
+    <div id="page-transition">
+        <div class="pt-spinner"></div>
+    </div>
+
+    <!-- Video Background -->
+    <div class="hero-bg">
+        <video autoplay muted loop playsinline>
+            <source src="https://raw.githubusercontent.com/projectsingularityv1-debug/projectsingularity.online/main/314066.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <!-- Navbar -->
+    <nav id="mainNav">
+        <div class="nav-logo">
+            <img src="https://raw.githubusercontent.com/kentatvv1-tech/UI-BYKENTA/main/logo%20w.png" alt="Singularity">
+        </div>
+
+        <ul class="nav-links">
+            <li><a href="home.html" class="nav-active">Home</a></li>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="issues.html">Issues</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li><a href="https://discord.gg/" target="_blank">Discord</a></li>
+            <li><a href="scripts.html">Scripts Hub</a></li>
+        </ul>
+
+        <div class="nav-right" id="navRight">
+            <!-- Populated by JS -->
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero" id="home">
+        <h1 class="hero-title">SINGULARITY HUP</h1>
+        <p class="hero-subtitle">Welcome back!</p>
+
+        <div class="hero-actions">
+            <a href="login.html" class="btn-download" id="downloadBtn">
+                Sign In <i class="ph ph-sign-in"></i>
+                </button>
+                <a href="register.html" class="btn-learn" id="registerBtn">
+                    Create Account <i class="ph ph-arrow-right"></i>
+                </a>
+        </div>
+
+        <p class="hero-note">
+            Go to <a href="#">minimum download requirements</a> · <a href="#">Terms of Service</a>
+        </p>
+    </section>
+
+    <!-- Trusted By Partners -->
+    <section class="trusted-section">
+        <p class="trusted-label">Trusted by the community</p>
+        <div class="trusted-logos">
+            <span class="trusted-logo">TTJY Studio X SINGULARITY HUP</span>
+
+        </div>
+    </section>
+
+    <!-- Navigation Cards -->
+    <section class="nav-cards-section" id="explore">
+        <p class="nav-cards-label">Explore Singularity</p>
+        <div class="nav-cards-grid">
+
+            <a href="index.html" class="nav-card" id="card-dashboard">
+                <div class="nav-card-icon"><i class="ph ph-squares-four"></i></div>
+                <div class="nav-card-body">
+                    <h3>Dashboard</h3>
+                    <p>Manage all your repositories and scripts in one place</p>
+                </div>
+                <i class="ph ph-arrow-right nav-card-arrow"></i>
+            </a>
+
+            <a href="issues.html" class="nav-card" id="card-issues">
+                <div class="nav-card-icon"><i class="ph ph-warning-circle"></i></div>
+                <div class="nav-card-body">
+                    <h3>Issues</h3>
+                    <p>Track problems and report bugs in the system</p>
+                </div>
+                <i class="ph ph-arrow-right nav-card-arrow"></i>
+            </a>
+
+            <a href="editor.html" class="nav-card" id="card-editor">
+                <div class="nav-card-icon"><i class="ph ph-code"></i></div>
+                <div class="nav-card-body">
+                    <h3>Script Editor</h3>
+                    <p>Write and run Lua scripts with the online editor</p>
+                </div>
+                <i class="ph ph-arrow-right nav-card-arrow"></i>
+            </a>
+
+    </section>
+
+    <!-- Security Section -->
+    <section class="security-section" id="security">
+        <div class="security-inner">
+            <div class="security-header">
+                <span class="security-badge"><i class="ph ph-shield-check"></i> Trusted & Secure</span>
+                <h2 class="security-title">Built with Security in Mind</h2>
+                <p class="security-desc">Every layer of Singularity is designed to protect your account, your data, and
+                    your system from threats.</p>
+            </div>
+
+            <div class="security-grid">
+
+                <div class="security-card" id="sec-auth">
+                    <div class="sec-icon"><i class="ph ph-lock-key"></i></div>
+                    <h3>Secure Authentication</h3>
+                    <p>Powered by Supabase Auth with industry-standard JWT tokens. Your credentials are never stored in
+                        plain text.</p>
+                </div>
+
+                <div class="security-card" id="sec-encrypt">
+                    <div class="sec-icon"><i class="ph ph-key"></i></div>
+                    <h3>Encrypted License Keys</h3>
+                    <p>All license keys are hashed and validated server-side. No key can be reused, duplicated, or
+                        spoofed.</p>
+                </div>
+
+                <div class="security-card" id="sec-api">
+                    <div class="sec-icon"><i class="ph ph-shield"></i></div>
+                    <h3>Protected API Endpoints</h3>
+                    <p>Row-Level Security (RLS) on every database table ensures users can only access their own data.
+                    </p>
+                </div>
+
+                <div class="security-card" id="sec-malware">
+                    <div class="sec-icon"><i class="ph ph-virus"></i></div>
+                    <h3>Zero Malware Policy</h3>
+                    <p>Singularity contains no malicious code. All binaries are scanned and verified before every
+                        release.</p>
+                </div>
+
+                <div class="security-card" id="sec-privacy">
+                    <div class="sec-icon"><i class="ph ph-eye-slash"></i></div>
+                    <h3>Privacy First</h3>
+                    <p>We collect only what's necessary. No personal data is sold or shared with third parties — ever.
+                    </p>
+                </div>
+
+                <div class="security-card" id="sec-update">
+                    <div class="sec-icon"><i class="ph ph-arrows-clockwise"></i></div>
+                    <h3>Continuous Updates</h3>
+                    <p>Our team actively monitors threats and pushes security patches to keep you protected at all
+                        times.</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Cookie Banner -->
+    <div class="cookie-banner" id="cookieBanner">
+        <div class="cookie-content">
+            <h4>We use cookies</h4>
+            <p>We use cookies to provide services on this website, connect to social media, and analyze your web
+                traffic. You can manage your preferences or learn more in our cookie policy.</p>
+        </div>
+        <div class="cookie-actions">
+            <button class="btn-cookie" onclick="closeCookie()">Manage Settings</button>
+            <button class="btn-cookie" onclick="closeCookie()">Essential Only</button>
+            <button class="btn-cookie btn-cookie-accept" onclick="acceptCookie()">Accept All</button>
+        </div>
+    </div>
+
+    <!-- Auth module script -->
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+
+        (async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                const navRight = document.getElementById('navRight');
+
+                if (session?.user) {
+                    // ── LOGGED IN: show profile dropdown ──
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('username, avatar_url')
+                        .eq('id', session.user.id)
+                        .single();
+
+                    const username = profile?.username
+                        || session.user.user_metadata?.full_name
+                        || session.user.user_metadata?.name
+                        || session.user.email.split('@')[0];
+
+                    // Priority: 1) self-uploaded, 2) Discord/OAuth metadata, 3) initials fallback
+                    const meta = session.user.user_metadata || {};
+                    const avatar = profile?.avatar_url
+                        || meta.avatar_url
+                        || meta.picture
+                        || meta.avatar
+                        || `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=111111&color=fff&bold=true`;
+
+                    const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=111111&color=fff&bold=true`;
+
+                    navRight.innerHTML = `
+                        <div class="nav-auth-wrap" id="navAuthWrap">
+                            <button class="nav-profile-btn" id="navProfileBtn">
+                                <img src="${avatar}" alt="${username}"
+                                     onerror="this.onerror=null;this.src='${fallbackAvatar}'">
+                                <span>${username}</span>
+                                <i class="ph ph-caret-down caret"></i>
+                            </button>
+                            <div class="nav-dropdown" id="navDropdown">
+                                <a href="index.html"><i class="ph ph-squares-four"></i> Dashboard</a>
+                                <a href="profile.html"><i class="ph ph-user"></i> Profile</a>
+                                <a href="editor.html"><i class="ph ph-code"></i> Script Editor</a>
+                                <div class="dropdown-divider"></div>
+                                <button class="dropdown-danger" id="logoutBtn"><i class="ph ph-sign-out"></i> Sign Out</button>
+                            </div>
+                        </div>
+                    `;
+
+                    // Toggle dropdown
+                    document.getElementById('navProfileBtn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        document.getElementById('navAuthWrap').classList.toggle('open');
+                    });
+
+                    // Logout
+                    document.getElementById('logoutBtn').addEventListener('click', async () => {
+                        await supabase.auth.signOut();
+                        navigateTo('home.html');
+                    });
+
+                    // Hero Sign In btn → dashboard when logged in
+                    const dlBtn = document.getElementById('downloadBtn');
+                    if (dlBtn) {
+                        dlBtn.innerHTML = '<i class="ph ph-squares-four"></i> Go to Dashboard';
+                        dlBtn.onclick = () => navigateTo('index.html');
+                    }
+                    // Hide Create Account link on hero
+                    const regBtn = document.getElementById('registerBtn');
+                    if (regBtn) regBtn.style.display = 'none';
+
+                } else {
+                    // ── LOGGED OUT: show Sign In / Sign Up dropdown ──
+                    navRight.innerHTML = `
+                        <div class="nav-auth-wrap" id="navAuthWrap">
+                            <button class="nav-auth-btn" id="navAuthBtn">
+                                <i class="ph ph-user"></i>
+                                Account
+                                <i class="ph ph-caret-down caret"></i>
+                            </button>
+                            <div class="nav-dropdown" id="navDropdown">
+                                <a href="login.html"><i class="ph ph-sign-in"></i> Sign In</a>
+                                <a href="register.html"><i class="ph ph-user-plus"></i> Create Account</a>
+                            </div>
+                        </div>
+                    `;
+
+                    document.getElementById('navAuthBtn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        document.getElementById('navAuthWrap').classList.toggle('open');
+                    });
+
+                    // Hero Sign In btn → login when logged out
+                    const dlBtn = document.getElementById('downloadBtn');
+                    if (dlBtn) dlBtn.onclick = () => navigateTo('login.html');
+
+                }
+            } catch (_) {
+                const navRight = document.getElementById('navRight');
+                navRight.innerHTML = `
+                    <div class="nav-auth-wrap" id="navAuthWrap">
+                        <button class="nav-auth-btn" id="navAuthBtn">
+                            <i class="ph ph-user"></i> Account
+                            <i class="ph ph-caret-down caret"></i>
+                        </button>
+                        <div class="nav-dropdown" id="navDropdown">
+                            <a href="login.html"><i class="ph ph-sign-in"></i> Sign In</a>
+                            <a href="register.html"><i class="ph ph-user-plus"></i> Create Account</a>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('navAuthBtn')?.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    document.getElementById('navAuthWrap')?.classList.toggle('open');
+                });
+            }
+        })();
+    </script>
+
+    <script>
+        // ── Page Transition ───────────────────────────────────
+        const pt = document.getElementById('page-transition');
+
+        function navigateTo(url) {
+            pt.classList.add('fade-in');
+            setTimeout(() => { window.location.href = url; }, 350);
+        }
+
+        // Intercept all internal anchor clicks
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('a');
+            if (!link) return;
+            const href = link.getAttribute('href');
+            if (!href || href.startsWith('http') || href.startsWith('#') || href.startsWith('mailto') || link.target === '_blank') return;
+            e.preventDefault();
+            navigateTo(href);
+        });
+
+        // Fade out when page loads
+        window.addEventListener('pageshow', () => {
+            pt.classList.remove('fade-in');
+        });
+
+        // ── Cookie ───────────────────────────────────────────
+        function closeCookie() {
+            document.getElementById('cookieBanner').classList.add('hidden');
+        }
+        function acceptCookie() {
+            localStorage.setItem('sg_cookieAccepted', '1');
+            closeCookie();
+        }
+        if (localStorage.getItem('sg_cookieAccepted')) {
+            document.getElementById('cookieBanner').classList.add('hidden');
+        }
+
+        // ── Navbar scroll ────────────────────────────────────
+        const nav = document.getElementById('mainNav');
+        window.addEventListener('scroll', () => {
+            nav.style.background = window.scrollY > 20
+                ? 'rgba(0,0,0,0.85)'
+                : 'rgba(0,0,0,0.5)';
+        });
+
+        // ── Learn more scroll ────────────────────────────────
+        document.getElementById('learnMoreBtn').addEventListener('click', () => {
+            document.querySelector('.trusted-section').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // ── Close dropdown on outside click ──────────────────
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.nav-auth-wrap.open').forEach(el => el.classList.remove('open'));
+        });
+    </script>
+
+</body>
+
+</html>
