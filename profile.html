@@ -492,7 +492,7 @@
             <nav class="sidebar-nav">
                 <a class="sidebar-link active" data-target="tab-overview"><i class="ph ph-chart-line-up"></i> ภาพรวม</a>
                 <a class="sidebar-link" data-target="tab-personal-info"><i class="ph ph-user"></i> ข้อมูลส่วนตัว</a>
-                <a class="sidebar-link"><i class="ph ph-lock-key"></i> การเข้าสู่ระบบและความปลอดภัย</a>
+                <a class="sidebar-link" data-target="tab-security"><i class="ph ph-lock-key"></i> การเข้าสู่ระบบและความปลอดภัย</a>
                 <a class="sidebar-link"><i class="ph ph-package"></i> แพ็กเกจ</a>
                 <a class="sidebar-link"><i class="ph ph-clock-counter-clockwise"></i> เซสชัน</a>
                 <a class="sidebar-link"><i class="ph ph-key"></i> ประวัติคีย์</a>
@@ -609,6 +609,45 @@
                 </div>
             </div>
 
+            <!-- TAB: การเข้าสู่ระบบและความปลอดภัย -->
+            <div id="tab-security" class="tab-content">
+                <div class="personal-info-container">
+                    <div class="info-header">
+                        <h2>การเข้าสู่ระบบและความปลอดภัย</h2>
+                        <p>ดูแลบัญชีให้ปลอดภัย ทั้งรหัสผ่าน อีเมล Discord และอุปกรณ์ที่เชื่อมไว้</p>
+                    </div>
+                    
+                    <div class="info-list">
+                        <div class="info-row" style="flex-direction:row; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div class="info-label" style="color:#fff; font-size:1.05rem; font-weight:500; margin-bottom:4px;">รหัสผ่าน</div>
+                                <div class="info-value" style="color:#888; font-size:0.9rem; font-weight:400;">รักษาบัญชีของคุณให้ปลอดภัย</div>
+                            </div>
+                        </div>
+                        <div class="info-row" style="flex-direction:row; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div class="info-label" style="color:#fff; font-size:1.05rem; font-weight:500; margin-bottom:4px;">อีเมล</div>
+                                <div class="info-value" id="secEmail" style="color:#888; font-size:0.9rem; font-weight:400;">—</div>
+                            </div>
+                        </div>
+                        <div class="info-row" style="flex-direction:row; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div class="info-label" style="color:#fff; font-size:1.05rem; font-weight:500; margin-bottom:4px;">Discord</div>
+                                <div class="info-value" style="color:#888; font-size:0.9rem; font-weight:400;">k2nta</div>
+                            </div>
+                            <button style="background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:6px; padding:6px 14px; cursor:pointer; font-family:inherit; font-size:0.9rem; font-weight:500; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">ยกเลิกการเชื่อมโยง Discord</button>
+                        </div>
+                        <div class="info-row" style="flex-direction:row; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div class="info-label" style="color:#f66; font-size:1.05rem; font-weight:500; margin-bottom:4px;">Delete account</div>
+                                <div class="info-value" style="color:#888; font-size:0.9rem; font-weight:400;">Request deletion by password and email confirmation.</div>
+                            </div>
+                            <button style="background:transparent; border:1px solid #f66; color:#f66; border-radius:6px; padding:6px 14px; cursor:pointer; font-weight:500; font-family:inherit; font-size:0.9rem; transition: all 0.2s;" onmouseover="this.style.background='#f66'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#f66';">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
     
@@ -702,6 +741,10 @@
                 // Fill Personal Info Tab
                 document.getElementById("piUsername").textContent = currentUser.username;
                 document.getElementById("piEmail").textContent = currentUser.email;
+                
+                // Fill Security Tab
+                const secEmail = document.getElementById("secEmail");
+                if(secEmail) secEmail.textContent = currentUser.email;
                 
                 if (currentUser.avatar_url) {
                     document.getElementById("sidebarAvatar").src = currentUser.avatar_url;
