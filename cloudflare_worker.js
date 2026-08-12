@@ -18,12 +18,19 @@ export default {
     }
 
     // ═══════════════════════════════════════════════════════
-    // Route: POST /verify-key — ตรวจสอบ Key จาก Roblox Script
+    // Route: /verify-key — ตรวจสอบ Key จาก Roblox Script
     // ═══════════════════════════════════════════════════════
-    if (url.pathname === '/verify-key' && request.method === 'POST') {
+    if (url.pathname === '/verify-key') {
       try {
-        const body = await request.json();
-        const keyValue = (body.key || '').trim();
+        let keyValue = '';
+        if (request.method === 'POST') {
+          const body = await request.json();
+          keyValue = (body.key || '').trim();
+        } else if (request.method === 'GET') {
+          keyValue = (url.searchParams.get('k') || '').trim();
+        } else {
+          return jsonResponse({ valid: false, message: 'Method not allowed.' }, 405);
+        }
 
         if (!keyValue) {
           return jsonResponse({ valid: false, message: 'Key cannot be empty.' }, 400);
