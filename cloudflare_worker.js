@@ -18,9 +18,9 @@ export default {
     }
 
     // ═══════════════════════════════════════════════════════
-    // Route: /verify-key — ตรวจสอบ Key จาก Roblox Script
+    // Route: /verify-key หรือ /raw/verify-key — ตรวจสอบ Key จาก Roblox Script
     // ═══════════════════════════════════════════════════════
-    if (url.pathname === '/verify-key') {
+    if (url.pathname === '/verify-key' || url.pathname === '/raw/verify-key') {
       try {
         let keyValue = '';
         if (request.method === 'POST') {
