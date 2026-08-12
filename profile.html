@@ -1,159 +1,519 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile — Singularity</title>
-    <link rel="icon" type="image/png"
-        href="https://raw.githubusercontent.com/kentatvv1-tech/UI-BYKENTA/main/logo%20w.png">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
-        rel="stylesheet">
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/kentatvv1-tech/UI-BYKENTA/main/logo%20w.png">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        /* Real Account Custom Styles */
+        body {
+            background-color: #060606;
+            color: #ffffff;
+            font-family: 'Outfit', 'Kanit', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* Hide the starfield for this clean layout */
+        #starfield {
+            display: none !important;
+        }
+
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 40px;
+            background-color: transparent;
+        }
+
+        .top-header h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .btn-logout {
+            background: #ffffff;
+            color: #000000;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .btn-logout:hover {
+            transform: scale(1.05);
+            background: #f0f0f0;
+        }
+
+        .profile-container {
+            display: flex;
+            max-width: 1300px;
+            margin: 40px auto;
+            padding: 0 40px;
+            gap: 60px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+            padding-left: 12px;
+        }
+
+        .sidebar-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin: 0 0 2px 0;
+            text-transform: uppercase;
+        }
+
+        .sidebar-email {
+            font-size: 0.85rem;
+            color: #888888;
+            margin: 0;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: #a0a0a0;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-link i {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        .sidebar-link:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-link.active {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding-top: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hero-profile {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+        }
+
+        .hero-avatar-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 24px;
+        }
+
+        .hero-avatar {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 0 40px rgba(255, 0, 0, 0.1); /* Reddish glow from reference */
+        }
+
+        .edit-avatar-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: #ffffff;
+            color: #000000;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid #060606;
+            transition: transform 0.2s;
+        }
+
+        .edit-avatar-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .hero-name {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .hero-email {
+            font-size: 1rem;
+            color: #888888;
+            margin: 0;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin-bottom: 60px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .stat-box {
+            padding: 24px 16px;
+            text-align: center;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-box:last-child {
+            border-right: none;
+        }
+
+        .stat-val {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #888888;
+        }
+
+        /* Activity Section */
+        .activity-section {
+            width: 100%;
+        }
+
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 24px;
+        }
+
+        .activity-title h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+        }
+
+        .activity-title p {
+            font-size: 0.85rem;
+            color: #888888;
+            margin: 0;
+        }
+
+        .activity-legends {
+            display: flex;
+            gap: 16px;
+            font-size: 0.85rem;
+            color: #888888;
+            font-weight: 500;
+        }
+
+        .legend-item.active {
+            color: #ffffff;
+        }
+
+        /* Graph Container */
+        .graph-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            padding-bottom: 20px;
+        }
+
+        .activity-graph {
+            display: grid;
+            /* 52 weeks */
+            grid-template-columns: repeat(52, 1fr);
+            grid-template-rows: repeat(7, 1fr);
+            gap: 4px;
+            width: fit-content;
+            margin-bottom: 12px;
+        }
+
+        .graph-cell {
+            width: 12px;
+            height: 12px;
+            background: #1a1a1a;
+            border-radius: 2px;
+        }
+
+        /* Levels of activity */
+        .lvl-1 { background: #333333; }
+        .lvl-2 { background: #666666; }
+        .lvl-3 { background: #aaaaaa; }
+        .lvl-4 { background: #ffffff; }
+
+        .graph-months {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            font-size: 0.75rem;
+            color: #888888;
+            padding-right: 12px; /* adjust based on cell width */
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 500;
+            border: 1px solid rgba(255,255,255,0.1);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            pointer-events: none;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
 </head>
 
 <body>
-    <canvas id="starfield"></canvas>
+    <!-- Top Header -->
+    <header class="top-header">
+        <h1>Real Account</h1>
+        <button id="logoutBtn" class="btn-logout">ออกจากระบบ</button>
+    </header>
 
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="nav-left">
-            <div class="logo">
-                <img src="https://raw.githubusercontent.com/kentatvv1-tech/UI-BYKENTA/main/logo%20w.png"
-                    alt="Singularity Logo" class="custom-logo">
-                <span>Singularity</span>
+    <!-- Main Layout -->
+    <div class="profile-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-user">
+                <img id="sidebarAvatar" src="https://ui-avatars.com/api/?name=U&background=111&color=fff&size=96" alt="Avatar" class="sidebar-avatar">
+                <div>
+                    <h2 id="sidebarUsername" class="sidebar-name">—</h2>
+                    <p id="sidebarEmail" class="sidebar-email">—</p>
+                </div>
             </div>
-        </div>
-        <ul class="nav-links">
-            <li><a href="home.html">Home</a></li>
-            <li><a href="index.html">Dashboard</a></li>
-            <li><a href="issues.html">Issues</a></li>
-            <li><a href="profile.html">Profile</a></li>
-            <li><a href="scripts.html">Scripts Hub</a></li>
-            <li><a href="key.html">My Key</a></li>
-            <li><a href="executors.html" class="active">Executors</a></li>
-        </ul>
-        <div class="nav-right">
-            <button class="icon-btn" id="logoutBtn" title="Sign out"><i class="ph ph-sign-out"></i></button>
-        </div>
-    </nav>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="sidebar-link active"><i class="ph ph-chart-line-up"></i> ภาพรวม</a>
+                <a href="#" class="sidebar-link"><i class="ph ph-user"></i> ข้อมูลส่วนตัว</a>
+                <a href="#" class="sidebar-link"><i class="ph ph-lock-key"></i> การเข้าสู่ระบบและความปลอดภัย</a>
+                <a href="#" class="sidebar-link"><i class="ph ph-package"></i> แพ็กเกจ</a>
+                <a href="#" class="sidebar-link"><i class="ph ph-desktop"></i> อุปกรณ์</a>
+                <a href="#" class="sidebar-link"><i class="ph ph-clock-counter-clockwise"></i> เซสชัน</a>
+                <a href="#" class="sidebar-link"><i class="ph ph-key"></i> ประวัติคีย์</a>
+                <a href="#" class="sidebar-link"><i class="ph ph-swap"></i> การเปลี่ยนแปลงบัญชี</a>
+                <a href="index.html" class="sidebar-link" style="margin-top:20px; color:#ff8000;"><i class="ph ph-arrow-left"></i> กลับหน้าหลัก</a>
+            </nav>
+        </aside>
 
-    <!-- Main -->
-    <main class="container" style="align-items:flex-start">
-        <!-- Profile Card -->
-        <aside style="width:280px;flex-shrink:0">
-            <div class="glass-panel" style="padding:28px;text-align:center">
-                <div style="position:relative;display:inline-block;margin-bottom:16px">
-                    <img id="profileAvatar" src="https://ui-avatars.com/api/?name=U&background=000&color=fff&size=96"
-                        alt="Profile"
-                        style="width:96px;height:96px;border-radius:50%;border:2px solid rgba(255,255,255,0.2)">
-                    <label for="avatarUpload" title="Change avatar"
-                        style="position:absolute;bottom:0;right:0;background:#fff;color:#000;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem">
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Hero Profile -->
+            <div class="hero-profile">
+                <div class="hero-avatar-wrapper">
+                    <img id="mainAvatar" src="https://ui-avatars.com/api/?name=U&background=111&color=fff&size=200" alt="Avatar" class="hero-avatar">
+                    <label for="avatarUpload" class="edit-avatar-btn" title="Change avatar">
                         <i class="ph ph-pencil-simple"></i>
                         <input type="file" id="avatarUpload" accept="image/*" style="display:none">
                     </label>
                 </div>
-                <h2 id="profileUsername" style="font-size:1.2rem;margin-bottom:4px">—</h2>
-                <p id="profileEmail" style="color:#666;font-size:0.85rem;margin-bottom:20px">—</p>
+                <h2 id="mainUsername" class="hero-name">—</h2>
+                <p id="mainEmail" class="hero-email">—</p>
+            </div>
 
-                <div style="display:flex;justify-content:center;gap:24px;margin-bottom:20px">
-                    <div style="text-align:center">
-                        <div id="repoCount" style="font-size:1.4rem;font-weight:700">0</div>
-                        <div style="font-size:0.75rem;color:#666">Repos</div>
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div id="statMemberSince" class="stat-val">—</div>
+                    <div class="stat-label">เป็นสมาชิกตั้งแต่</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-val">Free</div>
+                    <div class="stat-label">แพ็กเกจปัจจุบัน</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-val">20 hours</div>
+                    <div class="stat-label">เวลาในบัญชี</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-val">0</div>
+                    <div class="stat-label">บัญชี Roblox ที่สร้างแล้ว</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-val">1</div>
+                    <div class="stat-label">อุปกรณ์ที่ใช้</div>
+                </div>
+            </div>
+
+            <!-- Activity Section -->
+            <div class="activity-section">
+                <div class="activity-header">
+                    <div class="activity-title">
+                        <h3>กิจกรรม</h3>
+                        <p>กิจกรรมของคุณในช่วงปีที่ผ่านมา</p>
+                    </div>
+                    <div class="activity-legends">
+                        <span class="legend-item active">รายวัน</span>
+                        <span class="legend-item">รายสัปดาห์</span>
+                        <span class="legend-item">สะสม</span>
                     </div>
                 </div>
 
-                <button class="btn-primary" id="editProfileBtn" style="width:100%">
-                    <i class="ph ph-pencil-simple"></i> Edit Profile
-                </button>
-            </div>
-
-            <!-- Edit Profile Form (hidden by default) -->
-            <div id="editProfileForm" class="glass-panel hidden" style="padding:24px;margin-top:16px">
-                <h3 style="margin-bottom:16px;font-size:0.95rem">Edit Profile</h3>
-                <div id="editProfileError" class="error-banner hidden"></div>
-                <div class="form-group">
-                    <label>Username</label>
-                    <input type="text" id="editUsername">
+                <div class="graph-wrapper">
+                    <div class="activity-graph" id="activityGraph">
+                        <!-- Cells injected via JS -->
+                    </div>
+                    <div class="graph-months">
+                        <span>ส.ค.</span>
+                        <span>ก.ย.</span>
+                        <span>ต.ค.</span>
+                        <span>พ.ย.</span>
+                        <span>ธ.ค.</span>
+                        <span>ม.ค.</span>
+                        <span>ก.พ.</span>
+                        <span>มี.ค.</span>
+                        <span>เม.ย.</span>
+                        <span>พ.ค.</span>
+                        <span>มิ.ย.</span>
+                        <span>ก.ค.</span>
+                        <span>ส.ค.</span>
+                    </div>
                 </div>
-                <div style="display:flex;gap:10px;margin-top:16px">
-                    <button class="btn-secondary" id="cancelEditBtn" style="flex:1">Cancel</button>
-                    <button class="btn-primary" id="saveProfileBtn" style="flex:1">
-                        <span id="saveProfileText">Save</span>
-                        <span id="saveProfileSpinner" class="spinner hidden"></span>
-                    </button>
-                </div>
             </div>
-        </aside>
+        </main>
+    </div>
+    
+    <div id="toast" class="toast"></div>
 
-        <!-- Repositories -->
-        <section class="content-area">
-            <div class="section-header" style="margin-bottom:20px">
-                <h2 style="font-size:1.1rem">Repositories</h2>
-                <a href="index.html" class="btn-primary btn-sm"><i class="ph ph-plus"></i> New</a>
-            </div>
-            <div id="profileRepoList">
-                <div style="color:#555;text-align:center;padding:40px">Loading...</div>
-            </div>
-        </section>
-    </main>
-
-    <script src="script.js"></script>
     <script type="module">
         import { requireAuth, logout, getCurrentUserProfile } from "./auth.js";
         import { supabase } from "./supabase-config.js";
 
         let currentUser = null;
+        
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => toast.className = 'toast', 2800);
+        }
+
+        // Generate Graph Cells (52 weeks * 7 days)
+        function generateGraph() {
+            const graph = document.getElementById('activityGraph');
+            let html = '';
+            for (let i = 0; i < 364; i++) {
+                // Randomly light up some squares to mimic the image
+                let level = 0;
+                if (i > 340 && Math.random() > 0.7) {
+                    level = Math.floor(Math.random() * 4) + 1; // 1 to 4
+                } else if (Math.random() > 0.95) {
+                    level = Math.floor(Math.random() * 2) + 1;
+                }
+                
+                // Hardcode the right-most columns to have some white squares like the image
+                if (i === 356 || i === 362 || i === 363) level = 4;
+                if (i === 350 || i === 360) level = 3;
+                if (i === 355 || i === 349) level = 2;
+
+                const className = level > 0 ? `graph-cell lvl-${level}` : 'graph-cell';
+                html += `<div class="${className}"></div>`;
+            }
+            graph.innerHTML = html;
+        }
+
+        function formatDateThai(isoString) {
+            if (!isoString) return '—';
+            const date = new Date(isoString);
+            const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+            const day = date.getDate();
+            const month = months[date.getMonth()];
+            const year = date.getFullYear() + 543; // Convert to Thai Buddhist Era
+            return `${day} ${month} ${year}`;
+        }
 
         // ── Init ─────────────────────────────────────────────
         (async () => {
+            generateGraph();
+            
             try {
                 await requireAuth();
                 currentUser = await getCurrentUserProfile();
                 if (!currentUser) return;
 
                 // Fill profile
-                document.getElementById("profileUsername").textContent = currentUser.username;
-                document.getElementById("profileEmail").textContent = currentUser.email;
-                if (currentUser.avatar_url) document.getElementById("profileAvatar").src = currentUser.avatar_url;
-                document.getElementById("editUsername").value = currentUser.username;
-                document.title = `${currentUser.username} — Singularity`;
-
-                // Load repos
-                const { data: repos, error } = await supabase.from('repositories').select('*').eq('owner_id', currentUser.uid);
-                if (repos) {
-                    document.getElementById("repoCount").textContent = repos.length;
-                    renderProfileRepos(repos);
+                document.getElementById("sidebarUsername").textContent = currentUser.username;
+                document.getElementById("sidebarEmail").textContent = currentUser.email;
+                document.getElementById("mainUsername").textContent = currentUser.username;
+                document.getElementById("mainEmail").textContent = currentUser.email;
+                
+                if (currentUser.avatar_url) {
+                    document.getElementById("sidebarAvatar").src = currentUser.avatar_url;
+                    document.getElementById("mainAvatar").src = currentUser.avatar_url;
                 }
+                
+                document.getElementById("statMemberSince").textContent = formatDateThai(currentUser.created_at);
+                
+                document.title = `${currentUser.username} — Real Account`;
 
             } catch (_) { }
         })();
-
-        function renderProfileRepos(repos) {
-            const container = document.getElementById("profileRepoList");
-            if (repos.length === 0) {
-                container.innerHTML = `<div style="color:#555;text-align:center;padding:40px">No repositories yet.</div>`;
-                return;
-            }
-            container.innerHTML = "";
-            repos.forEach(repo => {
-                const card = document.createElement("div");
-                card.className = "glass-panel";
-                card.style.cssText = "padding:20px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;";
-                card.innerHTML = `
-                    <div>
-                        <a href="repo.html?id=${repo.id}" style="font-weight:600;font-size:1rem;color:#fff">
-                            <i class="ph ph-book-bookmark" style="margin-right:6px"></i>${escapeHtml(repo.name)}
-                        </a>
-                        <p style="color:#666;font-size:0.85rem;margin-top:4px">${escapeHtml(repo.description || "No description")}</p>
-                    </div>
-                    <span class="badge ${repo.is_private ? 'private' : 'public'}">${repo.is_private ? 'Private' : 'Public'}</span>
-                `;
-                container.appendChild(card);
-            });
-        }
 
         // ── Avatar Upload ─────────────────────────────────────
         document.getElementById("avatarUpload").addEventListener("change", async (e) => {
@@ -161,7 +521,7 @@
             if (!file || !currentUser) return;
             const { error: uploadError } = await supabase.storage.from('avatars').upload(`${currentUser.uid}`, file, { upsert: true });
             if (uploadError) {
-                window.showToast("Failed to upload avatar: " + uploadError.message, "error");
+                showToast("Failed to upload avatar: " + uploadError.message, "error");
                 return;
             }
             const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(`${currentUser.uid}`);
@@ -170,57 +530,14 @@
             const finalUrl = publicUrl + "?t=" + Date.now();
             await supabase.from('profiles').update({ avatar_url: finalUrl }).eq('id', currentUser.uid);
 
-            document.getElementById("profileAvatar").src = finalUrl;
+            document.getElementById("sidebarAvatar").src = finalUrl;
+            document.getElementById("mainAvatar").src = finalUrl;
             currentUser.avatar_url = finalUrl;
-        });
-
-        // ── Edit Profile ─────────────────────────────────────
-        document.getElementById("editProfileBtn").addEventListener("click", () => {
-            document.getElementById("editProfileForm").classList.toggle("hidden");
-        });
-        document.getElementById("cancelEditBtn").addEventListener("click", () => {
-            document.getElementById("editProfileForm").classList.add("hidden");
-        });
-
-        document.getElementById("saveProfileBtn").addEventListener("click", async () => {
-            const username = document.getElementById("editUsername").value.trim();
-            const errEl = document.getElementById("editProfileError");
-            const spinner = document.getElementById("saveProfileSpinner");
-            const btnText = document.getElementById("saveProfileText");
-            const btn = document.getElementById("saveProfileBtn");
-
-            if (!username) {
-                errEl.textContent = "Username cannot be empty.";
-                errEl.classList.remove("hidden");
-                return;
-            }
-
-            errEl.classList.add("hidden");
-            btn.disabled = true;
-            btnText.textContent = "Saving...";
-            spinner.classList.remove("hidden");
-
-            try {
-                await supabase.from('profiles').update({ username }).eq('id', currentUser.uid);
-                currentUser.username = username;
-                document.getElementById("profileUsername").textContent = username;
-                document.getElementById("editProfileForm").classList.add("hidden");
-            } catch (err) {
-                errEl.textContent = "Failed to save profile.";
-                errEl.classList.remove("hidden");
-            } finally {
-                btn.disabled = false;
-                btnText.textContent = "Save";
-                spinner.classList.add("hidden");
-            }
+            showToast("อัปเดตรูปโปรไฟล์สำเร็จ!");
         });
 
         // ── Logout ───────────────────────────────────────────
         document.getElementById("logoutBtn").addEventListener("click", () => logout());
-
-        function escapeHtml(str) {
-            return String(str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        }
     </script>
 </body>
 
