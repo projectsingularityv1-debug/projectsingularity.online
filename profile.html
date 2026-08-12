@@ -385,6 +385,111 @@
             transform: translateX(-50%) translateY(0);
             opacity: 1;
         }
+
+        /* Edit Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-box {
+            background: #12131c;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            width: 90%;
+            max-width: 400px;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        .modal-overlay.show .modal-box {
+            transform: translateY(0);
+        }
+
+        .modal-title {
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .modal-desc {
+            color: #888;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .modal-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-family: var(--font-main);
+            font-size: 0.95rem;
+            margin-bottom: 24px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .modal-input:focus {
+            border-color: #ff8000;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: var(--font-main);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .modal-btn-cancel {
+            background: transparent;
+            color: #888;
+        }
+
+        .modal-btn-cancel:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .modal-btn-save {
+            background: #ff8000;
+            color: #fff;
+        }
+
+        .modal-btn-save:hover {
+            background: #e67300;
+        }
     </style>
 </head>
 
@@ -689,6 +794,19 @@
     
     <div id="toast" class="toast"></div>
 
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-title" id="editModalTitle">แก้ไขข้อมูล</div>
+            <div class="modal-desc" id="editModalDesc" style="display:none;"></div>
+            <input type="text" id="editModalInput" class="modal-input" placeholder="กรอกข้อมูลใหม่..." />
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" onclick="closeEditModal()">ยกเลิก</button>
+                <button class="modal-btn modal-btn-save" id="btnSaveEditModal">บันทึก</button>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
     <script type="module">
         import { requireAuth, logout, getCurrentUserProfile } from "./auth.js";
@@ -971,65 +1089,109 @@
             showToast("ไม่สามารถลบบัญชีได้ด้วยตนเอง กรุณาติดต่อผู้ดูแลระบบ", "error");
         });
 
+        // ── Custom Edit Modal Logic ─────────────────────────────────
+        let currentEditAction = null;
+
+        function openEditModal(title, desc, currentValue, onSave) {
+            document.getElementById("editModalTitle").textContent = title;
+            const descEl = document.getElementById("editModalDesc");
+            if (desc) {
+                descEl.textContent = desc;
+                descEl.style.display = "block";
+            } else {
+                descEl.style.display = "none";
+            }
+            const input = document.getElementById("editModalInput");
+            input.value = currentValue || "";
+            document.getElementById("editModal").classList.add("show");
+            input.focus();
+            
+            // Unbind previous action
+            const saveBtn = document.getElementById("btnSaveEditModal");
+            const newSaveBtn = saveBtn.cloneNode(true);
+            saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+            
+            newSaveBtn.addEventListener("click", () => {
+                const newValue = document.getElementById("editModalInput").value;
+                onSave(newValue);
+            });
+            
+            // Allow enter to save
+            input.onkeydown = function(e) {
+                if(e.key === 'Enter') {
+                    e.preventDefault();
+                    newSaveBtn.click();
+                }
+            };
+        }
+
+        window.closeEditModal = function() {
+            document.getElementById("editModal").classList.remove("show");
+        }
+
         // ── Profile Edits ───────────────────────────────────────────
-        document.getElementById("btnEditUsername")?.addEventListener("click", async () => {
-            const newUsername = prompt("ระบุชื่อผู้ใช้ใหม่:", currentUser.username);
-            if (!newUsername || newUsername.trim() === currentUser.username) return;
-            
-            try {
-                const { error } = await supabase.from('profiles').update({ username: newUsername.trim() }).eq('id', currentUser.uid);
-                if (error) throw error;
-                currentUser.username = newUsername.trim();
-                document.getElementById("piUsername").textContent = currentUser.username;
-                document.getElementById("sidebarUsername").textContent = currentUser.username;
-                document.getElementById("mainUsername").textContent = currentUser.username;
-                showToast("อัปเดตชื่อผู้ใช้สำเร็จ!");
-            } catch (err) {
-                showToast("ไม่สามารถอัปเดตชื่อผู้ใช้ได้: " + err.message, "error");
-            }
+        document.getElementById("btnEditUsername")?.addEventListener("click", () => {
+            openEditModal("ระบุชื่อผู้ใช้ใหม่", null, currentUser.username, async (newUsername) => {
+                if (!newUsername || newUsername.trim() === currentUser.username) { closeEditModal(); return; }
+                try {
+                    const { error } = await supabase.from('profiles').update({ username: newUsername.trim() }).eq('id', currentUser.uid);
+                    if (error) throw error;
+                    currentUser.username = newUsername.trim();
+                    document.getElementById("piUsername").textContent = currentUser.username;
+                    document.getElementById("sidebarUsername").textContent = currentUser.username;
+                    document.getElementById("mainUsername").textContent = currentUser.username;
+                    showToast("อัปเดตชื่อผู้ใช้สำเร็จ!");
+                    closeEditModal();
+                } catch (err) {
+                    showToast("ไม่สามารถอัปเดตชื่อผู้ใช้ได้: " + err.message, "error");
+                }
+            });
         });
 
-        document.getElementById("btnEditEmail")?.addEventListener("click", async () => {
-            const newEmail = prompt("ระบุอีเมลใหม่:\n(คุณอาจจะต้องยืนยันอีเมลใหม่ก่อนจึงจะเปลี่ยนสำเร็จ)", currentUser.email);
-            if (!newEmail || newEmail.trim() === currentUser.email) return;
-            
-            try {
-                const { error } = await supabase.auth.updateUser({ email: newEmail.trim() });
-                if (error) throw error;
-                showToast("ส่งคำขอเปลี่ยนอีเมลแล้ว กรุณาเช็คกล่องจดหมายของคุณ!");
-            } catch (err) {
-                showToast("ไม่สามารถเปลี่ยนอีเมลได้: " + err.message, "error");
-            }
+        document.getElementById("btnEditEmail")?.addEventListener("click", () => {
+            openEditModal("ระบุอีเมลใหม่", "คุณอาจจะต้องยืนยันอีเมลใหม่ก่อนจึงจะเปลี่ยนสำเร็จ", currentUser.email, async (newEmail) => {
+                if (!newEmail || newEmail.trim() === currentUser.email) { closeEditModal(); return; }
+                try {
+                    const { error } = await supabase.auth.updateUser({ email: newEmail.trim() });
+                    if (error) throw error;
+                    showToast("ส่งคำขอเปลี่ยนอีเมลแล้ว กรุณาเช็คกล่องจดหมายของคุณ!");
+                    closeEditModal();
+                } catch (err) {
+                    showToast("ไม่สามารถเปลี่ยนอีเมลได้: " + err.message, "error");
+                }
+            });
         });
 
-        document.getElementById("btnEditCountry")?.addEventListener("click", async () => {
-            const newCountry = prompt("ระบุประเทศ/ภูมิภาค:", currentUser.country || "");
-            if (newCountry === null || newCountry.trim() === (currentUser.country || "")) return;
-            
-            try {
-                const { error } = await supabase.from('profiles').update({ country: newCountry.trim() }).eq('id', currentUser.uid);
-                if (error) throw error;
-                currentUser.country = newCountry.trim();
-                document.getElementById("piCountry").textContent = currentUser.country || "ยังตรวจไม่พบ";
-                showToast("อัปเดตประเทศ/ภูมิภาคสำเร็จ!");
-            } catch (err) {
-                showToast("ไม่สามารถอัปเดตได้: " + err.message, "error");
-            }
+        document.getElementById("btnEditCountry")?.addEventListener("click", () => {
+            openEditModal("ระบุประเทศ/ภูมิภาค", null, currentUser.country || "", async (newCountry) => {
+                if (newCountry === null || newCountry.trim() === (currentUser.country || "")) { closeEditModal(); return; }
+                try {
+                    const { error } = await supabase.from('profiles').update({ country: newCountry.trim() }).eq('id', currentUser.uid);
+                    if (error) throw error;
+                    currentUser.country = newCountry.trim();
+                    document.getElementById("piCountry").textContent = currentUser.country || "ยังตรวจไม่พบ";
+                    showToast("อัปเดตประเทศ/ภูมิภาคสำเร็จ!");
+                    closeEditModal();
+                } catch (err) {
+                    showToast("ไม่สามารถอัปเดตได้: " + err.message, "error");
+                }
+            });
         });
 
-        document.getElementById("btnEditLanguage")?.addEventListener("click", async () => {
-            const newLanguage = prompt("ระบุภาษา:", currentUser.language || "ไทย");
-            if (newLanguage === null || newLanguage.trim() === (currentUser.language || "ไทย")) return;
-            
-            try {
-                const { error } = await supabase.from('profiles').update({ language: newLanguage.trim() }).eq('id', currentUser.uid);
-                if (error) throw error;
-                currentUser.language = newLanguage.trim();
-                document.getElementById("piLanguage").textContent = currentUser.language || "ไทย";
-                showToast("อัปเดตภาษาสำเร็จ!");
-            } catch (err) {
-                showToast("ไม่สามารถอัปเดตได้: " + err.message, "error");
-            }
+        document.getElementById("btnEditLanguage")?.addEventListener("click", () => {
+            openEditModal("ระบุภาษา", null, currentUser.language || "ไทย", async (newLanguage) => {
+                if (newLanguage === null || newLanguage.trim() === (currentUser.language || "ไทย")) { closeEditModal(); return; }
+                try {
+                    const { error } = await supabase.from('profiles').update({ language: newLanguage.trim() }).eq('id', currentUser.uid);
+                    if (error) throw error;
+                    currentUser.language = newLanguage.trim();
+                    document.getElementById("piLanguage").textContent = currentUser.language || "ไทย";
+                    showToast("อัปเดตภาษาสำเร็จ!");
+                    closeEditModal();
+                } catch (err) {
+                    showToast("ไม่สามารถอัปเดตได้: " + err.message, "error");
+                }
+            });
         });
 
         // ── Logout ───────────────────────────────────────────
