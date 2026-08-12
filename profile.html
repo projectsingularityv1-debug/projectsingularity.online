@@ -1204,22 +1204,22 @@
                     } else {
                         let html = '';
                         accounts.forEach(acc => {
-                            const avatarUrl = \`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=\${acc.roblox_userid}&size=150x150&format=Png&isCircular=true\`;
+                            const avatarUrl = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${acc.roblox_userid}&size=150x150&format=Png&isCircular=true`;
                             const date = new Date(acc.last_used_at).toLocaleString('th-TH');
                             
-                            html += \`
+                            html += `
                             <div class="file-row" style="display:flex; align-items:center; gap: 15px; padding: 15px;">
-                                <img src="\${avatarUrl}" alt="Avatar" style="width: 50px; height: 50px; border-radius: 50%; background: #222;" onerror="this.src='https://ui-avatars.com/api/?name=\${acc.roblox_username}&background=random'">
+                                <img src="${avatarUrl}" alt="Avatar" style="width: 50px; height: 50px; border-radius: 50%; background: #222;" onerror="this.src='https://ui-avatars.com/api/?name=${acc.roblox_username}&background=random'">
                                 <div style="flex: 1;">
-                                    <div style="font-weight: 600; color: #fff; font-size: 1.1rem;">\${acc.roblox_username}</div>
-                                    <div style="font-size: 0.85rem; color: #888;">ID: \${acc.roblox_userid}</div>
+                                    <div style="font-weight: 600; color: #fff; font-size: 1.1rem;">${acc.roblox_username}</div>
+                                    <div style="font-size: 0.85rem; color: #888;">ID: ${acc.roblox_userid}</div>
                                 </div>
                                 <div style="text-align: right;">
                                     <div style="font-size: 0.85rem; color: #aaa;">ใช้งานล่าสุด</div>
-                                    <div style="font-size: 0.9rem; color: #fff;">\${date}</div>
+                                    <div style="font-size: 0.9rem; color: #fff;">${date}</div>
                                 </div>
                             </div>
-                            \`;
+                            `;
                         });
                         listElem.innerHTML = html;
                     }
