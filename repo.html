@@ -56,7 +56,7 @@
                     <div class="upload-text">Click to browse or drag files here</div>
                     <div class="upload-subtext">Supports .lua, .txt, .json</div>
                 </div>
-                <div id="uploadFileList" class="file-list hidden"></div>
+                <div id="uploadFileList" class="upload-file-list hidden"></div>
             </div>
             <div class="form-group" style="margin-top:16px;">
                 <label class="toggle-row" for="autoObfuscateCheck">
@@ -461,7 +461,7 @@
                 let listHtml = '';
                 for (let i = 0; i < files.length; i++) {
                     const f = files[i];
-                    listHtml += `<div class="file-list-item">
+                    listHtml += `<div class="upload-file-list-item">
                                     <i class="ph ${getFileIcon(f.name)}" style="font-size:1.1rem"></i>
                                     ${escapeHtml(f.name)} <span style="color:#666; font-size:0.75rem;">(${(f.size / 1024).toFixed(1)} KB)</span>
                                  </div>`;
