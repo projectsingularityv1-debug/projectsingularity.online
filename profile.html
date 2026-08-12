@@ -9,6 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Localization -->
+    <script src="i18n.js"></script>
     <style>
         /* Real Account Custom Styles */
         body {
@@ -509,13 +511,13 @@
             </div>
         </div>
         <ul class="nav-links">
-            <li><a href="home.html">Home</a></li>
-            <li><a href="index.html">Dashboard</a></li>
-            <li><a href="issues.html">Issues</a></li>
-            <li><a href="profile.html" class="active">Profile</a></li>
-            <li><a href="scripts.html">Scripts Hub</a></li>
-            <li><a href="key.html">My Key</a></li>
-            <li><a href="executors.html">Executors</a></li>
+            <li><a href="home.html" data-i18n="nav.home">Home</a></li>
+            <li><a href="index.html" data-i18n="nav.dashboard">Dashboard</a></li>
+            <li><a href="issues.html" data-i18n="nav.issues">Issues</a></li>
+            <li><a href="profile.html" class="active" data-i18n="nav.profile">Profile</a></li>
+            <li><a href="scripts.html" data-i18n="nav.scripts">Scripts Hub</a></li>
+            <li><a href="key.html" data-i18n="nav.key">My Key</a></li>
+            <li><a href="executors.html" data-i18n="nav.executors">Executors</a></li>
         </ul>
         <div class="nav-right">
             <!-- Notification Bell -->
@@ -595,10 +597,10 @@
             </div>
             
             <nav class="sidebar-nav">
-                <a class="sidebar-link active" data-target="tab-overview"><i class="ph ph-chart-line-up"></i> ภาพรวม</a>
-                <a class="sidebar-link" data-target="tab-personal-info"><i class="ph ph-user"></i> ข้อมูลส่วนตัว</a>
-                <a class="sidebar-link" data-target="tab-security"><i class="ph ph-lock-key"></i> การเข้าสู่ระบบและความปลอดภัย</a>
-                <a class="sidebar-link" data-target="tab-key-history"><i class="ph ph-key"></i> ประวัติคีย์</a>
+                <a class="sidebar-link active" data-target="tab-overview" data-i18n="sidebar.overview"><i class="ph ph-chart-line-up"></i> ภาพรวม</a>
+                <a class="sidebar-link" data-target="tab-personal-info" data-i18n="sidebar.personal_info"><i class="ph ph-user"></i> ข้อมูลส่วนตัว</a>
+                <a class="sidebar-link" data-target="tab-security" data-i18n="sidebar.security"><i class="ph ph-lock-key"></i> การเข้าสู่ระบบและความปลอดภัย</a>
+                <a class="sidebar-link" data-target="tab-key-history" data-i18n="sidebar.key_history"><i class="ph ph-clock-counter-clockwise"></i> ประวัติคีย์</a>
                 <a href="index.html" class="sidebar-link" style="margin-top:20px; color:#ff8000;"><i class="ph ph-arrow-left"></i> กลับหน้าหลัก</a>
             </nav>
         </aside>
@@ -625,7 +627,7 @@
                 <div class="stats-grid">
                     <div class="stat-box">
                         <div id="statMemberSince" class="stat-val">—</div>
-                        <div class="stat-label">เป็นสมาชิกตั้งแต่</div>
+                        <div class="stat-label" data-i18n="overview.stats.days">จำนวนวันที่ใช้งาน</div>
                     </div>
                     <div class="stat-box">
                         <div class="stat-val">Free</div>
@@ -637,7 +639,7 @@
                     </div>
                     <div class="stat-box" id="robloxStatBox" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                         <div class="stat-val" id="robloxAccountCount">0</div>
-                        <div class="stat-label">บัญชี Roblox ที่ใช้กับระบบ</div>
+                        <div class="stat-label" data-i18n="overview.stats.roblox">บัญชี Roblox ที่ใช้กับระบบ</div>
                     </div>
                 </div>
 
@@ -645,8 +647,8 @@
                 <div class="activity-section">
                     <div class="activity-header">
                         <div class="activity-title">
-                            <h3>กิจกรรม</h3>
-                            <p>กิจกรรมของคุณในช่วงปีที่ผ่านมา</p>
+                            <h3 data-i18n="overview.title">กิจกรรม</h3>
+                            <p data-i18n="overview.subtitle">กิจกรรมของคุณในช่วงปีที่ผ่านมา</p>
                         </div>
                         <div class="activity-legends">
                             <span class="legend-item active">รายวัน</span>
@@ -682,42 +684,44 @@
             <div id="tab-personal-info" class="tab-content">
                 <div class="personal-info-container">
                     <div class="info-header">
-                        <h2>ข้อมูลส่วนตัว</h2>
-                        <p>จัดการรายละเอียดที่เชื่อมกับบัญชีของคุณ</p>
+                        <h2 data-i18n="personal.title">ข้อมูลส่วนตัว</h2>
+                        <p data-i18n="personal.subtitle">จัดการรายละเอียดที่เชื่อมกับบัญชีของคุณ</p>
                     </div>
                     
                     <div class="info-list">
                         <div class="info-row" style="flex-direction:row; justify-content:space-between; align-items:center;">
                             <div>
-                                <div class="info-label" style="color:#888; font-size:0.95rem; margin-bottom:4px;">ชื่อผู้ใช้</div>
+                                <div class="info-label" data-i18n="personal.username" style="color:#888; font-size:0.95rem; margin-bottom:4px;">ชื่อผู้ใช้</div>
                                 <div class="info-value" id="piUsername" style="color:#fff; font-size:1.1rem; font-weight:500;">—</div>
                             </div>
-                            <button id="btnEditUsername" style="background:transparent; border:none; color:#ff8000; cursor:pointer; font-size:0.9rem; font-weight:500;">แก้ไข</button>
+                            <button id="btnEditUsername" data-i18n="personal.edit" style="background:transparent; border:none; color:#ff8000; cursor:pointer; font-size:0.9rem; font-weight:500;">แก้ไข</button>
                         </div>
                         <div class="info-row" style="flex-direction:row; justify-content:space-between; align-items:center;">
                             <div>
-                                <div class="info-label" style="color:#888; font-size:0.95rem; margin-bottom:4px;">อีเมล</div>
+                                <div class="info-label" data-i18n="personal.email" style="color:#888; font-size:0.95rem; margin-bottom:4px;">อีเมล</div>
                                 <div class="info-value" id="piEmail" style="color:#fff; font-size:1.1rem; font-weight:500;">—</div>
                             </div>
-                            <button id="btnEditEmail" style="background:transparent; border:none; color:#ff8000; cursor:pointer; font-size:0.9rem; font-weight:500;">แก้ไข</button>
+                            <button id="btnEditEmail" data-i18n="personal.edit" style="background:transparent; border:none; color:#ff8000; cursor:pointer; font-size:0.9rem; font-weight:500;">แก้ไข</button>
                         </div>
                         <div class="info-row" style="flex-direction:row; justify-content:space-between; align-items:center;">
                             <div>
                                 <div class="info-label" style="color:#888; font-size:0.95rem; margin-bottom:4px;">ประเทศ / ภูมิภาค</div>
                                 <div class="info-value" id="piCountry" style="color:#fff; font-size:1.1rem; font-weight:500;">ยังตรวจไม่พบ</div>
                             </div>
-                            <button id="btnEditCountry" style="background:transparent; border:none; color:#ff8000; cursor:pointer; font-size:0.9rem; font-weight:500;">แก้ไข</button>
+                            <button id="btnEditCountry" data-i18n="personal.edit" style="background:transparent; border:none; color:#ff8000; cursor:pointer; font-size:0.9rem; font-weight:500;">แก้ไข</button>
                         </div>
                         <div class="info-row" style="flex-direction:row; justify-content:space-between; align-items:center;">
                             <div>
-                                <div class="info-label" style="color:#888; font-size:0.95rem; margin-bottom:4px;">ภาษา</div>
-                                <div class="info-value" id="piLanguage" style="color:#fff; font-size:1.1rem; font-weight:500;">ไทย</div>
+                                <div class="info-label" data-i18n="lang.label" style="color:#888; font-size:0.95rem; margin-bottom:4px;">ภาษา</div>
+                                <select id="languageSelect" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px; outline: none; font-family: var(--font-main); font-size: 1rem; cursor: pointer;">
+                                    <option value="th">🇹🇭 ภาษาไทย</option>
+                                    <option value="en">🇬🇧 English</option>
+                                </select>
                             </div>
-                            <button id="btnEditLanguage" style="background:transparent; border:none; color:#ff8000; cursor:pointer; font-size:0.9rem; font-weight:500;">แก้ไข</button>
                         </div>
                         <div class="info-row" style="flex-direction:row; justify-content:space-between; align-items:center;">
                             <div>
-                                <div class="info-label" style="color:#888; font-size:0.95rem; margin-bottom:4px;">เป็นสมาชิกตั้งแต่</div>
+                                <div class="info-label" data-i18n="personal.created" style="color:#888; font-size:0.95rem; margin-bottom:4px;">เป็นสมาชิกตั้งแต่</div>
                                 <div class="info-value" id="piMemberSince" style="color:#fff; font-size:1.1rem; font-weight:500;">—</div>
                             </div>
                         </div>
@@ -729,37 +733,37 @@
             <div id="tab-security" class="tab-content">
                 <div class="personal-info-container">
                     <div class="info-header">
-                        <h2>การเข้าสู่ระบบและความปลอดภัย</h2>
-                        <p>ดูแลบัญชีให้ปลอดภัย ทั้งรหัสผ่าน อีเมล Discord และอุปกรณ์ที่เชื่อมไว้</p>
+                        <h2 data-i18n="security.title">การเข้าสู่ระบบและความปลอดภัย</h2>
+                        <p data-i18n="security.subtitle">ดูแลบัญชีให้ปลอดภัย ทั้งรหัสผ่าน อีเมล Discord และอุปกรณ์ที่เชื่อมไว้</p>
                     </div>
                     
                     <div class="info-list">
                         <div class="info-row" style="flex-direction:row; justify-content:space-between; align-items:center;">
                             <div>
-                                <div class="info-label" style="color:#fff; font-size:1.05rem; font-weight:500; margin-bottom:4px;">รหัสผ่าน</div>
+                                <div class="info-label" data-i18n="security.password" style="color:#fff; font-size:1.05rem; font-weight:500; margin-bottom:4px;">รหัสผ่าน</div>
                                 <div class="info-value" style="color:#888; font-size:0.9rem; font-weight:400;">รักษาบัญชีของคุณให้ปลอดภัย</div>
                             </div>
-                            <button id="btnChangePassword" style="background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:6px; padding:6px 14px; cursor:pointer; font-family:inherit; font-size:0.9rem; font-weight:500; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">เปลี่ยนรหัสผ่าน</button>
+                            <button id="btnChangePassword" data-i18n="security.change" style="background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:6px; padding:6px 14px; cursor:pointer; font-family:inherit; font-size:0.9rem; font-weight:500; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">เปลี่ยนรหัสผ่าน</button>
                         </div>
                         <div class="info-row" style="flex-direction:row; justify-content:space-between; align-items:center;">
                             <div>
-                                <div class="info-label" style="color:#fff; font-size:1.05rem; font-weight:500; margin-bottom:4px;">อีเมล</div>
+                                <div class="info-label" data-i18n="personal.email" style="color:#fff; font-size:1.05rem; font-weight:500; margin-bottom:4px;">อีเมล</div>
                                 <div class="info-value" id="secEmail" style="color:#888; font-size:0.9rem; font-weight:400;">—</div>
                             </div>
                         </div>
                         <div class="info-row" style="flex-direction:row; justify-content:space-between; align-items:center;">
                             <div>
-                                <div class="info-label" style="color:#fff; font-size:1.05rem; font-weight:500; margin-bottom:4px;">Discord</div>
+                                <div class="info-label" data-i18n="security.discord" style="color:#fff; font-size:1.05rem; font-weight:500; margin-bottom:4px;">Discord</div>
                                 <div class="info-value" id="secDiscord" style="color:#888; font-size:0.9rem; font-weight:400;">ไม่ได้เชื่อมต่อ</div>
                             </div>
-                            <button id="btnUnlinkDiscord" style="background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:6px; padding:6px 14px; cursor:pointer; font-family:inherit; font-size:0.9rem; font-weight:500; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">ยกเลิกการเชื่อมโยง Discord</button>
+                            <button id="btnUnlinkDiscord" data-i18n="security.link" style="background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:6px; padding:6px 14px; cursor:pointer; font-family:inherit; font-size:0.9rem; font-weight:500; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">ยกเลิกการเชื่อมโยง Discord</button>
                         </div>
                         <div class="info-row" style="flex-direction:row; justify-content:space-between; align-items:center;">
                             <div>
-                                <div class="info-label" style="color:#f66; font-size:1.05rem; font-weight:500; margin-bottom:4px;">Delete account</div>
-                                <div class="info-value" style="color:#888; font-size:0.9rem; font-weight:400;">Request deletion by password and email confirmation.</div>
+                                <div class="info-label" data-i18n="security.delete_title" style="color:#f66; font-size:1.05rem; font-weight:500; margin-bottom:4px;">Delete account</div>
+                                <div class="info-value" data-i18n="security.delete_desc" style="color:#888; font-size:0.9rem; font-weight:400;">Request deletion by password and email confirmation.</div>
                             </div>
-                            <button id="btnDeleteAccount" style="background:transparent; border:1px solid #f66; color:#f66; border-radius:6px; padding:6px 14px; cursor:pointer; font-weight:500; font-family:inherit; font-size:0.9rem; transition: all 0.2s;" onmouseover="this.style.background='#f66'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#f66';">Delete</button>
+                            <button id="btnDeleteAccount" data-i18n="security.delete_btn" style="background:transparent; border:1px solid #f66; color:#f66; border-radius:6px; padding:6px 14px; cursor:pointer; font-weight:500; font-family:inherit; font-size:0.9rem; transition: all 0.2s;" onmouseover="this.style.background='#f66'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#f66';">Delete</button>
                         </div>
                     </div>
                 </div>
@@ -769,8 +773,8 @@
         <div id="tab-key-history" class="tab-content">
             <div class="personal-info-container">
                 <div class="info-header">
-                    <h2>ประวัติคีย์</h2>
-                    <p>คีย์ลิขสิทธิ์ทั้งหมดที่คุณแลก</p>
+                    <h2 data-i18n="keyhistory.title">ประวัติคีย์</h2>
+                    <p data-i18n="keyhistory.subtitle">คีย์ลิขสิทธิ์ทั้งหมดที่คุณแลก</p>
                 </div>
                 
                 <div class="info-list" style="padding: 0;" id="keyHistoryList">
@@ -801,8 +805,8 @@
             <div class="modal-desc" id="editModalDesc" style="display:none;"></div>
             <input type="text" id="editModalInput" class="modal-input" placeholder="กรอกข้อมูลใหม่..." />
             <div class="modal-actions">
-                <button class="modal-btn modal-btn-cancel" onclick="closeEditModal()">ยกเลิก</button>
-                <button class="modal-btn modal-btn-save" id="btnSaveEditModal">บันทึก</button>
+                <button class="modal-btn modal-btn-cancel" onclick="closeEditModal()" data-i18n="modal.cancel">ยกเลิก</button>
+                <button class="modal-btn modal-btn-save" id="btnSaveEditModal" data-i18n="modal.save">บันทึก</button>
             </div>
         </div>
     </div>
@@ -811,7 +815,7 @@
     <div id="robloxAccountsModal" class="modal-overlay hidden">
         <div class="modal glass-panel">
             <div class="modal-header">
-                <h2><i class="ph ph-users"></i> บัญชี Roblox ที่ใช้กับระบบ</h2>
+                <h2 data-i18n="roblox.title"><i class="ph ph-users"></i> บัญชี Roblox ที่ใช้กับระบบ</h2>
                 <button class="icon-btn" id="closeRobloxModalBtn"><i class="ph ph-x"></i></button>
             </div>
             <div class="file-list" id="robloxAccountsList" style="max-height: 400px; overflow-y: auto;">
