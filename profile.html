@@ -389,11 +389,93 @@
 </head>
 
 <body>
-    <!-- Top Header -->
-    <header class="top-header">
-        <h1>Real Account</h1>
-        <button id="logoutBtn" class="btn-logout">ออกจากระบบ</button>
-    </header>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="logo">
+                <img src="https://raw.githubusercontent.com/kentatvv1-tech/UI-BYKENTA/main/logo%20w.png"
+                    alt="Singularity Logo" class="custom-logo">
+                <span>Singularity</span>
+            </div>
+            <div class="search-bar">
+                <i class="ph ph-magnifying-glass"></i>
+                <input type="text" id="searchInput" placeholder="Search or jump to...">
+                <span class="shortcut">/</span>
+            </div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="issues.html">Issues</a></li>
+            <li><a href="profile.html" class="active">Profile</a></li>
+            <li><a href="scripts.html">Scripts Hub</a></li>
+            <li><a href="key.html">My Key</a></li>
+            <li><a href="executors.html">Executors</a></li>
+        </ul>
+        <div class="nav-right">
+            <!-- Notification Bell -->
+            <div id="notifBellWrap" style="position:relative;">
+                <button class="icon-btn" id="notifBell" title="Notifications">
+                    <i class="ph ph-bell"></i>
+                    <span id="notifBadge" style="display:none;"></span>
+                </button>
+                <div id="notifPanel">
+                    <div class="notif-header">
+                        <h4>Notifications</h4>
+                        <button id="notifMarkAll">Mark all read</button>
+                    </div>
+                    <div id="notifList"></div>
+                </div>
+            </div>
+            <button class="btn-primary btn-sm" id="newRepoBtn">
+                <i class="ph ph-plus"></i> New
+            </button>
+            <div class="profile-avatar">
+                <img id="navAvatar" src="https://ui-avatars.com/api/?name=U&background=000&color=fff"
+                    alt="User Profile">
+            </div>
+            <button class="icon-btn" id="logoutBtn" title="Sign out"><i class="ph ph-sign-out"></i></button>
+        </div>
+    </nav>
+    
+    <!-- New Repo Modal -->
+    <div id="newRepoModal" class="modal-overlay hidden">
+        <div class="modal glass-panel">
+            <div class="modal-header">
+                <h2><i class="ph ph-book-bookmark"></i> Create a new repository</h2>
+                <button class="icon-btn" id="closeModalBtn"><i class="ph ph-x"></i></button>
+            </div>
+            <div id="modalError" class="error-banner hidden"></div>
+            <div class="form-group">
+                <label>Repository name <span style="color:#f66">*</span></label>
+                <input type="text" id="repoName" placeholder="my-awesome-project">
+            </div>
+            <div class="form-group" style="margin-top:16px">
+                <label>Description <span style="color:#666">(optional)</span></label>
+                <input type="text" id="repoDesc" placeholder="Short description of your repository">
+            </div>
+            <div class="form-group" style="margin-top:16px">
+                <label>Visibility</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="visibility" value="private" checked>
+                        <i class="ph ph-lock"></i> Private
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="visibility" value="public">
+                        <i class="ph ph-globe"></i> Public
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelModalBtn">Cancel</button>
+                <button class="btn-primary" id="createRepoBtn">
+                    <span id="createRepoBtnText">Create repository</span>
+                    <span id="createRepoSpinner" class="spinner hidden"></span>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Main Layout -->
     <div class="profile-container">
@@ -532,6 +614,7 @@
     
     <div id="toast" class="toast"></div>
 
+    <script src="script.js"></script>
     <script type="module">
         import { requireAuth, logout, getCurrentUserProfile } from "./auth.js";
         import { supabase } from "./supabase-config.js";
@@ -622,6 +705,8 @@
                 if (currentUser.avatar_url) {
                     document.getElementById("sidebarAvatar").src = currentUser.avatar_url;
                     document.getElementById("mainAvatar").src = currentUser.avatar_url;
+                    const navAvatar = document.getElementById("navAvatar");
+                    if(navAvatar) navAvatar.src = currentUser.avatar_url;
                 }
                 
                 const memberSinceStr = formatDateThai(currentUser.created_at);
@@ -649,6 +734,8 @@
 
             document.getElementById("sidebarAvatar").src = finalUrl;
             document.getElementById("mainAvatar").src = finalUrl;
+            const navAvatar = document.getElementById("navAvatar");
+            if(navAvatar) navAvatar.src = finalUrl;
             currentUser.avatar_url = finalUrl;
             showToast("อัปเดตรูปโปรไฟล์สำเร็จ!");
         });
