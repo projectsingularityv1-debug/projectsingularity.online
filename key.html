@@ -712,7 +712,7 @@
             Singularity
         </a>
         <div style="display:flex; gap:16px; align-items:center;">
-            <a href="admin-keys.html" class="key-nav-back" id="adminLink" style="display:none; color:#ff8000; font-weight:600;">👑 Manage All Keys</a>
+            <a href="admin-keys.html" class="key-nav-back" id="adminLink" style="display:none; color:#ff8000; font-weight:600;">Manage All Keys</a>
             <a href="index.html" class="key-nav-back">← Back to Dashboard</a>
         </div>
     </nav>
@@ -720,7 +720,7 @@
     <!-- Main -->
     <div class="key-page">
         <div class="key-page-header">
-            <h1>🔑 Script Key</h1>
+            <h1>Script Key</h1>
             <p>ใช้ Key นี้ใน <strong style="color:rgba(255,255,255,0.8)">Loader.lua</strong> เพื่อยืนยันตัวตนก่อนใช้งานสคริปต์ใน Roblox</p>
         </div>
 
@@ -802,7 +802,7 @@
                 </li>
                 <li class="step-item">
                     <span class="step-num">5</span>
-                    <span class="step-text">ถ้า Key ถูกต้อง สคริปต์จะเริ่มทำงานตามปกติ ✅</span>
+                    <span class="step-text">ถ้า Key ถูกต้อง สคริปต์จะเริ่มทำงานตามปกติ</span>
                 </li>
             </ol>
         </div>
@@ -814,7 +814,6 @@
     <!-- Reset Confirm Modal -->
     <div class="modal-overlay" id="resetModal">
         <div class="modal-box">
-            <div class="modal-icon">⚠️</div>
             <h3>Reset Key?</h3>
             <p>Key เดิมของคุณจะถูกลบและสร้างใหม่ทันที Key เก่าจะใช้งานไม่ได้อีกต่อไป</p>
             <div class="modal-actions">
@@ -938,7 +937,7 @@
             keyMeta.style.display = 'flex';
             metaCreated.textContent = fmtDate(keyData.created_at);
             metaExpires.textContent = keyData.expires_at ? fmtDate(keyData.expires_at) : 'Never';
-            metaStatus.textContent = isActive ? '✅ Valid' : '❌ Expired';
+            metaStatus.textContent = isActive ? 'Valid' : 'Expired';
 
             generateBtn.innerHTML = `
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
@@ -985,7 +984,7 @@
 
                 currentKey = data;
                 renderKey(data);
-                showToast('🎉 Key generated successfully!', 'success');
+                showToast('Key generated successfully!', 'success');
             } catch (e) {
                 showAlert('Error: ' + e.message);
                 renderNoKey();
@@ -1020,7 +1019,7 @@
 
                 currentKey = data;
                 renderKey(data);
-                showToast('🔄 Key has been reset!', 'success');
+                showToast('Key has been reset!', 'success');
             } catch (e) {
                 showAlert('Error: ' + e.message);
             } finally {
@@ -1038,7 +1037,7 @@
             try {
                 await navigator.clipboard.writeText(keyText);
                 copyBtn.style.color = '#00dc82';
-                showToast('✅ Key copied to clipboard!', 'success');
+                showToast('Key copied to clipboard!', 'success');
                 setTimeout(() => copyBtn.style.color = '#ff8000', 2000);
             } catch {
                 showToast('Failed to copy. Please copy manually.', 'error');
