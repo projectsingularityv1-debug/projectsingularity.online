@@ -1365,6 +1365,7 @@ function Library:Window(p)
 
 	local Title = p.Title or 'null'
 	local Desc = p.Desc or ''
+	local Version = p.Version or '1.0'
 	local Icon = p.Icon or 'door-open'
 	local Theme = p.Theme or 'Dark'
 	local Keybind = p.Config.Keybind or Enum.KeyCode.LeftControl
@@ -5256,7 +5257,7 @@ function Library:Window(p)
 			if not firsttime then
 				firsttime = true
 				Tabs:Notify({
-					Title = 'Dummy Kawaii',
+					Title = Title .. " v" .. Version,
 					Desc = 'Press the <font color="#FF77A5" size="14">('..tostring(Keybind):gsub("Enum.KeyCode.", "")..')</font> button to hide and show the UI',
 					Time = 10
 				})
