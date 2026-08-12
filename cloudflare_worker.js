@@ -74,7 +74,7 @@ export default {
 
         // ── ดึงข้อมูล Profile ──────────────────────────────────
         let profile = null;
-        const profileQuery = `${SUPABASE_URL}/rest/v1/profiles?id=eq.${row.user_id}&select=username,email,avatar_url`;
+        const profileQuery = `${SUPABASE_URL}/rest/v1/profiles?id=eq.${row.user_id}&select=username,avatar_url`;
         const profileRes = await fetch(profileQuery, {
           method: 'GET',
           headers: {
