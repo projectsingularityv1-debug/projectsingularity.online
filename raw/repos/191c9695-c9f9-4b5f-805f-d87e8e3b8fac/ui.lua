@@ -1791,10 +1791,22 @@ function Library:Window(p)
 							end
 							local cleanName = (ProfileData.Username or "user"):gsub("[^%w]", "")
 							local fileName = "SingularityAssets/" .. cleanName .. "_avatar.png"
-							local imgData = game:HttpGet(avatarUrl)
-							if imgData and #imgData > 0 then
-								writefile(fileName, imgData)
-								Profile_Avatar.Image = getcustomasset(fileName)
+							
+							-- ใช้ request() แทน game:HttpGet() สำหรับโหลดรูป
+							local req = (request or http_request or (syn and syn.request) or (http and http.request))
+							if req then
+								local response = req({ Url = avatarUrl, Method = "GET" })
+								if response and response.StatusCode == 200 and response.Body then
+									writefile(fileName, response.Body)
+									Profile_Avatar.Image = getcustomasset(fileName)
+								end
+							else
+								-- Fallback 
+								local imgData = game:HttpGet(avatarUrl)
+								if imgData and #imgData > 0 then
+									writefile(fileName, imgData)
+									Profile_Avatar.Image = getcustomasset(fileName)
+								end
 							end
 						end
 					end)
