@@ -51,36 +51,55 @@ export async function logout() {
 export async function getCurrentUserProfile() {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error || !user) return null;
-    
+
+    // Derive sensible fallbacks from auth.user directly
+    const authEmail = user.email || '';
+    const authUsername = user.user_metadata?.username
+        || user.user_metadata?.full_name
+        || user.user_metadata?.name
+        || authEmail.split('@')[0]
+        || 'User';
+    const authAvatar = user.user_metadata?.avatar_url
+        || user.user_metadata?.picture
+        || `https://ui-avatars.com/api/?name=${encodeURIComponent(authUsername)}&background=1a1a2e&color=ff8000&bold=true`;
+
     // Fetch profile data from 'profiles' table
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
-        
-    if (profile) {
-        let avatar = profile.avatar_url;
-        // If the avatar is the default UI-Avatar or missing, try to use the Discord one
-        if (!avatar || avatar.includes("ui-avatars.com") || avatar.includes("null")) {
-            avatar = user.user_metadata?.avatar_url || user.user_metadata?.picture || avatar;
-            
-            // Generate a fallback avatar if still nothing
-            if (!avatar) {
-                avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.username || 'User')}&background=000&color=fff`;
-            }
-        }
-        return { ...profile, avatar_url: avatar, email: user.email, uid: user.id };
-    }
-    
-    let fallbackAvatar = user.user_metadata?.avatar_url || user.user_metadata?.picture;
-    let fallbackUsername = user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.username || user.email.split('@')[0];
-    
-    if (!fallbackAvatar) {
-        fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(fallbackUsername)}&background=000&color=fff`;
+
+    if (profileError) {
+        console.warn('[Auth] profiles fetch error:', profileError.message);
     }
 
-    return { uid: user.id, email: user.email, username: fallbackUsername, avatar_url: fallbackAvatar };
+    // If profile row exists, merge with auth data (auth data wins for email)
+    if (profile) {
+        let avatar = profile.avatar_url;
+        // Fall back to auth avatar if profile avatar is missing or a ui-avatars placeholder
+        if (!avatar || avatar.includes('ui-avatars.com') || avatar === 'null') {
+            avatar = authAvatar;
+        }
+        return {
+            ...profile,
+            avatar_url: avatar,
+            email: authEmail,          // always use auth email (most reliable)
+            username: profile.username || authUsername,
+            uid: user.id,
+        };
+    }
+
+    // No profile row — use auth data only
+    return {
+        uid: user.id,
+        email: authEmail,
+        username: authUsername,
+        avatar_url: authAvatar,
+        country: 'ยังตรวจไม่พบ',
+        language: 'ไทย',
+        created_at: user.created_at,
+    };
 }
 
 // ── Password Reset ──────────────────────────────────────────────
