@@ -704,24 +704,43 @@
             setTimeout(() => toast.className = 'toast', 2800);
         }
 
-        // Generate Graph Cells (52 weeks * 7 days)
-        function generateGraph() {
+        // Generate Graph Cells (52 weeks * 7 days) based on real key generation data
+        async function generateGraph(user) {
             const graph = document.getElementById('activityGraph');
             let html = '';
-            for (let i = 0; i < 364; i++) {
-                let level = 0;
-                if (i > 340 && Math.random() > 0.7) {
-                    level = Math.floor(Math.random() * 4) + 1;
-                } else if (Math.random() > 0.95) {
-                    level = Math.floor(Math.random() * 2) + 1;
-                }
-                
-                if (i === 356 || i === 362 || i === 363) level = 4;
-                if (i === 350 || i === 360) level = 3;
-                if (i === 355 || i === 349) level = 2;
+            
+            // Fetch all keys to count daily generation
+            const { data: keys } = await supabase.from('script_keys').select('created_at').eq('user_id', user.uid);
+            
+            const counts = {};
+            if (keys) {
+                keys.forEach(k => {
+                    const d = new Date(k.created_at);
+                    // Use local date string YYYY-MM-DD for counting
+                    const dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+                    counts[dateStr] = (counts[dateStr] || 0) + 1;
+                });
+            }
 
+            const today = new Date();
+            
+            for (let i = 0; i < 364; i++) {
+                const daysAgo = 363 - i;
+                const cellDate = new Date(today);
+                cellDate.setDate(cellDate.getDate() - daysAgo);
+                
+                const dateStr = cellDate.getFullYear() + '-' + String(cellDate.getMonth() + 1).padStart(2, '0') + '-' + String(cellDate.getDate()).padStart(2, '0');
+                
+                const count = counts[dateStr] || 0;
+                let level = 0;
+                if (count === 1) level = 1;
+                else if (count === 2) level = 2;
+                else if (count === 3) level = 3;
+                else if (count >= 4) level = 4;
+                
                 const className = level > 0 ? `graph-cell lvl-${level}` : 'graph-cell';
-                html += `<div class="${className}"></div>`;
+                // Tooltip added for clarity
+                html += `<div class="${className}" title="${count} keys on ${dateStr}"></div>`;
             }
             graph.innerHTML = html;
         }
@@ -761,12 +780,13 @@
 
         // ── Init ─────────────────────────────────────────────
         (async () => {
-            generateGraph();
-            
             try {
                 await requireAuth();
                 currentUser = await getCurrentUserProfile();
                 if (!currentUser) return;
+                
+                // Generate activity graph using real user data
+                generateGraph(currentUser);
 
                 // Fill profile
                 document.getElementById("sidebarUsername").textContent = currentUser.username;

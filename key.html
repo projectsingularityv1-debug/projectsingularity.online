@@ -904,10 +904,12 @@
                     .from('script_keys')
                     .select('*')
                     .eq('user_id', currentUser.id)
-                    .single();
+                    .eq('is_active', true)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .maybeSingle();
 
-                if (error && error.code !== 'PGRST116') {
-                    // PGRST116 = no rows found
+                if (error) {
                     showAlert('Error loading key: ' + error.message);
                 }
 
@@ -969,10 +971,13 @@
             generateBtn.innerHTML = '<span class="spin"></span> Generating...';
 
             try {
+                const expiresAt = new Date();
+                expiresAt.setHours(expiresAt.getHours() + 24);
+                
                 const newKey = generateKeyValue();
                 const { data, error } = await supabase
                     .from('script_keys')
-                    .insert({ user_id: currentUser.id, key_value: newKey, is_active: true })
+                    .insert({ user_id: currentUser.id, key_value: newKey, is_active: true, expires_at: expiresAt.toISOString() })
                     .select()
                     .single();
 
@@ -999,16 +1004,19 @@
             resetBtn.innerHTML = '<span class="spin"></span>';
 
             try {
-                // Delete old key
+                // Revoke old key instead of deleting it to preserve history
                 if (currentKey) {
-                    await supabase.from('script_keys').delete().eq('id', currentKey.id);
+                    await supabase.from('script_keys').update({ is_active: false }).eq('id', currentKey.id);
                 }
 
-                // Insert new key
+                // Insert new key with 24 hour expiration
+                const expiresAt = new Date();
+                expiresAt.setHours(expiresAt.getHours() + 24);
+                
                 const newKey = generateKeyValue();
                 const { data, error } = await supabase
                     .from('script_keys')
-                    .insert({ user_id: currentUser.id, key_value: newKey, is_active: true })
+                    .insert({ user_id: currentUser.id, key_value: newKey, is_active: true, expires_at: expiresAt.toISOString() })
                     .select()
                     .single();
 
