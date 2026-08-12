@@ -117,6 +117,7 @@
             font-weight: 500;
             border-radius: 8px;
             transition: all 0.2s ease;
+            cursor: pointer;
         }
 
         .sidebar-link i {
@@ -138,9 +139,17 @@
         .main-content {
             flex: 1;
             padding-top: 60px;
-            display: flex;
+        }
+
+        /* Tabs */
+        .tab-content {
+            display: none;
+            width: 100%;
             flex-direction: column;
             align-items: center;
+        }
+        .tab-content.active {
+            display: flex;
         }
 
         .hero-profile {
@@ -201,7 +210,7 @@
         /* Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             width: 100%;
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
@@ -306,6 +315,55 @@
             padding-right: 12px; /* adjust based on cell width */
         }
         
+        /* Personal Info Tab */
+        .personal-info-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .info-header {
+            margin-bottom: 32px;
+        }
+        .info-header h2 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+        }
+        .info-header p {
+            font-size: 1rem;
+            color: #888;
+            margin: 0;
+        }
+
+        .info-list {
+            width: 100%;
+        }
+
+        .info-row {
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-size: 0.95rem;
+            color: #888;
+            margin-bottom: 8px;
+            font-weight: 400;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            color: #fff;
+            font-weight: 500;
+        }
+
         .toast {
             position: fixed;
             bottom: 30px;
@@ -350,92 +408,125 @@
             </div>
             
             <nav class="sidebar-nav">
-                <a href="#" class="sidebar-link active"><i class="ph ph-chart-line-up"></i> ภาพรวม</a>
-                <a href="#" class="sidebar-link"><i class="ph ph-user"></i> ข้อมูลส่วนตัว</a>
-                <a href="#" class="sidebar-link"><i class="ph ph-lock-key"></i> การเข้าสู่ระบบและความปลอดภัย</a>
-                <a href="#" class="sidebar-link"><i class="ph ph-package"></i> แพ็กเกจ</a>
-                <a href="#" class="sidebar-link"><i class="ph ph-desktop"></i> อุปกรณ์</a>
-                <a href="#" class="sidebar-link"><i class="ph ph-clock-counter-clockwise"></i> เซสชัน</a>
-                <a href="#" class="sidebar-link"><i class="ph ph-key"></i> ประวัติคีย์</a>
-                <a href="#" class="sidebar-link"><i class="ph ph-swap"></i> การเปลี่ยนแปลงบัญชี</a>
+                <a class="sidebar-link active" data-target="tab-overview"><i class="ph ph-chart-line-up"></i> ภาพรวม</a>
+                <a class="sidebar-link" data-target="tab-personal-info"><i class="ph ph-user"></i> ข้อมูลส่วนตัว</a>
+                <a class="sidebar-link"><i class="ph ph-lock-key"></i> การเข้าสู่ระบบและความปลอดภัย</a>
+                <a class="sidebar-link"><i class="ph ph-package"></i> แพ็กเกจ</a>
+                <a class="sidebar-link"><i class="ph ph-clock-counter-clockwise"></i> เซสชัน</a>
+                <a class="sidebar-link"><i class="ph ph-key"></i> ประวัติคีย์</a>
+                <a class="sidebar-link"><i class="ph ph-swap"></i> การเปลี่ยนแปลงบัญชี</a>
                 <a href="index.html" class="sidebar-link" style="margin-top:20px; color:#ff8000;"><i class="ph ph-arrow-left"></i> กลับหน้าหลัก</a>
             </nav>
         </aside>
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Hero Profile -->
-            <div class="hero-profile">
-                <div class="hero-avatar-wrapper">
-                    <img id="mainAvatar" src="https://ui-avatars.com/api/?name=U&background=111&color=fff&size=200" alt="Avatar" class="hero-avatar">
-                    <label for="avatarUpload" class="edit-avatar-btn" title="Change avatar">
-                        <i class="ph ph-pencil-simple"></i>
-                        <input type="file" id="avatarUpload" accept="image/*" style="display:none">
-                    </label>
-                </div>
-                <h2 id="mainUsername" class="hero-name">—</h2>
-                <p id="mainEmail" class="hero-email">—</p>
-            </div>
-
-            <!-- Stats Grid -->
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <div id="statMemberSince" class="stat-val">—</div>
-                    <div class="stat-label">เป็นสมาชิกตั้งแต่</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-val">Free</div>
-                    <div class="stat-label">แพ็กเกจปัจจุบัน</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-val">20 hours</div>
-                    <div class="stat-label">เวลาในบัญชี</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-val">0</div>
-                    <div class="stat-label">บัญชี Roblox ที่สร้างแล้ว</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-val">1</div>
-                    <div class="stat-label">อุปกรณ์ที่ใช้</div>
-                </div>
-            </div>
-
-            <!-- Activity Section -->
-            <div class="activity-section">
-                <div class="activity-header">
-                    <div class="activity-title">
-                        <h3>กิจกรรม</h3>
-                        <p>กิจกรรมของคุณในช่วงปีที่ผ่านมา</p>
+            
+            <!-- TAB: ภาพรวม -->
+            <div id="tab-overview" class="tab-content active">
+                <!-- Hero Profile -->
+                <div class="hero-profile">
+                    <div class="hero-avatar-wrapper">
+                        <img id="mainAvatar" src="https://ui-avatars.com/api/?name=U&background=111&color=fff&size=200" alt="Avatar" class="hero-avatar">
+                        <label for="avatarUpload" class="edit-avatar-btn" title="Change avatar">
+                            <i class="ph ph-pencil-simple"></i>
+                            <input type="file" id="avatarUpload" accept="image/*" style="display:none">
+                        </label>
                     </div>
-                    <div class="activity-legends">
-                        <span class="legend-item active">รายวัน</span>
-                        <span class="legend-item">รายสัปดาห์</span>
-                        <span class="legend-item">สะสม</span>
+                    <h2 id="mainUsername" class="hero-name">—</h2>
+                    <p id="mainEmail" class="hero-email">—</p>
+                </div>
+
+                <!-- Stats Grid (4 columns now since devices are removed) -->
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div id="statMemberSince" class="stat-val">—</div>
+                        <div class="stat-label">เป็นสมาชิกตั้งแต่</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-val">Free</div>
+                        <div class="stat-label">แพ็กเกจปัจจุบัน</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-val">20 hours</div>
+                        <div class="stat-label">เวลาในบัญชี</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-val">0</div>
+                        <div class="stat-label">บัญชี Roblox ที่สร้างแล้ว</div>
                     </div>
                 </div>
 
-                <div class="graph-wrapper">
-                    <div class="activity-graph" id="activityGraph">
-                        <!-- Cells injected via JS -->
+                <!-- Activity Section -->
+                <div class="activity-section">
+                    <div class="activity-header">
+                        <div class="activity-title">
+                            <h3>กิจกรรม</h3>
+                            <p>กิจกรรมของคุณในช่วงปีที่ผ่านมา</p>
+                        </div>
+                        <div class="activity-legends">
+                            <span class="legend-item active">รายวัน</span>
+                            <span class="legend-item">รายสัปดาห์</span>
+                            <span class="legend-item">สะสม</span>
+                        </div>
                     </div>
-                    <div class="graph-months">
-                        <span>ส.ค.</span>
-                        <span>ก.ย.</span>
-                        <span>ต.ค.</span>
-                        <span>พ.ย.</span>
-                        <span>ธ.ค.</span>
-                        <span>ม.ค.</span>
-                        <span>ก.พ.</span>
-                        <span>มี.ค.</span>
-                        <span>เม.ย.</span>
-                        <span>พ.ค.</span>
-                        <span>มิ.ย.</span>
-                        <span>ก.ค.</span>
-                        <span>ส.ค.</span>
+
+                    <div class="graph-wrapper">
+                        <div class="activity-graph" id="activityGraph">
+                            <!-- Cells injected via JS -->
+                        </div>
+                        <div class="graph-months">
+                            <span>ส.ค.</span>
+                            <span>ก.ย.</span>
+                            <span>ต.ค.</span>
+                            <span>พ.ย.</span>
+                            <span>ธ.ค.</span>
+                            <span>ม.ค.</span>
+                            <span>ก.พ.</span>
+                            <span>มี.ค.</span>
+                            <span>เม.ย.</span>
+                            <span>พ.ค.</span>
+                            <span>มิ.ย.</span>
+                            <span>ก.ค.</span>
+                            <span>ส.ค.</span>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <!-- TAB: ข้อมูลส่วนตัว -->
+            <div id="tab-personal-info" class="tab-content">
+                <div class="personal-info-container">
+                    <div class="info-header">
+                        <h2>ข้อมูลส่วนตัว</h2>
+                        <p>จัดการรายละเอียดที่เชื่อมกับบัญชี Real ของคุณ</p>
+                    </div>
+                    
+                    <div class="info-list">
+                        <div class="info-row">
+                            <div class="info-label">ชื่อผู้ใช้</div>
+                            <div class="info-value" id="piUsername">—</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">อีเมล</div>
+                            <div class="info-value" id="piEmail">—</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">ประเทศ / ภูมิภาค</div>
+                            <div class="info-value">ยังตรวจไม่พบ</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">ภาษา</div>
+                            <div class="info-value">ไทย</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">เป็นสมาชิกตั้งแต่</div>
+                            <div class="info-value" id="piMemberSince">—</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
     
@@ -459,15 +550,13 @@
             const graph = document.getElementById('activityGraph');
             let html = '';
             for (let i = 0; i < 364; i++) {
-                // Randomly light up some squares to mimic the image
                 let level = 0;
                 if (i > 340 && Math.random() > 0.7) {
-                    level = Math.floor(Math.random() * 4) + 1; // 1 to 4
+                    level = Math.floor(Math.random() * 4) + 1;
                 } else if (Math.random() > 0.95) {
                     level = Math.floor(Math.random() * 2) + 1;
                 }
                 
-                // Hardcode the right-most columns to have some white squares like the image
                 if (i === 356 || i === 362 || i === 363) level = 4;
                 if (i === 350 || i === 360) level = 3;
                 if (i === 355 || i === 349) level = 2;
@@ -488,6 +577,29 @@
             return `${day} ${month} ${year}`;
         }
 
+        // ── Tab Switching Logic ────────────────────────────────
+        const navLinks = document.querySelectorAll('.sidebar-link[data-target]');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Remove active from all links
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                // Add active to clicked link
+                link.classList.add('active');
+
+                // Hide all tabs
+                tabContents.forEach(tab => tab.classList.remove('active'));
+                
+                // Show target tab
+                const targetId = link.getAttribute('data-target');
+                if (targetId) {
+                    document.getElementById(targetId).classList.add('active');
+                }
+            });
+        });
+
         // ── Init ─────────────────────────────────────────────
         (async () => {
             generateGraph();
@@ -503,12 +615,18 @@
                 document.getElementById("mainUsername").textContent = currentUser.username;
                 document.getElementById("mainEmail").textContent = currentUser.email;
                 
+                // Fill Personal Info Tab
+                document.getElementById("piUsername").textContent = currentUser.username;
+                document.getElementById("piEmail").textContent = currentUser.email;
+                
                 if (currentUser.avatar_url) {
                     document.getElementById("sidebarAvatar").src = currentUser.avatar_url;
                     document.getElementById("mainAvatar").src = currentUser.avatar_url;
                 }
                 
-                document.getElementById("statMemberSince").textContent = formatDateThai(currentUser.created_at);
+                const memberSinceStr = formatDateThai(currentUser.created_at);
+                document.getElementById("statMemberSince").textContent = memberSinceStr;
+                document.getElementById("piMemberSince").textContent = memberSinceStr;
                 
                 document.title = `${currentUser.username} — Real Account`;
 
@@ -526,7 +644,6 @@
             }
             const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(`${currentUser.uid}`);
 
-            // Update profile with unique URL (add timestamp to bypass cache)
             const finalUrl = publicUrl + "?t=" + Date.now();
             await supabase.from('profiles').update({ avatar_url: finalUrl }).eq('id', currentUser.uid);
 
