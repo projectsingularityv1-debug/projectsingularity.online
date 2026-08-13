@@ -74,7 +74,7 @@
     padding: 10px 14px;
     color: #fff;
     font-size: 0.95rem;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Outfit', 'Kanit', sans-serif;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -94,7 +94,7 @@
     padding: 12px;
     font-size: 0.95rem;
     font-weight: 700;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Outfit', 'Kanit', sans-serif;
     cursor: pointer;
     display: flex;
     align-items: center;

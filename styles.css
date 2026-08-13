@@ -25,7 +25,7 @@
     --glass-blur: blur(12px);
     
     /* Typography */
-    --font-main: 'Outfit', -apple-system, sans-serif;
+    --font-main: 'Outfit', 'Kanit', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
 }
 
