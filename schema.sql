@@ -220,3 +220,31 @@ create policy "Admins can manage all keys"
     )
   );
 
+
+
+-- ============================================================
+-- 8. Roblox Accounts (ประวัติตัวละครที่ใช้คีย์)
+-- ============================================================
+create table if not exists public.roblox_accounts (
+  id              uuid default gen_random_uuid() primary key,
+  user_id         uuid references public.profiles(id) on delete cascade not null,
+  roblox_username text not null,
+  roblox_userid   bigint not null,
+  key_used        text not null,
+  last_used_at    timestamptz default now(),
+  unique(user_id, roblox_userid)
+);
+
+alter table public.roblox_accounts enable row level security;
+
+create policy "Users can view own roblox accounts" 
+  on public.roblox_accounts for select using (auth.uid() = user_id);
+
+create policy "Admins can view all roblox accounts" 
+  on public.roblox_accounts for all 
+  using ( 
+    exists ( 
+      select 1 from public.profiles 
+      where id = auth.uid() and is_admin = true 
+    ) 
+  );
