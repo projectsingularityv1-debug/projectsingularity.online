@@ -219,48 +219,54 @@ export default {
     // ═══════════════════════════════════════════════════════
     // Route: GET /raw/* — ดึงไฟล์สคริปต์จาก Supabase
     // ═══════════════════════════════════════════════════════
-    const supabaseUrl = 'https://jqtxjbuiplmqjodqozre.supabase.co/storage/v1/object/public';
+    if (url.pathname.startsWith('/raw')) {
+      const supabaseUrl = 'https://jqtxjbuiplmqjodqozre.supabase.co/storage/v1/object/public';
 
-    let path = url.pathname;
-    if (path.startsWith('/raw')) {
-      path = path.replace('/raw', '');
-    }
+      let path = url.pathname.replace(/^\/raw/, '');
+      const targetUrl = supabaseUrl + path;
 
-    const targetUrl = supabaseUrl + path;
+      const userAgent = request.headers.get('User-Agent') || '';
 
-    const userAgent = request.headers.get('User-Agent') || '';
-
-    if (!userAgent.toLowerCase().includes('roblox')) {
-      return new Response(
-        "-- Access Denied\nwarn('ไม่สามารถดูโค้ดผ่านเบราว์เซอร์ได้! อนุญาตให้รันผ่าน Roblox เท่านั้น')",
-        {
-          status: 403,
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-        }
-      );
-    }
-
-    const supabaseResponse = await fetch(targetUrl);
-
-    if (!supabaseResponse.ok) {
-      return new Response(
-        "-- 404 Not Found\nwarn('หาไฟล์ไม่เจอ หรือลิงก์ผิด')",
-        {
-          status: 404,
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-        }
-      );
-    }
-
-    const scriptContent = await supabaseResponse.text();
-
-    return new Response(scriptContent, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8',
-        'Access-Control-Allow-Origin': '*'
+      if (!userAgent.toLowerCase().includes('roblox') && !url.searchParams.has('allow_browser')) {
+        return new Response(
+          "-- Access Denied\nwarn('ไม่สามารถดูโค้ดผ่านเบราว์เซอร์ได้! อนุญาตให้รันผ่าน Roblox เท่านั้น')",
+          {
+            status: 403,
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+          }
+        );
       }
-    });
+
+      const supabaseResponse = await fetch(targetUrl);
+
+      if (!supabaseResponse.ok) {
+        return new Response(
+          "-- 404 Not Found\nwarn('หาไฟล์ไม่เจอ หรือลิงก์ผิด')",
+          {
+            status: 404,
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+          }
+        );
+      }
+
+      const scriptContent = await supabaseResponse.text();
+
+      return new Response(scriptContent, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // Fallback: Passthrough for Web Pages (HTML, JS, CSS)
+    // ═══════════════════════════════════════════════════════
+    if (env && env.ASSETS) {
+      return env.ASSETS.fetch(request);
+    }
+    return fetch(request);
   },
 };
 
