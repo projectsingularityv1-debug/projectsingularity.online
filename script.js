@@ -1,11 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Tab switching logic (visual only for mockup)
+    // Tab switching logic
     const tabs = document.querySelectorAll('.tab');
     tabs.forEach(tab => {
         tab.addEventListener('click', (e) => {
-            e.preventDefault();
-            tabs.forEach(t => t.classList.remove('active'));
-            e.currentTarget.classList.add('active');
+            const href = tab.getAttribute('href');
+            if (!href || href === '#') {
+                e.preventDefault();
+                tabs.forEach(t => t.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+            }
         });
     });
 

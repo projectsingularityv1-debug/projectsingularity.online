@@ -1334,53 +1334,33 @@
     </script>
 
     <script>
-        // ── Page Transition ───────────────────────────────────
-        const pt = document.getElementById('page-transition');
-
         function navigateTo(url) {
-            pt.classList.add('fade-in');
-            setTimeout(() => { window.location.href = url; }, 350);
+            window.location.href = url;
         }
-
-        // Intercept all internal anchor clicks
-        document.addEventListener('click', (e) => {
-            const link = e.target.closest('a');
-            if (!link) return;
-            const href = link.getAttribute('href');
-            if (!href || href.startsWith('http') || href.startsWith('#') || href.startsWith('mailto') || link.target === '_blank') return;
-            e.preventDefault();
-            navigateTo(href);
-        });
-
-        // Fade out when page loads
-        window.addEventListener('pageshow', () => {
-            pt.classList.remove('fade-in');
-        });
 
         // ── Cookie ───────────────────────────────────────────
-        function closeCookie() {
-            document.getElementById('cookieBanner').classList.add('hidden');
-        }
-        function acceptCookie() {
+        window.closeCookie = function() {
+            const b = document.getElementById('cookieBanner');
+            if (b) b.classList.add('hidden');
+        };
+        window.acceptCookie = function() {
             localStorage.setItem('sg_cookieAccepted', '1');
-            closeCookie();
-        }
+            window.closeCookie();
+        };
         if (localStorage.getItem('sg_cookieAccepted')) {
-            document.getElementById('cookieBanner').classList.add('hidden');
+            const b = document.getElementById('cookieBanner');
+            if (b) b.classList.add('hidden');
         }
 
         // ── Navbar scroll ────────────────────────────────────
         const nav = document.getElementById('mainNav');
-        window.addEventListener('scroll', () => {
-            nav.style.background = window.scrollY > 20
-                ? 'rgba(0,0,0,0.85)'
-                : 'rgba(0,0,0,0.5)';
-        });
-
-        // ── Learn more scroll ────────────────────────────────
-        document.getElementById('learnMoreBtn').addEventListener('click', () => {
-            document.querySelector('.trusted-section').scrollIntoView({ behavior: 'smooth' });
-        });
+        if (nav) {
+            window.addEventListener('scroll', () => {
+                nav.style.background = window.scrollY > 20
+                    ? 'rgba(0,0,0,0.85)'
+                    : 'rgba(0,0,0,0.5)';
+            });
+        }
 
         // ── Close dropdown on outside click ──────────────────
         document.addEventListener('click', () => {

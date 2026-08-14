@@ -1181,6 +1181,13 @@
             });
         });
 
+        const btnHelpModal = document.getElementById("btnHelpModal");
+        if (btnHelpModal) {
+            btnHelpModal.addEventListener("click", () => {
+                document.querySelector(".cli-card")?.scrollIntoView({ behavior: "smooth" });
+            });
+        }
+
         // Logout
         document.getElementById("logoutBtn").addEventListener("click", () => logout());
     </script>
