@@ -662,46 +662,6 @@
             flex-shrink: 0;
         }
 
-        /* ── Page Transition Overlay ── */
-        #page-transition {
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-            background: #000000;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.35s ease;
-        }
-
-        #page-transition.fade-in {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        #page-transition.fade-out {
-            opacity: 0;
-        }
-
-        /* Spinner inside transition */
-        #page-transition .pt-spinner {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 36px;
-            height: 36px;
-            border: 3px solid rgba(255, 255, 255, 0.15);
-            border-top-color: rgba(255, 255, 255, 0.7);
-            border-radius: 50%;
-            animation: ptSpin 0.7s linear infinite;
-        }
-
-        @keyframes ptSpin {
-            to {
-                transform: translate(-50%, -50%) rotate(360deg);
-            }
-        }
-
         /* ── Nav Auth Dropdown ── */
         .nav-auth-wrap {
             position: relative;
@@ -1036,14 +996,9 @@
 
 <body>
 
-    <!-- Page Transition Overlay -->
-    <div id="page-transition">
-        <div class="pt-spinner"></div>
-    </div>
-
     <!-- Video Background -->
     <div class="hero-bg">
-        <video autoplay muted loop playsinline>
+        <video autoplay muted loop playsinline preload="metadata" style="filter: brightness(0.6);">
             <source src="https://raw.githubusercontent.com/projectsingularityv1-debug/projectsingularity.online/main/314066.mp4" type="video/mp4">
         </video>
     </div>

@@ -12,61 +12,73 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Starfield Animation
+    // Ultra-lightweight Starfield Animation
     const canvas = document.getElementById('starfield');
     if (!canvas) return;
     
-    const ctx = canvas.getContext('2d');
-    
-    // Resize canvas to fill window
+    const ctx = canvas.getContext('2d', { alpha: true });
+    let animationFrameId = null;
+    let isPageVisible = !document.hidden;
+
     function resize() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
     }
-    window.addEventListener('resize', resize);
+    
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(resize, 100);
+    });
     resize();
     
-    // Star properties
-    const numStars = 150;
+    const numStars = 60;
     const stars = [];
     
     for (let i = 0; i < numStars; i++) {
         stars.push({
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height,
-            radius: Math.random() * 1.5,
-            vx: Math.random() * 0.5 - 0.25,
-            vy: Math.random() * 0.5 - 0.25,
-            alpha: Math.random()
+            size: Math.random() > 0.8 ? 2 : 1,
+            vx: Math.random() * 0.3 - 0.15,
+            vy: Math.random() * 0.3 - 0.15,
+            alpha: Math.random() * 0.7 + 0.3
         });
     }
     
     function animate() {
+        if (!isPageVisible) return;
+        
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#ffffff';
         
         for (let i = 0; i < numStars; i++) {
             const star = stars[i];
-            
-            // Move star
             star.x += star.vx;
             star.y += star.vy;
             
-            // Wrap around edges
             if (star.x < 0) star.x = canvas.width;
-            if (star.x > canvas.width) star.x = 0;
+            else if (star.x > canvas.width) star.x = 0;
             if (star.y < 0) star.y = canvas.height;
-            if (star.y > canvas.height) star.y = 0;
+            else if (star.y > canvas.height) star.y = 0;
             
-            // Draw star
-            ctx.beginPath();
-            ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
-            ctx.fill();
+            ctx.globalAlpha = star.alpha;
+            ctx.fillRect(star.x | 0, star.y | 0, star.size, star.size);
         }
         
-        requestAnimationFrame(animate);
+        animationFrameId = requestAnimationFrame(animate);
     }
     
+    document.addEventListener('visibilitychange', () => {
+        isPageVisible = !document.hidden;
+        if (isPageVisible) {
+            cancelAnimationFrame(animationFrameId);
+            animate();
+        } else {
+            cancelAnimationFrame(animationFrameId);
+        }
+    });
+
     animate();
 });
 
