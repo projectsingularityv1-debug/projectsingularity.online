@@ -28,9 +28,7 @@
         </div>
         <ul class="nav-links">
             <li><a href="home.html" data-i18n="nav.home">หน้าแรก</a></li>
-            <li><a href="index.html" data-i18n="nav.dashboard">แดชบอร์ด</a></li>
-            <li><a href="push.html"><i class="ph ph-git-commit"></i> Push Station</a></li>
-            <li><a href="issues.html" data-i18n="nav.issues">แจ้งปัญหา</a></li>
+            <li><a href="scripts.html" data-i18n="nav.scripts">สคริปต์ฮับ</a></li>
             <li><a href="profile.html" data-i18n="nav.profile">โปรไฟล์</a></li>
             <li><a href="scripts.html" data-i18n="nav.scripts">สคริปต์ฮับ</a></li>
             <li><a href="key.html" data-i18n="nav.key">คีย์ของฉัน</a></li>
@@ -43,34 +41,6 @@
             <button class="icon-btn" id="logoutBtn" title="Sign out"><i class="ph ph-sign-out"></i></button>
         </div>
     </nav>
-
-    <!-- CLI Push Instructions Modal -->
-    <div id="cliPushModal" class="modal-overlay hidden">
-        <div class="modal glass-panel" style="max-width: 600px;">
-            <div class="modal-header">
-                <h2><i class="ph ph-terminal-window" style="color:#00f2fe"></i> Push via Singularity CLI</h2>
-                <button class="icon-btn" id="closeCliPushBtn"><i class="ph ph-x"></i></button>
-            </div>
-            <p style="color:#aaa; font-size:0.88rem; margin:12px 0 16px 0; line-height:1.5;">
-                Deploy code directly from your project directory using custom Git-like commands with auto-obfuscation.
-            </p>
-            <div class="form-group">
-                <label style="color:#00f2fe; font-size:0.85rem; font-weight:700;"># Push existing folder or code</label>
-                <div style="background:#090c14; border:1px solid rgba(0,242,254,0.25); border-radius:10px; padding:14px; position:relative; margin-top:6px;">
-                    <pre id="cliModalCodeBlock" style="margin:0; font-family:'JetBrains Mono',monospace; font-size:0.85rem; color:#38bdf8; line-height:1.7;">sg remote add origin <span id="cliModalRepoId">...</span>
-sg push -u origin main --force</pre>
-                    <button class="btn-secondary btn-sm" id="btnCopyCliModalCode" style="position:absolute; top:10px; right:10px; padding:4px 8px; font-size:0.75rem;">
-                        <i class="ph ph-copy"></i> Copy
-                    </button>
-                </div>
-            </div>
-            <div style="margin-top:16px; display:flex; gap:10px;">
-                <a id="btnLaunchPushStationFromModal" href="#" class="btn-primary" style="flex:1; text-align:center; text-decoration:none; background:linear-gradient(135deg, #00f2fe, #4facfe); color:#000; font-weight:700; padding:10px 16px; border-radius:8px;">
-                    <i class="ph ph-rocket-launch"></i> Open Web/Desktop Push Station
-                </a>
-            </div>
-        </div>
-    </div>
 
     <!-- Upload Modal -->
     <div id="uploadModal" class="modal-overlay hidden">
@@ -208,12 +178,10 @@ sg push -u origin main --force</pre>
                     <span id="repoNameDisplay" class="repo-name-large">repository</span>
                     <span id="repoBadge" class="badge private">Private</span>
                 </div>
-                <div class="repo-actions" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                    <a id="pushStationLink" href="#" class="btn-primary btn-sm" style="background:linear-gradient(135deg, #00f2fe, #4facfe); color:#000; font-weight:700;">
-                        <i class="ph ph-rocket-launch"></i> Push Station
-                    </a>
-                    <button class="btn-secondary btn-sm" id="cliPushBtn">
-                        <i class="ph ph-terminal-window"></i> CLI Push
+                <div class="header-actions">
+                    <button class="btn-primary btn-sm" id="uploadFileBtn">
+                        <i class="ph ph-upload-simple"></i> Upload
+                        <input type="file" id="fileUploadInput" multiple style="display:none">
                     </button>
                     <button class="btn-secondary btn-sm" id="uploadBtn">
                         <i class="ph ph-upload-simple"></i> Upload
@@ -310,41 +278,6 @@ sg push -u origin main --force</pre>
                 document.getElementById("issuesLink").href = issuesUrl;
                 document.getElementById("issuesTabLink").href = issuesUrl;
 
-                // Setup Push Station & CLI modal links
-                const pushStationUrl = `push.html?id=${repoId}`;
-                const pushStationLink = document.getElementById("pushStationLink");
-                if (pushStationLink) pushStationLink.href = pushStationUrl;
-                
-                const btnModalOpenPush = document.getElementById("btnLaunchPushStationFromModal");
-                if (btnModalOpenPush) btnModalOpenPush.href = pushStationUrl;
-
-                const cliModalRepoId = document.getElementById("cliModalRepoId");
-                if (cliModalRepoId) cliModalRepoId.textContent = repoId;
-
-                // CLI Push Modal
-                const cliPushBtn = document.getElementById("cliPushBtn");
-                const cliPushModal = document.getElementById("cliPushModal");
-                const closeCliPushBtn = document.getElementById("closeCliPushBtn");
-                const btnCopyCliModalCode = document.getElementById("btnCopyCliModalCode");
-
-                if (cliPushBtn) {
-                    cliPushBtn.addEventListener("click", () => cliPushModal.classList.remove("hidden"));
-                }
-                if (closeCliPushBtn) {
-                    closeCliPushBtn.addEventListener("click", () => cliPushModal.classList.add("hidden"));
-                }
-                if (btnCopyCliModalCode) {
-                    btnCopyCliModalCode.addEventListener("click", () => {
-                        const cmdText = `sg remote add origin ${repoId}\nsg push -u origin main --force`;
-                        navigator.clipboard.writeText(cmdText).then(() => {
-                            btnCopyCliModalCode.innerHTML = `<i class="ph ph-check" style="color:#4caf50"></i> Copied!`;
-                            setTimeout(() => {
-                                btnCopyCliModalCode.innerHTML = `<i class="ph ph-copy"></i> Copy`;
-                            }, 2000);
-                        });
-                    });
-                }
-
                 await loadFiles();
             } catch (_) { }
         })();
@@ -366,25 +299,10 @@ sg push -u origin main --force</pre>
                         <div style="padding:28px 24px; background:rgba(10,14,22,0.6); border-radius:12px; margin:16px;">
                             <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
                                 <i class="ph ph-lightning" style="color:#00f2fe; font-size:1.4rem;"></i>
-                                <h3 style="font-size:1.15rem; color:#fff; margin:0; font-weight:700;">Quick Setup — Push Code to this repository</h3>
-                            </div>
-                            <p style="color:#8899a6; font-size:0.88rem; margin:0 0 16px 0; line-height:1.5;">
-                                Get started by pushing your project files using the Singularity CLI or drag & drop in Push Station.
-                            </p>
-                            
-                            <div style="background:#07090f; border:1px solid rgba(0,242,254,0.25); border-radius:10px; padding:16px; font-family:'JetBrains Mono',monospace; font-size:0.88rem; color:#38bdf8; position:relative; margin-bottom:18px;">
-                                <div style="color:#64748b; margin-bottom:6px;"># Push an existing project via Command Line:</div>
-                                <div style="color:#fff;">sg remote add origin <span style="color:#00f2fe">${repoId}</span></div>
-                                <div style="color:#fff; margin-top:4px;">sg push -u origin main --force</div>
-                            </div>
-                            
-                            <div style="display:flex; gap:12px; flex-wrap:wrap;">
-                                <a href="push.html?id=${repoId}" class="btn-primary" style="background:linear-gradient(135deg, #00f2fe, #4facfe); color:#000; text-decoration:none; font-weight:800; display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border-radius:10px; box-shadow:0 0 20px rgba(0,242,254,0.25);">
-                                    <i class="ph ph-rocket-launch"></i> Launch Push Station (Drag & Drop)
-                                </a>
-                                <button class="btn-secondary" id="btnUploadFirstFile" style="display:inline-flex; align-items:center; gap:6px; padding:10px 18px; border-radius:10px;">
-                                    <i class="ph ph-upload-simple"></i> Upload Files Manually
-                                </button>
+                                <h3 style="font-size:1.15rem; color:#fff; margin:0; font-weight:700;">Quick Setup</h3>
+                                <p style="color:#888; font-size:0.9rem; margin-top:8px;">
+                                    Upload your first Lua script to start using this repository.
+                                </p>
                             </div>
                         </div>`;
                     
