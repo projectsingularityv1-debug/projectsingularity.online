@@ -347,14 +347,21 @@ async function obfuscateLua(sourceCode) {
 }
 
 // ── Interactive Prompts ──────────────────────────────────────
+let _rl = null;
+function getReadline() {
+    if (!_rl) {
+        _rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
+    }
+    return _rl;
+}
+
 function prompt(question) {
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    });
     return new Promise(resolve => {
+        const rl = getReadline();
         rl.question(question, answer => {
-            rl.close();
             resolve(answer.trim());
         });
     });
@@ -922,6 +929,17 @@ async function cmdPush(args) {
 
     let repoId = localCfg.remote?.[remoteName] || localCfg.remote?.origin;
 
+    // Validate saved repoId — if invalid or corrupted, auto-reset it
+    if (repoId && !cleanRepoIdInput(repoId)) {
+        console.log(c.warn(`Saved remote repository '${repoId}' is invalid. Resetting...`));
+        repoId = null;
+        if (localCfg.remote) {
+            delete localCfg.remote[remoteName];
+            delete localCfg.remote.origin;
+            saveLocalConfig(localCfg, cwd);
+        }
+    }
+
     // Check if repoId was passed directly as positional
     if (!repoId && remoteName && cleanRepoIdInput(remoteName)) {
         repoId = cleanRepoIdInput(remoteName);
@@ -1120,6 +1138,8 @@ async function main() {
     } catch (e) {
         console.error(`\n${c.error('Error:')} ${e.message || e}`);
         process.exit(1);
+    } finally {
+        if (_rl) _rl.close();
     }
 }
 
