@@ -1,0 +1,10 @@
+# Ignore large media and system files
+314066.mp4
+*.mp4
+node_modules/
+.env
+.env.*
+.DS_Store
+Thumbs.db
+*.tmp
+*.log
