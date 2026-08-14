@@ -179,11 +179,7 @@
                     <span id="repoBadge" class="badge private">Private</span>
                 </div>
                 <div class="header-actions">
-                    <button class="btn-primary btn-sm" id="uploadFileBtn">
-                        <i class="ph ph-upload-simple"></i> Upload
-                        <input type="file" id="fileUploadInput" multiple style="display:none">
-                    </button>
-                    <button class="btn-secondary btn-sm" id="uploadBtn">
+                    <button class="btn-primary btn-sm" id="uploadBtn">
                         <i class="ph ph-upload-simple"></i> Upload
                     </button>
                     <a id="issuesLink" href="#" class="btn-secondary btn-sm">
@@ -327,29 +323,33 @@
                     const isReadme = name.toLowerCase() === "readme.md";
                     const isLua = name.endsWith(".lua") || name.endsWith(".txt");
 
+                    const updateTime = file.updated_at ? new Date(file.updated_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+
                     const row = document.createElement("div");
                     row.className = "file-row file-item";
                     row.innerHTML = `
-                        <div class="file-name">
+                        <div class="file-name" style="flex:1;">
                             <i class="ph ${getFileIcon(name)}"></i>
-                            <a href="editor.html?repoId=${repoId}&file=${encodeURIComponent(name)}">${escapeHtml(name)}</a>
+                            <a href="editor.html?repoId=${repoId}&file=${encodeURIComponent(name)}" style="font-weight:600;">${escapeHtml(name)}</a>
+                        </div>
+                        <div class="file-time" style="color:#8899a6; font-size:0.85rem; width:180px; text-align:left;">
+                            ${updateTime}
                         </div>
                         <div class="file-msg" style="display:flex;gap:12px;justify-content:flex-end">
                             ${isLua ? `
-                            <button class="copy-btn" data-url="${fileUrl}" title="Copy loadstring" style="background:none;border:none;color:#666;cursor:pointer;font-size:0.8rem">
+                            <button class="copy-btn" data-url="${fileUrl}" title="Copy loadstring" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:0.85rem; transition:color 0.2s;">
                                 <i class="ph ph-copy"></i> Copy Script
                             </button>
                             ` : ''}
-                            <a href="${fileUrl}" target="_blank" title="View raw" style="color:#666;font-size:0.8rem">
+                            <a href="${fileUrl}" target="_blank" title="View raw" style="color:#aaa;font-size:0.85rem; text-decoration:none; transition:color 0.2s;">
                                 <i class="ph ph-arrow-square-out"></i> Raw
                             </a>
                             ${(currentUser && currentUser.uid === repoData.owner_id) ? `
-                            <button class="del-btn" data-name="${escapeHtml(name)}" title="Delete file" style="background:none;border:none;color:#666;cursor:pointer;font-size:0.85rem">
+                            <button class="del-btn" data-name="${escapeHtml(name)}" title="Delete file" style="background:none;border:none;color:#f66;cursor:pointer;font-size:0.9rem">
                                 <i class="ph ph-trash"></i>
                             </button>
                             ` : ''}
                         </div>
-                        <div class="file-time"></div>
                     `;
                     fileList.appendChild(row);
 
@@ -544,6 +544,72 @@
                 progress.style.color = "#f66";
             }
         });
+
+        // ── Direct Drag & Drop to Overwrite ─────────────────
+        const fileExplorer = document.querySelector('.file-explorer');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            fileExplorer.addEventListener(eventName, preventDefaults, false);
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileExplorer.addEventListener(eventName, () => {
+                if (currentUser && currentUser.uid === repoData.owner_id) {
+                    fileExplorer.style.borderColor = '#00f2fe';
+                    fileExplorer.style.background = 'rgba(0, 242, 254, 0.05)';
+                }
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileExplorer.addEventListener(eventName, () => {
+                fileExplorer.style.borderColor = '';
+                fileExplorer.style.background = '';
+            }, false);
+        });
+
+        fileExplorer.addEventListener('drop', async (e) => {
+            if (!currentUser || currentUser.uid !== repoData.owner_id) return;
+            let dt = e.dataTransfer;
+            let files = dt.files;
+            if (!files.length) return;
+
+            const autoObf = obfCheck?.checked;
+            showToast(`Uploading ${files.length} file(s)...`, 'info');
+
+            try {
+                for (const file of files) {
+                    let contentType = file.type || "text/plain;charset=utf-8";
+                    if (file.name.endsWith(".lua") || file.name.endsWith(".txt") || file.name.endsWith(".js") || file.name.endsWith(".html") || file.name.endsWith(".css")) {
+                        contentType = "text/plain;charset=utf-8";
+                    }
+
+                    if (file.name.endsWith(".lua") && autoObf) {
+                        const code = await file.text();
+                        const obfuscatedCode = await obfuscateLuaCode(code);
+
+                        const rawFile = new Blob([code], { type: contentType });
+                        let rawName = file.name.replace('.lua', '.raw.lua');
+                        await supabase.storage.from('repos').upload(`${repoId}/${rawName}`, rawFile, { upsert: true, contentType });
+
+                        const obfFile = new Blob([obfuscatedCode], { type: contentType });
+                        const { error } = await supabase.storage.from('repos').upload(`${repoId}/${file.name}`, obfFile, { upsert: true, contentType });
+                        if (error) throw error;
+                    } else {
+                        const { error } = await supabase.storage.from('repos').upload(`${repoId}/${file.name}`, file, {
+                            upsert: true,
+                            contentType: contentType
+                        });
+                        if (error) throw error;
+                    }
+                }
+                showToast('Files uploaded & overwritten successfully!', 'success');
+                await loadFiles();
+            } catch (err) {
+                showToast('Upload failed: ' + err.message, 'error');
+            }
+        });
+
 
         // ── Delete File Modal ────────────────────────────────
         const deleteModal = document.getElementById("deleteModal");
