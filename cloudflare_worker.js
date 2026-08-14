@@ -261,6 +261,24 @@ export default {
     }
 
     // ═══════════════════════════════════════════════════════
+    // Route: GET /roblox-avatar/:id — Proxy for Roblox avatars
+    // ═══════════════════════════════════════════════════════
+    if (url.pathname.startsWith('/roblox-avatar/')) {
+      const id = url.pathname.split('/').pop();
+      try {
+        const rbxRes = await fetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${id}&size=150x150&format=Png&isCircular=true`);
+        const rbxJson = await rbxRes.json();
+        if (rbxJson && rbxJson.data && rbxJson.data.length > 0) {
+          const imageUrl = rbxJson.data[0].imageUrl;
+          return Response.redirect(imageUrl, 302);
+        }
+        return new Response("Not found", { status: 404 });
+      } catch (err) {
+        return new Response("Error: " + err.message, { status: 500 });
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════
     // Fallback: Passthrough for Web Pages (HTML, JS, CSS)
     // ═══════════════════════════════════════════════════════
     if (env && env.ASSETS) {
