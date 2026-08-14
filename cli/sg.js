@@ -91,10 +91,12 @@ function loadGlobalConfig() {
             fs.mkdirSync(GLOBAL_CONFIG_DIR, { recursive: true });
         }
         if (fs.existsSync(GLOBAL_CONFIG_FILE)) {
-            return JSON.parse(fs.readFileSync(GLOBAL_CONFIG_FILE, 'utf8'));
+            const data = JSON.parse(fs.readFileSync(GLOBAL_CONFIG_FILE, 'utf8'));
+            if (!data.accounts) data.accounts = [];
+            return data;
         }
     } catch (_) {}
-    return {};
+    return { accounts: [] };
 }
 
 function saveGlobalConfig(cfg) {
@@ -106,6 +108,47 @@ function saveGlobalConfig(cfg) {
     } catch (e) {
         console.error(c.error(`Failed to save global config: ${e.message}`));
     }
+}
+
+function getActiveAccount() {
+    const cfg = loadGlobalConfig();
+    if (cfg.accounts && cfg.accounts.length > 0) {
+        if (cfg.activeAccountId) {
+            const found = cfg.accounts.find(a => a.userId === cfg.activeAccountId || a.email === cfg.activeAccountId || a.username === cfg.activeAccountId);
+            if (found) return found;
+        }
+        return cfg.accounts[0];
+    }
+    if (cfg.token) {
+        return {
+            token: cfg.token,
+            userId: cfg.userId,
+            email: cfg.email,
+            username: cfg.username
+        };
+    }
+    return null;
+}
+
+function saveAccountToGlobal(accountData) {
+    const cfg = loadGlobalConfig();
+    if (!cfg.accounts) cfg.accounts = [];
+    
+    // Check if account already exists
+    const idx = cfg.accounts.findIndex(a => (accountData.userId && a.userId === accountData.userId) || (accountData.email && a.email === accountData.email));
+    if (idx !== -1) {
+        cfg.accounts[idx] = { ...cfg.accounts[idx], ...accountData };
+    } else {
+        cfg.accounts.push(accountData);
+    }
+
+    cfg.activeAccountId = accountData.userId || accountData.email;
+    cfg.token = accountData.token;
+    cfg.userId = accountData.userId;
+    cfg.email = accountData.email;
+    cfg.username = accountData.username;
+    
+    saveGlobalConfig(cfg);
 }
 
 function loadLocalConfig(dir = process.cwd()) {
@@ -317,6 +360,174 @@ function prompt(question) {
     });
 }
 
+// ── Repository Fetcher & Creator ─────────────────────────────
+async function fetchUserRepositories(token, userId) {
+    try {
+        const res = await requestJson(`${DEFAULT_SUPABASE_URL}/rest/v1/repositories?owner_id=eq.${userId}&select=*&order=created_at.desc`, {
+            method: 'GET',
+            headers: {
+                'apikey': DEFAULT_SUPABASE_KEY,
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return Array.isArray(res.data) ? res.data : [];
+    } catch (_) {
+        return [];
+    }
+}
+
+async function createNewRepository(token, userId, username, repoName, isPrivate = true, description = '') {
+    const res = await requestJson(`${DEFAULT_SUPABASE_URL}/rest/v1/repositories`, {
+        method: 'POST',
+        headers: {
+            'apikey': DEFAULT_SUPABASE_KEY,
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+        }
+    }, {
+        name: repoName,
+        description: description,
+        is_private: isPrivate,
+        owner_id: userId,
+        owner_username: username
+    });
+
+    if (Array.isArray(res.data) && res.data.length > 0) {
+        return res.data[0];
+    }
+    return res.data;
+}
+
+// ── Sanitizer for Repo ID ────────────────────────────────────
+function cleanRepoIdInput(input) {
+    if (!input) return null;
+    let str = input.trim();
+    
+    // Check if user accidentally pasted a command
+    if (str.includes('sg push') || str.includes('git push') || str.includes('--force')) {
+        return null;
+    }
+
+    // Check if URL
+    if (str.includes('id=')) {
+        const match = str.match(/id=([a-f0-9-]+)/i);
+        if (match) return match[1];
+    }
+    if (str.includes('/repos/')) {
+        const match = str.match(/\/repos\/([a-f0-9-]+)/i);
+        if (match) return match[1];
+    }
+    
+    // If it is clean UUID or slug
+    if (/^[a-f0-9-]{10,}$/i.test(str)) {
+        return str;
+    }
+    if (!/\s/.test(str)) {
+        return str;
+    }
+    return null;
+}
+
+// ── Interactive Repository Picker ────────────────────────────
+async function selectOrCreateRepository(currentRepoId = null) {
+    let account = getActiveAccount();
+
+    if (!account || !account.token) {
+        console.log(`\n${c.warn('🔑 No Singularity account logged in.')}`);
+        console.log(`  [1] Log in to your Singularity Account (loads all your repositories)`);
+        console.log(`  [2] Enter Repository ID / URL manually`);
+        const choice = await prompt(`Choice [1/2] (Default 1): `) || '1';
+
+        if (choice === '1') {
+            await cmdLogin([]);
+            account = getActiveAccount();
+        } else {
+            const manualId = await prompt(`Enter Singularity Repository ID: `);
+            const cleaned = cleanRepoIdInput(manualId);
+            if (!cleaned) {
+                console.log(c.error('Invalid repository ID. Aborted.'));
+                process.exit(1);
+            }
+            return cleaned;
+        }
+    }
+
+    if (!account || !account.token) {
+        console.log(c.error('Login failed or cancelled.'));
+        process.exit(1);
+    }
+
+    while (true) {
+        console.log(`\n${c.bold('📦 Singularity Account:')} ${c.brand(account.username || 'User')} ${c.dim(`(${account.email || 'PAT'})`)}`);
+        console.log(c.dim('Fetching your repositories...'));
+
+        const repos = await fetchUserRepositories(account.token, account.userId);
+
+        console.log(`\n${c.bold('📂 Select Target Repository:')}`);
+        repos.forEach((r, idx) => {
+            const badge = r.is_private ? `${colors.yellow}[Private]${colors.reset}` : `${colors.green}[Public]${colors.reset}`;
+            const isCurrent = currentRepoId && (currentRepoId === r.id || currentRepoId === r.name) ? ` ${colors.cyan}← (current)${colors.reset}` : '';
+            console.log(`  [${colors.bold}${idx + 1}${colors.reset}] ${colors.bold}${r.name}${colors.reset} ${badge} ${c.dim(`- ${r.id}`)}${isCurrent}`);
+        });
+
+        const newRepoIdx = repos.length + 1;
+        const switchAccIdx = repos.length + 2;
+        const manualIdx = repos.length + 3;
+
+        console.log(`  [${colors.bold}${newRepoIdx}${colors.reset}] ➕ ${colors.green}Create New Repository${colors.reset}`);
+        console.log(`  [${colors.bold}${switchAccIdx}${colors.reset}] 🔄 ${colors.cyan}Switch Account / Log in another account${colors.reset}`);
+        console.log(`  [${colors.bold}${manualIdx}${colors.reset}] 🔗 Enter Repository ID manually`);
+
+        const choiceStr = await prompt(`\nSelect [1-${manualIdx}]: `);
+        const choiceNum = parseInt(choiceStr);
+
+        if (!isNaN(choiceNum) && choiceNum >= 1 && choiceNum <= repos.length) {
+            const selected = repos[choiceNum - 1];
+            console.log(c.success(`✔ Selected repository: ${colors.bold}${selected.name}${colors.reset} (${selected.id})`));
+            return selected.id;
+        }
+
+        if (choiceNum === newRepoIdx) {
+            console.log(c.bold('\n✨ Create New Singularity Repository'));
+            const name = await prompt('Repository Name: ');
+            if (!name) {
+                console.log(c.warn('Repository name cannot be empty.'));
+                continue;
+            }
+            const desc = await prompt('Description (optional): ');
+            const visChoice = await prompt('Visibility: 1. Private (Default)  2. Public\nChoice [1/2]: ') || '1';
+            const isPrivate = visChoice !== '2';
+
+            try {
+                console.log(c.dim('Creating repository on Singularity...'));
+                const newRepo = await createNewRepository(account.token, account.userId, account.username, name.trim(), isPrivate, desc);
+                console.log(c.success(`✔ Repository '${name}' created successfully! (${newRepo.id})`));
+                return newRepo.id;
+            } catch (err) {
+                console.log(c.error(`Failed to create repository: ${err.message}`));
+                continue;
+            }
+        }
+
+        if (choiceNum === switchAccIdx) {
+            await cmdAccount(['switch']);
+            account = getActiveAccount();
+            continue;
+        }
+
+        if (choiceNum === manualIdx) {
+            const manualId = await prompt('Enter Repository ID: ');
+            const cleaned = cleanRepoIdInput(manualId);
+            if (cleaned) return cleaned;
+            console.log(c.error('Invalid repository ID. Please try again.'));
+            continue;
+        }
+
+        console.log(c.error('Invalid option. Please enter a valid number.'));
+    }
+}
+
 // ── Banner Header ────────────────────────────────────────────
 function printBanner() {
     console.log(`
@@ -336,14 +547,14 @@ function showHelp() {
     console.log(`${colors.bold}USAGE:${colors.reset}`);
     console.log(`  ${c.brand('sg push -u origin main --force')}     ${c.dim('# Force push local project to remote main')}`);
     console.log(`  ${c.brand('sg push')}                           ${c.dim('# Push changes to current repository')}`);
-    console.log(`  ${c.brand('sg init')}                           ${c.dim('# Initialize Singularity project in current dir')}`);
-    console.log(`  ${c.brand('sg remote add origin <repo-id>')}    ${c.dim('# Link remote repository by ID or URL')}`);
+    console.log(`  ${c.brand('sg init')}                           ${c.dim('# Initialize Singularity project & pick repository')}`);
+    console.log(`  ${c.brand('sg account')}                        ${c.dim('# Manage and switch Singularity accounts')}`);
+    console.log(`  ${c.brand('sg remote add origin <repo-id>')}    ${c.dim('# Link remote repository by ID or interactive picker')}`);
     console.log(`  ${c.brand('sg remote -v')}                      ${c.dim('# View configured remotes')}`);
     console.log(`  ${c.brand('sg status')}                         ${c.dim('# View local files and unpushed changes')}`);
     console.log(`  ${c.brand('sg pull')}                           ${c.dim('# Download all remote files to local dir')}`);
     console.log(`  ${c.brand('sg login')}                          ${c.dim('# Authenticate with Singularity account/token')}`);
-    console.log(`  ${c.brand('sg whoami')}                         ${c.dim('# Show current logged in user and token')}`);
-    console.log(`  ${c.brand('sg config')}                         ${c.dim('# View or set global configuration')}`);
+    console.log(`  ${c.brand('sg whoami')}                         ${c.dim('# Show current active user account')}`);
     console.log('');
     console.log(`${colors.bold}PUSH OPTIONS:${colors.reset}`);
     console.log(`  ${colors.yellow}-u, --set-upstream${colors.reset}   Set upstream remote and branch (e.g. origin main)`);
@@ -352,12 +563,6 @@ function showHelp() {
     console.log(`  ${colors.yellow}--no-obfuscate${colors.reset}       Skip script obfuscation`);
     console.log(`  ${colors.yellow}--dir <path>${colors.reset}          Specify source directory (default: current dir)`);
     console.log(`  ${colors.yellow}--file <path>${colors.reset}         Push a single file instead of whole folder`);
-    console.log('');
-    console.log(`${colors.bold}EXAMPLES:${colors.reset}`);
-    console.log(`  ${c.dim('$')} sg init`);
-    console.log(`  ${c.dim('$')} sg remote add origin c92fa07b-891d-400b-9366-f2da1577c223`);
-    console.log(`  ${c.dim('$')} sg push -u origin main --force`);
-    console.log(`  ${c.dim('$')} sg push -o --force`);
     console.log('');
 }
 
@@ -375,9 +580,9 @@ async function cmdLogin(args) {
 
     if (!token) {
         console.log(`You can get your Personal Access Token from ${c.url('https://projectsingularity.online/profile.html')}`);
-        const authChoice = await prompt(`Choose login method:\n  1. Personal Access Token (PAT) [Recommended]\n  2. Email & Password\nChoice [1/2]: `);
+        const authChoice = await prompt(`Choose login method:\n  [1] Email & Password\n  [2] Personal Access Token (PAT)\nChoice [1/2] (Default 1): `) || '1';
 
-        if (authChoice === '2') {
+        if (authChoice === '1') {
             const email = await prompt('Email: ');
             const password = await prompt('Password: ');
 
@@ -395,19 +600,19 @@ async function cmdLogin(args) {
                 const user = res.data.user;
                 const username = user?.user_metadata?.username || email.split('@')[0];
 
-                const gConfig = loadGlobalConfig();
-                gConfig.token = token;
-                gConfig.refreshToken = res.data.refresh_token;
-                gConfig.userId = user.id;
-                gConfig.email = email;
-                gConfig.username = username;
-                saveGlobalConfig(gConfig);
+                saveAccountToGlobal({
+                    token: token,
+                    refreshToken: res.data.refresh_token,
+                    userId: user.id,
+                    email: email,
+                    username: username
+                });
 
                 console.log(c.success(`\n✔ Successfully logged in as ${colors.bold}${username}${colors.reset} (${email})`));
                 return;
             } catch (err) {
                 console.error(c.error(`\n✖ Login failed: ${err.data?.error_description || err.data?.msg || err.message || 'Invalid credentials'}`));
-                process.exit(1);
+                return;
             }
         } else {
             token = await prompt('\nEnter Singularity Token / Supabase Access Token: ');
@@ -416,7 +621,7 @@ async function cmdLogin(args) {
 
     if (!token) {
         console.log(c.error('Token cannot be empty.'));
-        process.exit(1);
+        return;
     }
 
     console.log(c.dim('\nVerifying token...'));
@@ -432,33 +637,81 @@ async function cmdLogin(args) {
         const user = res.data;
         const username = user.user_metadata?.username || user.email?.split('@')[0] || 'User';
 
-        const gConfig = loadGlobalConfig();
-        gConfig.token = token;
-        gConfig.userId = user.id;
-        gConfig.email = user.email;
-        gConfig.username = username;
-        saveGlobalConfig(gConfig);
+        saveAccountToGlobal({
+            token: token,
+            userId: user.id,
+            email: user.email,
+            username: username
+        });
 
         console.log(c.success(`\n✔ Successfully authenticated as ${colors.bold}${username}${colors.reset} (${user.email})`));
-        console.log(c.dim(`Credentials saved to ${GLOBAL_CONFIG_FILE}`));
     } catch (e) {
         console.error(c.error(`\n✖ Invalid or expired token.`));
-        process.exit(1);
     }
+}
+
+// ── COMMAND: account (Account Switcher) ──────────────────────
+async function cmdAccount(args = []) {
+    const cfg = loadGlobalConfig();
+    const accounts = cfg.accounts || [];
+
+    const sub = args[0] ? args[0].toLowerCase() : 'list';
+
+    if (sub === 'add' || sub === 'login') {
+        await cmdLogin([]);
+        return;
+    }
+
+    if (sub === 'switch' || sub === 'select' || sub === 'choose' || accounts.length > 0) {
+        if (accounts.length === 0) {
+            console.log(c.warn('No accounts saved yet.'));
+            await cmdLogin([]);
+            return;
+        }
+
+        console.log(`\n${c.bold('👥 Saved Singularity Accounts:')}`);
+        accounts.forEach((acc, i) => {
+            const isActive = (acc.userId === cfg.activeAccountId || acc.email === cfg.activeAccountId || (!cfg.activeAccountId && i === 0));
+            const marker = isActive ? `${colors.green}* [ACTIVE]${colors.reset}` : `  [${i + 1}]`;
+            console.log(`  ${marker} ${colors.bold}${acc.username || 'User'}${colors.reset} (${acc.email || 'Token Auth'})`);
+        });
+
+        console.log(`  [${accounts.length + 1}] ➕ Log in to another account`);
+
+        const choice = await prompt(`\nSelect account [1-${accounts.length + 1}] (or Enter to keep current): `);
+        if (!choice) return;
+
+        const num = parseInt(choice);
+        if (!isNaN(num) && num >= 1 && num <= accounts.length) {
+            const selected = accounts[num - 1];
+            cfg.activeAccountId = selected.userId || selected.email;
+            cfg.token = selected.token;
+            cfg.userId = selected.userId;
+            cfg.email = selected.email;
+            cfg.username = selected.username;
+            saveGlobalConfig(cfg);
+            console.log(c.success(`✔ Switched active account to: ${colors.bold}${selected.username}${colors.reset} (${selected.email})`));
+        } else if (num === accounts.length + 1) {
+            await cmdLogin([]);
+        }
+        return;
+    }
+
+    console.log(c.warn('No accounts found. Run `sg login` to add an account.'));
 }
 
 // ── COMMAND: whoami ──────────────────────────────────────────
 async function cmdWhoami() {
-    const gConfig = loadGlobalConfig();
-    if (!gConfig.token) {
+    const acc = getActiveAccount();
+    if (!acc || !acc.token) {
         console.log(c.warn('Not logged in. Run `sg login` to authenticate.'));
         return;
     }
-    console.log(c.bold('👤 Singularity Account'));
-    console.log(`  Username: ${c.brand(gConfig.username || 'Unknown')}`);
-    console.log(`  Email:    ${gConfig.email || 'N/A'}`);
-    console.log(`  User ID:  ${gConfig.userId || 'N/A'}`);
-    console.log(`  Token:    ${gConfig.token ? gConfig.token.substring(0, 15) + '...' : 'None'}`);
+    console.log(c.bold('👤 Current Active Account'));
+    console.log(`  Username: ${c.brand(acc.username || 'Unknown')}`);
+    console.log(`  Email:    ${acc.email || 'N/A'}`);
+    console.log(`  User ID:  ${acc.userId || 'N/A'}`);
+    console.log(`  Token:    ${acc.token ? acc.token.substring(0, 15) + '...' : 'None'}`);
 }
 
 // ── COMMAND: init ────────────────────────────────────────────
@@ -468,19 +721,12 @@ async function cmdInit(args) {
 
     console.log(c.bold(`✨ Initializing Singularity repository in ${path.basename(cwd)}`));
 
-    const repoInput = await prompt(`Enter Remote Repository ID (or press Enter to skip): `);
-    if (repoInput) {
-        localCfg.remote = {
-            origin: repoInput.trim(),
-            branch: 'main'
-        };
-    } else if (!localCfg.remote) {
-        localCfg.remote = {
-            origin: '',
-            branch: 'main'
-        };
-    }
+    const selectedRepoId = await selectOrCreateRepository(localCfg.remote?.origin);
 
+    localCfg.remote = {
+        origin: selectedRepoId,
+        branch: 'main'
+    };
     localCfg.autoObfuscate = true;
     saveLocalConfig(localCfg, cwd);
 
@@ -490,14 +736,9 @@ async function cmdInit(args) {
         fs.writeFileSync(sgIgnorePath, `# Singularity Ignore Rules\n.git\nnode_modules\n.env\n*.tmp\n*.log\n`, 'utf8');
     }
 
-    console.log(c.success(`\n✔ Initialized Singularity configuration in ${c.path(LOCAL_CONFIG_FILE)}`));
-    console.log(c.dim(`Next steps:`));
-    if (!localCfg.remote.origin) {
-        console.log(`  ${c.dim('1.')} sg remote add origin <repo_id>`);
-        console.log(`  ${c.dim('2.')} sg push -u origin main --force`);
-    } else {
-        console.log(`  ${c.dim('1.')} sg push -u origin main --force`);
-    }
+    console.log(c.success(`\n✔ Configured remote 'origin' -> ${selectedRepoId}`));
+    console.log(c.dim(`Saved to ${c.path(LOCAL_CONFIG_FILE)}`));
+    console.log(`\nNext step: Run ${c.brand('sg push -u origin main --force')} to upload your code!`);
 }
 
 // ── COMMAND: remote ──────────────────────────────────────────
@@ -511,18 +752,12 @@ async function cmdRemote(args) {
     if (sub === 'add') {
         const name = args[1] || 'origin';
         let target = args[2];
+        
         if (!target) {
-            target = await prompt(`Enter Repository ID for remote '${name}': `);
-        }
-        if (!target) {
-            console.log(c.error('Remote repository ID is required.'));
-            return;
-        }
-
-        // Clean target if URL was pasted
-        if (target.includes('id=')) {
-            const match = target.match(/id=([a-f0-9-]+)/i);
-            if (match) target = match[1];
+            target = await selectOrCreateRepository(localCfg.remote?.[name]);
+        } else {
+            const cleaned = cleanRepoIdInput(target);
+            if (cleaned) target = cleaned;
         }
 
         localCfg.remote[name] = target;
@@ -538,7 +773,7 @@ async function cmdRemote(args) {
         console.log(c.bold('Remote Repositories:'));
         const keys = Object.keys(localCfg.remote);
         if (keys.length === 0) {
-            console.log(c.dim('  No remotes configured. Use `sg remote add origin <repo_id>`'));
+            console.log(c.dim('  No remotes configured. Use `sg remote add origin` to select a repo.'));
         } else {
             keys.forEach(k => {
                 if (k === 'branch') return;
@@ -563,7 +798,7 @@ async function cmdStatus(args = []) {
     if (localCfg.remote?.origin) {
         console.log(`Your branch is tracking ${colors.cyan}origin/${localCfg.remote?.branch || 'main'}${colors.reset} [${localCfg.remote.origin}]`);
     } else {
-        console.log(c.warn('No remote configured. Run `sg remote add origin <repo_id>`'));
+        console.log(c.warn('No remote configured. Run `sg remote add origin` or `sg init`'));
     }
     console.log('');
 
@@ -589,15 +824,15 @@ async function cmdStatus(args = []) {
 async function cmdPull(args) {
     const cwd = process.cwd();
     const localCfg = loadLocalConfig(cwd) || {};
-    const gConfig = loadGlobalConfig();
+    const account = getActiveAccount();
 
     const repoId = args[0] || localCfg.remote?.origin;
     if (!repoId) {
-        console.log(c.error('No remote repository specified. Run `sg pull <repo_id>` or `sg remote add origin <repo_id>`'));
+        console.log(c.error('No remote repository specified. Run `sg pull <repo_id>` or `sg remote add origin`'));
         return;
     }
 
-    const token = gConfig.token || DEFAULT_SUPABASE_KEY;
+    const token = account?.token || DEFAULT_SUPABASE_KEY;
     console.log(c.bold(`⬇ Pulling files from repository ${colors.cyan}${repoId}${colors.reset}...`));
 
     try {
@@ -643,14 +878,10 @@ async function cmdPull(args) {
 async function cmdPush(args) {
     const cwd = process.cwd();
     const localCfg = loadLocalConfig(cwd) || {};
-    const gConfig = loadGlobalConfig();
+    const account = getActiveAccount();
 
     // Check Token / Authentication
-    let token = gConfig.token;
-    if (!token) {
-        // Fallback check if user provided inline or env
-        token = process.env.SINGULARITY_TOKEN || DEFAULT_SUPABASE_KEY;
-    }
+    let token = account?.token || process.env.SINGULARITY_TOKEN || DEFAULT_SUPABASE_KEY;
 
     // Parse Flags
     const isForce = args.includes('--force') || args.includes('-f') || args.includes('-force');
@@ -691,21 +922,19 @@ async function cmdPush(args) {
 
     let repoId = localCfg.remote?.[remoteName] || localCfg.remote?.origin;
 
-    // Check if repoId was passed directly as remoteName
-    if (!repoId && remoteName && remoteName.length > 15 && remoteName.includes('-')) {
-        repoId = remoteName;
+    // Check if repoId was passed directly as positional
+    if (!repoId && remoteName && cleanRepoIdInput(remoteName)) {
+        repoId = cleanRepoIdInput(remoteName);
         remoteName = 'origin';
     }
 
+    // If still no repoId, prompt interactive repository picker!
     if (!repoId) {
-        console.log(c.warn(`\nNo remote repository configured for '${remoteName}'.`));
-        repoId = await prompt(`Enter Target Singularity Repository ID: `);
-        if (!repoId) {
-            console.log(c.error('Push aborted: Repository ID is required.'));
-            process.exit(1);
-        }
+        console.log(c.warn(`\nNo remote repository linked for this folder.`));
+        repoId = await selectOrCreateRepository();
+
         if (!localCfg.remote) localCfg.remote = {};
-        localCfg.remote[remoteName] = repoId.trim();
+        localCfg.remote[remoteName] = repoId;
         localCfg.remote.branch = branchName;
         saveLocalConfig(localCfg, cwd);
     }
@@ -739,10 +968,10 @@ async function cmdPush(args) {
     const randomHash2 = crypto.randomBytes(4).toString('hex');
     const startTime = Date.now();
 
-    console.log(`${colors.cyan}Enumerating objects: ${filesToPush.length}, done.${colors.reset}`);
-    await new Promise(r => setTimeout(r, 120));
+    console.log(`\n${colors.cyan}Enumerating objects: ${filesToPush.length}, done.${colors.reset}`);
+    await new Promise(r => setTimeout(r, 80));
     console.log(`${colors.cyan}Counting objects: 100% (${filesToPush.length}/${filesToPush.length}), done.${colors.reset}`);
-    await new Promise(r => setTimeout(r, 100));
+    await new Promise(r => setTimeout(r, 60));
 
     let totalBytes = filesToPush.reduce((acc, f) => acc + f.size, 0);
     let totalKiB = (totalBytes / 1024).toFixed(2);
@@ -845,6 +1074,10 @@ async function main() {
         switch (command) {
             case 'push':
                 await cmdPush(args.slice(1));
+                break;
+            case 'account':
+            case 'accounts':
+                await cmdAccount(args.slice(1));
                 break;
             case 'init':
                 await cmdInit(args.slice(1));
