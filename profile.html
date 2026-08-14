@@ -861,7 +861,7 @@
     </div>
 
     <!-- Roblox Accounts Modal -->
-    <div id="robloxAccountsModal" class="modal-overlay hidden">
+    <div id="robloxAccountsModal" class="modal-overlay">
         <div class="modal glass-panel">
             <div class="modal-header">
                 <h2 data-i18n="roblox.title"><i class="ph ph-users"></i> บัญชี Roblox ที่ใช้กับระบบ</h2>
@@ -1334,11 +1334,11 @@
         // ── Roblox Accounts Modal Logic ──────────────────────────────
         const robloxModal = document.getElementById('robloxAccountsModal');
         document.getElementById('robloxStatBox')?.addEventListener('click', () => {
-            robloxModal.classList.remove('hidden');
+            robloxModal.classList.add('show');
             fetchRobloxAccounts(); // Refresh when opened
         });
-        document.getElementById('closeRobloxModalBtn')?.addEventListener('click', () => robloxModal.classList.add('hidden'));
-        document.getElementById('cancelRobloxModalBtn')?.addEventListener('click', () => robloxModal.classList.add('hidden'));
+        document.getElementById('closeRobloxModalBtn')?.addEventListener('click', () => robloxModal.classList.remove('show'));
+        document.getElementById('cancelRobloxModalBtn')?.addEventListener('click', () => robloxModal.classList.remove('show'));
 
         // ── Profile Edits ───────────────────────────────────────────
         document.getElementById("btnEditUsername")?.addEventListener("click", () => {
