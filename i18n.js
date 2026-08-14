@@ -2,6 +2,7 @@ const translations = {
     en: {
         "nav.home": "Home",
         "nav.dashboard": "Dashboard",
+        "nav.push_station": "Push Station",
         "nav.issues": "Issues",
         "nav.profile": "Profile",
         "nav.scripts": "Scripts Hub",
@@ -13,6 +14,7 @@ const translations = {
         "sidebar.security": `<i class="ph ph-lock-key"></i> Security & Login`,
         "sidebar.key_history": `<i class="ph ph-clock-counter-clockwise"></i> Key History`,
         "sidebar.roblox_accounts": `<i class="ph ph-game-controller"></i> Roblox Accounts`,
+        "sidebar.cli_tokens": `<i class="ph ph-terminal-window"></i> CLI & Push Tokens`,
         
         "overview.title": "Activity Overview",
         "overview.subtitle": "Your activity across all hubs and scripts",
@@ -71,6 +73,7 @@ const translations = {
     th: {
         "nav.home": "หน้าแรก",
         "nav.dashboard": "แดชบอร์ด",
+        "nav.push_station": "Push Station",
         "nav.issues": "แจ้งปัญหา",
         "nav.profile": "โปรไฟล์",
         "nav.scripts": "สคริปต์ฮับ",
@@ -82,6 +85,7 @@ const translations = {
         "sidebar.security": `<i class="ph ph-lock-key"></i> การเข้าสู่ระบบและความปลอดภัย`,
         "sidebar.key_history": `<i class="ph ph-clock-counter-clockwise"></i> ประวัติคีย์`,
         "sidebar.roblox_accounts": `<i class="ph ph-game-controller"></i> บัญชี Roblox ที่ใช้งาน`,
+        "sidebar.cli_tokens": `<i class="ph ph-terminal-window"></i> โทเค็น CLI & Push`,
         
         "overview.title": "ภาพรวมกิจกรรม",
         "overview.subtitle": "กิจกรรมของคุณในทุกสคริปต์และฮับ",

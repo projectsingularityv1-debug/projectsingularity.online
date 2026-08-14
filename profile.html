@@ -601,6 +601,8 @@
                 <a class="sidebar-link" data-target="tab-personal-info" data-i18n="sidebar.personal_info"><i class="ph ph-user"></i> ข้อมูลส่วนตัว</a>
                 <a class="sidebar-link" data-target="tab-security" data-i18n="sidebar.security"><i class="ph ph-lock-key"></i> การเข้าสู่ระบบและความปลอดภัย</a>
                 <a class="sidebar-link" data-target="tab-key-history" data-i18n="sidebar.key_history"><i class="ph ph-clock-counter-clockwise"></i> ประวัติคีย์</a>
+                <a class="sidebar-link" data-target="tab-cli-tokens"><i class="ph ph-terminal-window"></i> CLI & Push Tokens</a>
+                <a href="push.html" class="sidebar-link" style="color:#00f2fe;"><i class="ph ph-rocket-launch"></i> Push Station</a>
                 <a href="index.html" class="sidebar-link" style="margin-top:20px; color:#ff8000;"><i class="ph ph-arrow-left"></i> กลับหน้าหลัก</a>
             </nav>
         </aside>
@@ -793,6 +795,53 @@
             </div>
         </div>
 
+        <!-- TAB: CLI & Push Tokens -->
+        <div id="tab-cli-tokens" class="tab-content">
+            <div class="personal-info-container">
+                <div class="info-header">
+                    <h2><i class="ph ph-terminal-window" style="color:#00f2fe"></i> CLI & Push Access Tokens</h2>
+                    <p>Use this Personal Access Token to authenticate the Singularity CLI (<code>sg push -u origin main --force</code>) and Push Station.</p>
+                </div>
+                
+                <div class="info-list" style="width:100%;">
+                    <div class="info-row">
+                        <div class="info-label" style="color:#00f2fe; font-weight:600;">Personal Access Token (PAT)</div>
+                        <div style="display:flex; gap:10px; align-items:center; margin-top:8px; width:100%;">
+                            <input type="password" id="cliTokenInput" class="custom-input" readonly value="Loading token..." style="font-family:'JetBrains Mono',monospace; background:rgba(20,24,34,0.8); border:1px solid rgba(255,255,255,0.15); color:#38bdf8; padding:12px; border-radius:8px; flex:1;">
+                            <button id="btnToggleTokenVisibility" class="btn-browse" style="padding:10px 14px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:8px; cursor:pointer;"><i class="ph ph-eye"></i></button>
+                            <button id="btnCopyCliToken" class="btn-primary" style="background:linear-gradient(135deg, #00f2fe, #4facfe); color:#000; font-weight:700; border:none; padding:10px 16px; border-radius:8px; cursor:pointer;"><i class="ph ph-copy"></i> Copy Token</button>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-label" style="color:#fff; font-weight:600;">Quick Terminal Login</div>
+                        <div style="background:#090c14; border:1px solid rgba(0,242,254,0.2); border-radius:8px; padding:14px; margin-top:8px; font-family:'JetBrains Mono',monospace; font-size:0.88rem; color:#38bdf8; position:relative;">
+                            <pre id="cliLoginSnippet" style="margin:0;">sg login --token &lt;YOUR_TOKEN&gt;</pre>
+                            <button class="btn-copy-code" id="btnCopyLoginCmd" style="position:absolute; top:8px; right:8px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:6px; padding:4px 8px; font-size:0.75rem; cursor:pointer;"><i class="ph ph-copy"></i> Copy</button>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-label" style="color:#fff; font-weight:600;">Custom Push Commands</div>
+                        <div style="background:#090c14; border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:14px; margin-top:8px; font-family:'JetBrains Mono',monospace; font-size:0.85rem; color:#94a3b8; line-height:1.7;">
+                            <span style="color:#64748b;"># 1. Initialize local repository</span><br>
+                            <span style="color:#fff;">sg init</span><br><br>
+                            <span style="color:#64748b;"># 2. Add remote repository</span><br>
+                            <span style="color:#fff;">sg remote add origin &lt;repo_id&gt;</span><br><br>
+                            <span style="color:#64748b;"># 3. Force push code to main branch (auto-obfuscated)</span><br>
+                            <span style="color:#00f2fe; font-weight:700;">sg push -u origin main --force</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:20px; display:flex; gap:12px;">
+                        <a href="push.html" class="btn-primary" style="background:linear-gradient(135deg, #00f2fe, #4facfe); color:#000; text-decoration:none; font-weight:700; padding:10px 20px; border-radius:8px; display:inline-flex; align-items:center; gap:8px;">
+                            <i class="ph ph-rocket-launch"></i> Open Push Station App
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         </main>
     </div>
     
@@ -969,6 +1018,44 @@
                 const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || ''; };
                 setEl('sidebarUsername', currentUser.username);
                 setEl('sidebarEmail', currentUser.email);
+
+                // Setup CLI & Push Token
+                const accessToken = sessionData?.session?.access_token || '';
+                const cliTokenInput = document.getElementById('cliTokenInput');
+                const cliLoginSnippet = document.getElementById('cliLoginSnippet');
+                if (cliTokenInput) cliTokenInput.value = accessToken;
+                if (cliLoginSnippet) cliLoginSnippet.textContent = `sg login --token ${accessToken}`;
+
+                const btnToggleToken = document.getElementById('btnToggleTokenVisibility');
+                if (btnToggleToken && cliTokenInput) {
+                    btnToggleToken.addEventListener('click', () => {
+                        if (cliTokenInput.type === 'password') {
+                            cliTokenInput.type = 'text';
+                            btnToggleToken.innerHTML = '<i class="ph ph-eye-slash"></i>';
+                        } else {
+                            cliTokenInput.type = 'password';
+                            btnToggleToken.innerHTML = '<i class="ph ph-eye"></i>';
+                        }
+                    });
+                }
+
+                const btnCopyCliToken = document.getElementById('btnCopyCliToken');
+                if (btnCopyCliToken) {
+                    btnCopyCliToken.addEventListener('click', () => {
+                        navigator.clipboard.writeText(accessToken).then(() => {
+                            showToast('Token copied to clipboard!', 'success');
+                        });
+                    });
+                }
+
+                const btnCopyLoginCmd = document.getElementById('btnCopyLoginCmd');
+                if (btnCopyLoginCmd) {
+                    btnCopyLoginCmd.addEventListener('click', () => {
+                        navigator.clipboard.writeText(`sg login --token ${accessToken}`).then(() => {
+                            showToast('Login command copied!', 'success');
+                        });
+                    });
+                }
                 setEl('mainUsername', currentUser.username);
                 setEl('mainEmail', currentUser.email);
                 setEl('piUsername', currentUser.username);

@@ -47,12 +47,13 @@
         </div>
         <ul class="nav-links">
             <li><a href="home.html" data-i18n="nav.home">หน้าแรก</a></li>
-            <li><a href="index.html" data-i18n="nav.dashboard">แดชบอร์ด</a></li>
+            <li><a href="index.html" class="active" data-i18n="nav.dashboard">แดชบอร์ด</a></li>
+            <li><a href="push.html"><i class="ph ph-git-commit"></i> Push Station</a></li>
             <li><a href="issues.html" data-i18n="nav.issues">แจ้งปัญหา</a></li>
             <li><a href="profile.html" data-i18n="nav.profile">โปรไฟล์</a></li>
             <li><a href="scripts.html" data-i18n="nav.scripts">สคริปต์ฮับ</a></li>
             <li><a href="key.html" data-i18n="nav.key">คีย์ของฉัน</a></li>
-            <li><a href="executors.html" class="active" data-i18n="nav.executors">ตัวรัน</a></li>
+            <li><a href="executors.html" data-i18n="nav.executors">ตัวรัน</a></li>
         </ul>
         <div class="nav-right">
             <!-- Notification Bell -->
@@ -69,7 +70,10 @@
                     <div id="notifList"></div>
                 </div>
             </div>
-            <button class="btn-primary btn-sm" id="newRepoBtn">
+            <a href="push.html" class="btn-primary btn-sm" style="background:linear-gradient(135deg, #00f2fe, #4facfe); color:#000; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                <i class="ph ph-rocket-launch"></i> Push Code
+            </a>
+            <button class="btn-secondary btn-sm" id="newRepoBtn">
                 <i class="ph ph-plus"></i> New
             </button>
             <div class="profile-avatar">

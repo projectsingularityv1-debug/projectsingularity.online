@@ -1,0 +1,22 @@
+{
+  "name": "singularity-cli",
+  "version": "2.0.0",
+  "description": "Singularity Fast Git Push & Code Deployment Engine - Push repositories to Singularity with custom git-like workflow",
+  "main": "cli/sg.js",
+  "bin": {
+    "sg": "./cli/sg.js",
+    "singularity": "./cli/sg.js",
+    "singularity-push": "./cli/sg.js"
+  },
+  "keywords": [
+    "singularity",
+    "git",
+    "push",
+    "deploy",
+    "roblox",
+    "lua",
+    "obfuscate"
+  ],
+  "author": "Kenta",
+  "license": "MIT"
+}

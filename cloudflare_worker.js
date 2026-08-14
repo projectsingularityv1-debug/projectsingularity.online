@@ -89,7 +89,7 @@ export default {
             'Content-Type': 'application/json',
           }
         });
-        
+
         if (profileRes.ok) {
           const profileRows = await profileRes.json();
           if (profileRows && profileRows.length > 0) {
@@ -119,14 +119,14 @@ export default {
             console.error('Failed to fetch from auth:', e);
           }
         }
-        
+
         // Fallback สุดท้ายถ้ายังไม่มีรูป ให้ใช้รูปจาก Roblox ถ้าระบุ rbxId มา
         if (profile && !profile.avatar_url) {
-            if (rbxId) {
-                profile.avatar_url = `rbxthumb://type=AvatarHeadShot&id=${rbxId}&w=150&h=150`;
-            } else {
-                profile.avatar_url = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.username || 'User')}&background=1a1a2e&color=ff8000&bold=true`;
-            }
+          if (rbxId) {
+            profile.avatar_url = `rbxthumb://type=AvatarHeadShot&id=${rbxId}&w=150&h=150`;
+          } else {
+            profile.avatar_url = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.username || 'User')}&background=1a1a2e&color=ff8000&bold=true`;
+          }
         }
 
         // ── ตรวจสอบวันหมดอายุ (ถ้ามี) ────────────────────────
