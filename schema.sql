@@ -248,3 +248,26 @@ create policy "Admins can view all roblox accounts"
       where id = auth.uid() and is_admin = true 
     ) 
   );
+
+-- ============================================================
+-- 9. Site Settings (การตั้งค่าเว็บไซต์ / ลิ้งก์สคริปต์)
+-- ============================================================
+create table if not exists public.site_settings (
+  key         text primary key,
+  value       text not null,
+  updated_at  timestamptz default now()
+);
+
+alter table public.site_settings enable row level security;
+
+create policy "Public can read site settings" 
+  on public.site_settings for select using (true);
+
+create policy "Admins can manage site settings" 
+  on public.site_settings for all 
+  using ( 
+    exists ( 
+      select 1 from public.profiles 
+      where id = auth.uid() and is_admin = true 
+    ) 
+  );

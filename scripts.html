@@ -226,9 +226,14 @@
             <div class="code-text" id="loadstringCode">
                 loadstring(game:HttpGet('https://projectsingularity.online/raw/repos/80337d33-0a39-4c6d-acf6-55cef02b6c69/Loader.lua'))()
             </div>
-            <button class="copy-btn" id="copyBtn">
-                <i class="ph ph-copy"></i> Copy
-            </button>
+            <div class="snippet-actions">
+                <button class="btn-edit-script hidden" id="editScriptBtn" title="Edit Loader Script Link (Admin)">
+                    <i class="ph ph-pencil"></i> Edit Link
+                </button>
+                <button class="copy-btn" id="copyBtn">
+                    <i class="ph ph-copy"></i> Copy
+                </button>
+            </div>
         </div>
     </main>
 
@@ -246,6 +251,41 @@
             <div class="map-skeleton"></div>
         </div>
     </section>
+
+    <!-- Edit Loader Script Link Modal (Admin) -->
+    <div class="modal-overlay hidden" id="editScriptModal">
+        <div class="game-modal-card glass-panel" style="max-width:540px">
+            <div class="modal-header">
+                <h3 style="color:#ff8000"><i class="ph ph-link"></i> Edit Loader Script Link</h3>
+                <button class="icon-btn" id="closeEditScriptModal"><i class="ph ph-x"></i></button>
+            </div>
+            <p style="color:#aaa; font-size:0.85rem; margin: -6px 0 16px;">
+                Enter a raw Lua script URL or a complete loadstring code for users to copy.
+            </p>
+            <div class="form-group">
+                <label>Target Script URL / Code <span style="color:#f66">*</span></label>
+                <input type="text" id="scriptUrlInput" placeholder="https://projectsingularity.online/raw/repos/.../Loader.lua">
+            </div>
+            <div class="form-group" style="margin-top:14px">
+                <label>Generated Loadstring Preview</label>
+                <div class="preview-box" id="loadstringPreview">
+                    loadstring(game:HttpGet('...'))()
+                </div>
+            </div>
+            <div id="scriptModalError" style="display:none; color:#f87171; font-size:0.85rem; margin-top:12px;"></div>
+            <div class="modal-footer" style="margin-top:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <button class="btn-secondary" id="resetScriptDefault" type="button" style="color:#f87171; border-color:rgba(248,113,113,0.3)">
+                    <i class="ph ph-arrow-counter-clockwise"></i> Reset Default
+                </button>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-secondary" id="cancelEditScriptModal">Cancel</button>
+                    <button class="btn-primary" id="saveScriptBtn" style="background:linear-gradient(135deg, #ff8000, #ff5500); color:#fff;">
+                        <i class="ph ph-floppy-disk"></i> Save Link
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Add / Edit Game Modal -->
     <div class="modal-overlay hidden" id="gameModal">
@@ -307,9 +347,57 @@
     <script type="module">
         import { supabase } from './supabase-config.js';
 
+        const DEFAULT_LOADER_URL = 'https://projectsingularity.online/raw/repos/80337d33-0a39-4c6d-acf6-55cef02b6c69/Loader.lua';
+        let currentScriptUrl = DEFAULT_LOADER_URL;
+
         let isAdmin = false;
         let editingGameId = null;
         let deletingGameId = null;
+
+        // ── Loadstring helper functions ───────────────────────
+        function buildLoadstring(urlOrCode) {
+            const raw = (urlOrCode || '').trim();
+            if (!raw) return `loadstring(game:HttpGet('${DEFAULT_LOADER_URL}'))()`;
+            if (raw.startsWith('loadstring(')) return raw;
+            return `loadstring(game:HttpGet('${raw}'))()`;
+        }
+
+        function extractRawUrl(loadstringOrUrl) {
+            const raw = (loadstringOrUrl || '').trim();
+            const match = raw.match(/loadstring\s*\(\s*game:HttpGet\s*\(\s*['"]([^'"]+)['"]\s*\)\s*\)/i);
+            if (match && match[1]) return match[1];
+            return raw;
+        }
+
+        function applyScriptDisplay(value) {
+            const code = buildLoadstring(value);
+            document.getElementById('loadstringCode').textContent = code;
+            currentScriptUrl = extractRawUrl(value);
+        }
+
+        // Apply cached value immediately
+        const cachedUrl = localStorage.getItem('singularity_loader_url');
+        if (cachedUrl) {
+            applyScriptDisplay(cachedUrl);
+        }
+
+        // Fetch latest setting from Supabase
+        async function loadScriptSetting() {
+            try {
+                const { data } = await supabase
+                    .from('site_settings')
+                    .select('value')
+                    .eq('key', 'loader_script_url')
+                    .maybeSingle();
+
+                if (data?.value) {
+                    applyScriptDisplay(data.value);
+                    localStorage.setItem('singularity_loader_url', data.value);
+                }
+            } catch (err) {
+                console.warn('Could not fetch loader script setting from Supabase:', err);
+            }
+        }
 
         // ── Status style map ─────────────────────────────────
         const statusStyles = {
@@ -320,8 +408,8 @@
 
         // ── Copy Button ───────────────────────────────────────
         const copyBtn = document.getElementById('copyBtn');
-        const codeText = document.getElementById('loadstringCode').textContent;
         copyBtn.addEventListener('click', () => {
+            const codeText = document.getElementById('loadstringCode').textContent.trim();
             navigator.clipboard.writeText(codeText).then(() => {
                 copyBtn.innerHTML = '<i class="ph ph-check"></i> Copied!';
                 copyBtn.classList.add('copied');
@@ -344,8 +432,77 @@
             if (profile?.is_admin) {
                 isAdmin = true;
                 document.getElementById('addGameBtn').classList.remove('hidden');
+                document.getElementById('editScriptBtn').classList.remove('hidden');
             }
         }
+
+        // ── Edit Script URL Modal (Admin) ─────────────────────
+        const editScriptBtn = document.getElementById('editScriptBtn');
+        const editScriptModal = document.getElementById('editScriptModal');
+        const scriptUrlInput = document.getElementById('scriptUrlInput');
+        const loadstringPreview = document.getElementById('loadstringPreview');
+        const scriptModalError = document.getElementById('scriptModalError');
+        const saveScriptBtn = document.getElementById('saveScriptBtn');
+
+        editScriptBtn.addEventListener('click', () => {
+            scriptUrlInput.value = currentScriptUrl || DEFAULT_LOADER_URL;
+            loadstringPreview.textContent = buildLoadstring(scriptUrlInput.value);
+            scriptModalError.style.display = 'none';
+            editScriptModal.classList.remove('hidden');
+            scriptUrlInput.focus();
+        });
+
+        scriptUrlInput.addEventListener('input', (e) => {
+            const val = e.target.value.trim();
+            loadstringPreview.textContent = buildLoadstring(val);
+        });
+
+        document.getElementById('resetScriptDefault').addEventListener('click', () => {
+            scriptUrlInput.value = DEFAULT_LOADER_URL;
+            loadstringPreview.textContent = buildLoadstring(DEFAULT_LOADER_URL);
+            scriptModalError.style.display = 'none';
+        });
+
+        ['closeEditScriptModal', 'cancelEditScriptModal'].forEach(id => {
+            document.getElementById(id).addEventListener('click', () => {
+                editScriptModal.classList.add('hidden');
+            });
+        });
+
+        saveScriptBtn.addEventListener('click', async () => {
+            const val = scriptUrlInput.value.trim();
+            if (!val) {
+                scriptModalError.textContent = 'Please enter a valid script URL or loadstring.';
+                scriptModalError.style.display = 'block';
+                return;
+            }
+
+            saveScriptBtn.disabled = true;
+            saveScriptBtn.innerHTML = '<i class="ph ph-spinner spin"></i> Saving...';
+
+            try {
+                const { error } = await supabase
+                    .from('site_settings')
+                    .upsert({
+                        key: 'loader_script_url',
+                        value: val,
+                        updated_at: new Date().toISOString()
+                    }, { onConflict: 'key' });
+
+                if (error) {
+                    console.warn('Supabase site_settings upsert note:', error.message);
+                }
+            } catch (err) {
+                console.warn('Supabase site_settings error:', err);
+            }
+
+            localStorage.setItem('singularity_loader_url', val);
+            applyScriptDisplay(val);
+
+            saveScriptBtn.disabled = false;
+            saveScriptBtn.innerHTML = '<i class="ph ph-floppy-disk"></i> Save Link';
+            editScriptModal.classList.add('hidden');
+        });
 
         // ── Load & Render Games ───────────────────────────────
         async function loadGames() {
@@ -502,11 +659,59 @@
 
         // ── Init ──────────────────────────────────────────────
         await checkAdmin();
+        await loadScriptSetting();
         await loadGames();
     </script>
 
     <style>
-        /* Additional styles for admin games feature */
+        /* Additional styles for admin games and script features */
+        .snippet-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .btn-edit-script {
+            background: rgba(255, 128, 0, 0.15);
+            border: 1px solid rgba(255, 128, 0, 0.4);
+            color: #ff8000;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-family: var(--font-main);
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-edit-script:hover {
+            background: rgba(255, 128, 0, 0.3);
+            border-color: rgba(255, 128, 0, 0.8);
+            transform: translateY(-1px);
+        }
+
+        .btn-edit-script.hidden {
+            display: none;
+        }
+
+        .preview-box {
+            background: #000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            color: #a3e635;
+            word-break: break-all;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+
         .section-title-row {
             display: flex;
             align-items: center;
@@ -675,8 +880,4 @@
         }
     </style>
 </body>
-// Copy Button Logic (handled by module script above)
-</script>
-</body>
-
 </html>
