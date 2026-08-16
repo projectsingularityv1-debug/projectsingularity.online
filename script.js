@@ -32,7 +32,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     resize();
     
-    const numStars = 60;
+    // Optimize number of stars based on screen width (mobile friendly)
+    const isMobile = window.innerWidth < 768;
+    const numStars = isMobile ? 30 : 60;
     const stars = [];
     
     for (let i = 0; i < numStars; i++) {

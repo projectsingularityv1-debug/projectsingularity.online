@@ -74,6 +74,8 @@ a:hover {
     border: 1px solid var(--border-color);
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    will-change: transform, backdrop-filter;
+    transform: translateZ(0);
 }
 
 /* Navbar */
@@ -90,6 +92,8 @@ a:hover {
     position: sticky;
     top: 0;
     z-index: 100;
+    will-change: transform, backdrop-filter;
+    transform: translateZ(0);
 }
 
 .nav-left, .nav-right {
@@ -135,7 +139,7 @@ a:hover {
     border-radius: 8px;
     padding: 4px 12px;
     width: 320px;
-    transition: all 0.3s ease;
+    transition: width 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .search-bar:focus-within {
