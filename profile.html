@@ -1065,11 +1065,14 @@
         function formatDateThai(isoString) {
             if (!isoString) return '—';
             const date = new Date(isoString);
-            const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+            if (isNaN(date.getTime())) return '—';
+            const isThai = (localStorage.getItem('lang') || 'th') === 'th';
+            const monthsThai = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+            const monthsEng = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
             const day = date.getDate();
-            const month = months[date.getMonth()];
-            const year = date.getFullYear() + 543; // Convert to Thai Buddhist Era
-            return `${day} ${month} ${year}`;
+            const month = isThai ? monthsThai[date.getMonth()] : monthsEng[date.getMonth()];
+            const year = isThai ? (date.getFullYear() + 543) : date.getFullYear();
+            return isThai ? `${day} ${month} ${year}` : `${month} ${day}, ${year}`;
         }
 
         // ── Tab Switching Logic ────────────────────────────────
@@ -1132,11 +1135,13 @@
                     || user.user_metadata?.picture
                     || `https://ui-avatars.com/api/?name=${encodeURIComponent(authUsername)}&background=1a1a2e&color=ff8000&bold=true`;
 
-                currentUser = profile
-                    ? { ...profile, email: authEmail, username: profile.username || authUsername, avatar_url: profile.avatar_url || authAvatar, uid: user.id }
-                    : { uid: user.id, email: authEmail, username: authUsername, avatar_url: authAvatar, country: 'ยังตรวจไม่พบ', language: 'ไทย', created_at: user.created_at };
+                const createdAtDate = profile?.created_at || user.created_at || user.user_metadata?.created_at || new Date().toISOString();
 
-                console.log('[Profile] currentUser:', currentUser.username, currentUser.email);
+                currentUser = profile
+                    ? { ...profile, email: authEmail, username: profile.username || authUsername, avatar_url: profile.avatar_url || authAvatar, uid: user.id, created_at: createdAtDate }
+                    : { uid: user.id, email: authEmail, username: authUsername, avatar_url: authAvatar, country: 'ยังตรวจไม่พบ', language: 'ไทย', created_at: createdAtDate };
+
+                console.log('[Profile] currentUser:', currentUser.username, currentUser.email, currentUser.created_at);
 
                 // Generate activity graph
                 generateGraph(currentUser);
@@ -1202,8 +1207,10 @@
                 }
 
                 const memberSinceStr = formatDateThai(currentUser.created_at);
-                document.getElementById("statMemberSince").textContent = memberSinceStr;
-                document.getElementById("piMemberSince").textContent = memberSinceStr;
+                const statMemberSinceEl = document.getElementById("statMemberSince");
+                if (statMemberSinceEl) statMemberSinceEl.textContent = memberSinceStr;
+                const piMemberSinceEl = document.getElementById("piMemberSince");
+                if (piMemberSinceEl) piMemberSinceEl.textContent = memberSinceStr;
 
                 document.title = `${currentUser.username} — Account`;
 
@@ -1222,8 +1229,9 @@
                     }
                 }
 
-                // Fetch Key History
+                // Fetch Key History & Roblox Accounts
                 await loadKeyHistory();
+                await fetchRobloxAccounts();
 
             } catch (err) { console.error(err); }
         })();
