@@ -417,21 +417,37 @@
             document.getElementById('keysTableBody').innerHTML =
                 '<tr class="loading-row"><td colspan="6"><span class="spin"></span> กำลังโหลด...</td></tr>';
 
-            const { data, error } = await supabase
+            const { data: keysData, error: keysError } = await supabase
                 .from('script_keys')
                 .select(`
-                    id, key_value, is_active, expires_at, created_at, user_id,
-                    profiles:user_id (username, avatar_url)
+                    id, key_value, is_active, expires_at, created_at, user_id
                 `)
                 .order('created_at', { ascending: false });
 
-            if (error) {
-                showToast('Error: ' + error.message, 'error');
+            if (keysError) {
+                showToast('Error: ' + keysError.message, 'error');
                 return;
             }
 
-            // Also get auth emails via profiles only (we don't have direct auth access)
-            allKeys = data || [];
+            // Fetch profiles separately because foreign key points to auth.users, not public.profiles
+            const userIds = [...new Set((keysData || []).map(k => k.user_id))].filter(Boolean);
+            let profilesDict = {};
+            if (userIds.length > 0) {
+                const { data: profilesData } = await supabase
+                    .from('profiles')
+                    .select('id, username, avatar_url')
+                    .in('id', userIds);
+                
+                if (profilesData) {
+                    profilesData.forEach(p => profilesDict[p.id] = p);
+                }
+            }
+
+            // Map profiles into the keys data exactly as expected by the UI
+            allKeys = (keysData || []).map(k => ({
+                ...k,
+                profiles: profilesDict[k.user_id] || null
+            }));
             updateStats();
             applyFilter();
         }
