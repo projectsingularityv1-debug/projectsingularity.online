@@ -1256,3 +1256,72 @@ a:hover {
         overflow-x: auto;
     }
 }
+
+/* =========================================================
+   Banner Ads Layout System (3-column)
+   ========================================================= */
+
+.ad-layout-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    gap: 20px;
+}
+
+.main-content-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0; /* Prevent overflow */
+}
+
+/* Left & Right Ad Sidebars (Skyscraper 160x600 or 300x600) */
+.ad-sidebar {
+    width: 160px; /* Adjust based on AdNetwork, e.g., 160px or 300px */
+    min-width: 160px;
+    min-height: 600px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.3);
+    text-align: center;
+    font-size: 0.85rem;
+    position: sticky;
+    top: 80px; /* Sticks to top when scrolling */
+}
+
+/* Center Ads (e.g. 728x90 Leaderboard or Rectangles) */
+.ad-center {
+    width: 100%;
+    min-height: 90px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.3);
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+/* Placeholder text styling */
+.ad-placeholder-text {
+    opacity: 0.5;
+    line-height: 1.5;
+}
+
+/* Hide sidebars on smaller screens */
+@media (max-width: 1200px) {
+    .ad-sidebar {
+        display: none;
+    }
+}

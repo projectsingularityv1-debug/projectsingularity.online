@@ -565,8 +565,21 @@
         </div>
     </nav>
 
-    <!-- Main -->
-    <div class="key-page">
+    <!-- Main with Ad Layout -->
+    <div class="ad-layout-wrapper" style="margin-top: 40px;">
+        
+        <!-- ================= LEFT AD SIDEBAR ================= -->
+        <div class="ad-sidebar">
+            <div class="ad-placeholder-text">
+                [พื้นที่โฆษณาซ้าย]<br>160x600<br><br>
+                <small style="color: rgba(255,255,255,0.4); font-size: 11px;">(วางโค้ดโฆษณาตรงนี้)</small>
+            </div>
+            <!-- TODO: นำโค้ด <script> จาก Adsterra/Adsense มาวางตรงนี้ -->
+        </div>
+
+        <!-- ================= CENTER CONTENT ================= -->
+        <div class="main-content-column">
+            <div class="key-page" style="padding-top: 0; min-height: auto;">
         <div class="key-page-header">
             <h1>Script Key</h1>
             <p>ใช้ Key นี้ใน <strong style="color:rgba(255,255,255,0.8)">Loader.lua</strong> เพื่อยืนยันตัวตนก่อนใช้งานสคริปต์ใน Roblox</p>
@@ -642,6 +655,29 @@
         </div>
     </div>
 
+                <!-- ================= CENTER AD (Below Card) ================= -->
+                <div class="ad-center">
+                    <div class="ad-placeholder-text">
+                        [พื้นที่โฆษณากลาง]<br>728x90 หรือ Responsive<br>
+                        <small style="color: rgba(255,255,255,0.4); font-size: 11px;">(วางโค้ดโฆษณาตรงนี้)</small>
+                    </div>
+                    <!-- TODO: นำโค้ด <script> จาก Adsterra/Adsense มาวางตรงนี้ -->
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= RIGHT AD SIDEBAR ================= -->
+        <div class="ad-sidebar">
+            <div class="ad-placeholder-text">
+                [พื้นที่โฆษณาขวา]<br>160x600<br><br>
+                <small style="color: rgba(255,255,255,0.4); font-size: 11px;">(วางโค้ดโฆษณาตรงนี้)</small>
+            </div>
+            <!-- TODO: นำโค้ด <script> จาก Adsterra/Adsense มาวางตรงนี้ -->
+        </div>
+        
+    </div>
+
     <script type="module">
         import { requireAuth } from './auth.js';
         import { supabase } from './supabase-config.js';
@@ -704,13 +740,20 @@
             return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
         }
 
-        // ── Generate a random key ────────────────────────────────
+        // ── Helper: Generate a random key ────────────────────────
         function generateKeyValue() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             const segments = [8, 4, 4, 4, 12];
             return segments.map(len =>
                 Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
             ).join('-');
+        }
+
+        // ── Ad Redirect ──────────────────────────────────────────
+        function redirectToAd(action) {
+            sessionStorage.setItem('pending_key_action', action);
+            // TODO: Replace 'ad.html' with real Linkvertise/LootLabs link in the future
+            window.location.href = 'ad.html';
         }
 
         // ── Load key from Supabase ───────────────────────────────
@@ -784,7 +827,11 @@
         }
 
         // ── Generate key action ──────────────────────────────────
-        async function doGenerate() {
+        function doGenerate() {
+            redirectToAd('generate');
+        }
+
+        async function executeGenerate() {
             hideAlert();
             generateBtn.disabled = true;
             generateBtn.innerHTML = '<span class="spin"></span> Generating...';
@@ -816,8 +863,12 @@
         }
 
         // ── Reset key action ─────────────────────────────────────
-        async function doReset() {
+        function doReset() {
             closeModal();
+            redirectToAd('reset');
+        }
+
+        async function executeReset() {
             resetBtn.disabled = true;
             generateBtn.disabled = true;
             resetBtn.innerHTML = '<span class="spin"></span>';
@@ -885,7 +936,23 @@
         resetModal.addEventListener('click', (e) => { if (e.target === resetModal) closeModal(); });
 
         // ── Init ─────────────────────────────────────────────────
-        loadKey();
+        await loadKey();
+
+        // Check if returning from Ad Provider
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('ad_complete') === 'true') {
+            // Clean up URL without refreshing
+            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            const action = sessionStorage.getItem('pending_key_action');
+            sessionStorage.removeItem('pending_key_action');
+            
+            if (action === 'generate') {
+                executeGenerate();
+            } else if (action === 'reset') {
+                executeReset();
+            }
+        }
     </script>
 
     <script src="script.js"></script>

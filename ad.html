@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ad Redirect Simulation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0a0a0a;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            overflow: hidden;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: #ffaa4d;
+        }
+        p {
+            color: #aaa;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .timer {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+        .ad-placeholder {
+            background: rgba(255,255,255,0.03);
+            border: 2px dashed rgba(255,255,255,0.1);
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,0.3);
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .progress-bar-bg {
+            background: rgba(255,255,255,0.1);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            width: 100%;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: #ffaa4d;
+            width: 0%;
+            transition: width 1s linear;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sponsor Advertisement</h1>
+        <div class="ad-placeholder">
+            [Ad Banner Simulation]
+        </div>
+        <p>You will be redirected back to the Key System automatically in...</p>
+        <div class="timer" id="timer">5</div>
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progress"></div>
+        </div>
+    </div>
+
+    <script>
+        let timeLeft = 5;
+        const timerEl = document.getElementById('timer');
+        const progressEl = document.getElementById('progress');
+        
+        // Setup Progress bar animation
+        setTimeout(() => {
+            progressEl.style.width = '100%';
+        }, 100);
+
+        const countdown = setInterval(() => {
+            timeLeft--;
+            timerEl.textContent = timeLeft;
+            
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                timerEl.textContent = "Redirecting...";
+                // Redirect back to key.html with completion parameter
+                window.location.href = 'key.html?ad_complete=true';
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

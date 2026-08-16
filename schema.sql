@@ -271,3 +271,29 @@ create policy "Admins can manage site settings"
       where id = auth.uid() and is_admin = true 
     ) 
   );
+
+-- ============================================================
+-- 10. Database Indexes (Performance Optimization)
+-- ============================================================
+-- Profile indexes
+create index if not exists idx_profiles_is_admin on public.profiles(is_admin);
+
+-- Repositories indexes
+create index if not exists idx_repositories_owner_id on public.repositories(owner_id);
+create index if not exists idx_repositories_created_at on public.repositories(created_at desc);
+
+-- Issues indexes
+create index if not exists idx_issues_repo_id on public.issues(repo_id);
+create index if not exists idx_issues_author_id on public.issues(author_id);
+create index if not exists idx_issues_created_at on public.issues(created_at desc);
+
+-- Notifications indexes
+create index if not exists idx_notifications_user_id on public.notifications(user_id);
+create index if not exists idx_notifications_created_at on public.notifications(created_at desc);
+
+-- Script Keys indexes
+create index if not exists idx_script_keys_user_id on public.script_keys(user_id);
+create index if not exists idx_script_keys_created_at on public.script_keys(created_at desc);
+
+-- Roblox Accounts indexes
+create index if not exists idx_roblox_accounts_user_id on public.roblox_accounts(user_id);
